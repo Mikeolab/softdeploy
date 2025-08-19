@@ -1,449 +1,1397 @@
-import { useState } from "react";
-
-const Section = ({ id, title, subtitle, children }) => (
-  <section id={id} className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div className="mb-8">
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white/90">{title}</h2>
-      {subtitle && <p className="mt-2 text-white/60 max-w-3xl">{subtitle}</p>}
-    </div>
-    {children}
-  </section>
-);
-
-const Card = ({ children, className = "" }) => (
-  <div className={`rounded-2xl bg-white/5 ring-1 ring-white/10 backdrop-blur p-5 ${className}`}>{children}</div>
-);
-
-const Stat = ({ label, value }) => (
-  <div className="flex flex-col">
-    <span className="text-2xl font-semibold text-white">{value}</span>
-    <span className="text-white/50 text-sm">{label}</span>
-  </div>
-);
-
-const Feature = ({ title, desc }) => (
-  <Card>
-    <div className="flex items-start gap-4">
-      <div className="p-2 rounded-xl bg-white/10 text-sm">◆</div>
-      <div>
-        <h4 className="text-white font-medium">{title}</h4>
-        <p className="text-white/60 text-sm mt-1">{desc}</p>
-      </div>
-    </div>
-  </Card>
-);
-
-const Pill = ({ children }) => (
-  <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 text-emerald-300 px-3 py-1 text-xs ring-1 ring-emerald-400/20">
-    {children}
-  </span>
-);
-
-const TimelineItem = ({ phase, period, items }) => (
-  <div className="relative pl-8">
-    <div className="absolute left-0 top-2 h-full w-px bg-white/10"/>
-    <div className="absolute -left-[9px] top-2 h-4 w-4 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400"/>
-    <div className="mb-3 flex items-center gap-2">
-      <h4 className="text-white font-medium">{phase}</h4>
-      <Pill>{period}</Pill>
-    </div>
-    <ul className="space-y-2 list-disc marker:text-white/40 text-white/70 ml-5">
-      {items.map((it, idx) => <li key={idx}>{it}</li>)}
-    </ul>
-  </div>
-);
-
-const StackRow = ({ layer, tools }) => (
-  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 items-center py-3 border-b border-white/10">
-    <div className="text-white/60 text-sm col-span-2 sm:col-span-2">{layer}</div>
-    <div className="col-span-1 sm:col-span-4 flex flex-wrap gap-2">
-      {tools.map((t, i) => (
-        <span key={i} className="text-xs text-white/80 bg-white/5 rounded-full px-3 py-1 ring-1 ring-white/10">{t}</span>
-      ))}
-    </div>
-  </div>
-);
-
-const Badge = ({ children }) => (
-  <span className="text-[10px] uppercase tracking-wide text-white/60 bg-white/5 rounded px-2 py-1 ring-1 ring-white/10">{children}</span>
-);
-
-function HeroCTA() {
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   return (
-    <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -inset-32 opacity-30 -z-10" aria-hidden="true">
-        <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl"/>
-        <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"/>
+    <Router>
+      <Routes>
+        <Route path="/" element={<MarketingPage />} />
+        <Route path="/login" element={<LoginPage setIsAuthenticated={setIsAuthenticated} setUser={setUser} />} />
+        <Route path="/signup" element={<SignUpPage setIsAuthenticated={setIsAuthenticated} setUser={setUser} />} />
+        <Route path="/dashboard" element={<DashboardPage isAuthenticated={isAuthenticated} user={user} />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+      </Routes>
+    </Router>
+  );
+}
+// Modern Marketing Page
+function MarketingPage() {
+  return (
+    <div style={{ backgroundColor: '#0e1117', color: 'white', minHeight: '100vh' }}>
+      {/* Navigation */}
+      <nav style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 48px',
+        borderBottom: '1px solid #30363d',
+        position: 'sticky',
+        top: 0,
+        backgroundColor: '#0e1117',
+        zIndex: 100
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            height: '32px',
+            width: '32px',
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <span style={{ color: 'black', fontWeight: 'bold', fontSize: '14px' }}>SD</span>
+          </div>
+          <span style={{ fontSize: '20px', fontWeight: 'bold' }}>SoftDeploy</span>
+          <span style={{ 
+            fontSize: '12px', 
+            color: '#9ca3af',
+            backgroundColor: '#161b22',
+            padding: '2px 8px',
+            borderRadius: '12px',
+            marginLeft: '8px'
+          }}>
+            QA & CI/CD Platform
+          </span>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          <Link to="/features" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Features</Link>
+          <Link to="/pricing" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Roadmap</Link>
+          <Link to="#" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Tech</Link>
+          <Link to="#" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Integrations</Link>
+          <Link to="/dashboard" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Dashboard</Link>
+          
+          <div style={{ display: 'flex', gap: '12px', marginLeft: '24px' }}>
+            <Link to="#" style={{
+              color: '#d1d5db',
+              textDecoration: 'none',
+              fontSize: '14px',
+              padding: '8px 16px',
+              border: '1px solid #30363d',
+              borderRadius: '6px'
+            }}>
+              Docs
+            </Link>
+            <Link to="/login" style={{
+              background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+              color: 'black',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: '600',
+              padding: '8px 16px',
+              borderRadius: '6px'
+            }}>
+              Try Demo
+            </Link>
+          </div>
+        </div>
+      </nav>
+      {/* Hero Section */}
+      <div style={{ display: 'flex', padding: '80px 48px', gap: '80px', alignItems: 'center' }}>
+        {/* Left side - Content */}
+        <div style={{ flex: 1, maxWidth: '600px' }}>
+          <div style={{
+            fontSize: '12px',
+            color: '#10b981',
+            fontWeight: '600',
+            marginBottom: '16px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}>
+            QA-FIRST AUTOMATION
+          </div>
+          
+          <h1 style={{
+            fontSize: '48px',
+            fontWeight: 'bold',
+            lineHeight: '1.1',
+            margin: '0 0 24px 0'
+          }}>
+            Deliver high-quality<br />software faster
+          </h1>
+          
+          <p style={{
+            fontSize: '18px',
+            color: '#9ca3af',
+            lineHeight: '1.6',
+            marginBottom: '32px'
+          }}>
+            SoftDeploy automates your tests, integrates code continuously and deploys with confidence. Accelerate release cycles, improve code quality and respond to market changes quickly with built-in security and performance checks.
+          </p>
+          
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '48px' }}>
+            <Link to="/signup" style={{
+              background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+              color: 'black',
+              textDecoration: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '16px'
+            }}>
+              Try Demo
+            </Link>
+            <button style={{
+              background: 'transparent',
+              color: 'white',
+              border: '1px solid #30363d',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}>
+              See How It Works
+            </button>
+          </div>
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: '48px' }}>
+            <div>
+              <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'white' }}>7 min</div>
+              <div style={{ fontSize: '14px', color: '#9ca3af' }}>Avg. deploy time</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'white' }}>96%</div>
+              <div style={{ fontSize: '14px', color: '#9ca3af' }}>Success rate</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'white' }}>12</div>
+              <div style={{ fontSize: '14px', color: '#9ca3af' }}>Teams onboarded</div>
+            </div>
+          </div>
+        </div>
+        {/* Right side - Dashboard Preview */}
+        <div style={{ flex: 1, maxWidth: '500px' }}>
+          <div style={{
+            backgroundColor: '#161b22',
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+          }}>
+            {/* Live Pipeline */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                marginBottom: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981'
+                }} />
+                <span style={{ fontWeight: '600', fontSize: '14px' }}>Live Pipeline</span>
+                <span style={{ fontSize: '12px', color: '#9ca3af', marginLeft: 'auto' }}>View all ›</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
+                Staging • last run 2m ago
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '8px',
+                  padding: '12px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Scheduled</div>
+                  <div style={{ fontWeight: '600', fontSize: '14px' }}>Nightly E2E</div>
+                  <div style={{ fontSize: '12px', color: '#10b981', marginTop: '8px' }}>
+                    Passed (24/30)
+                  </div>
+                </div>
+                <div style={{
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '8px',
+                  padding: '12px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Deploy</div>
+                  <div style={{ fontWeight: '600', fontSize: '14px' }}>Staging → Prod</div>
+                  <div style={{
+                    backgroundColor: '#10b981',
+                    color: 'black',
+                    fontSize: '10px',
+                    fontWeight: '600',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    marginTop: '8px',
+                    display: 'inline-block'
+                  }}>
+                    One-click Deploy
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Alerts */}
+            <div>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                marginBottom: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f59e0b'
+                }} />
+                <span style={{ fontWeight: '600', fontSize: '14px' }}>Alerts</span>
+                <span style={{ 
+                  backgroundColor: '#161b22',
+                  color: '#f59e0b',
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  borderRadius: '8px',
+                  marginLeft: 'auto'
+                }}>
+                  Slack + Email
+                </span>
+              </div>
+              
+              <div style={{
+                backgroundColor: '#0d1117',
+                border: '1px solid #30363d',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '12px'
+              }}>
+                <div style={{ color: '#9ca3af', marginBottom: '4px' }}>+ E2E summary sent to</div>
+                <div style={{ color: '#9ca3af', marginBottom: '4px' }}>App alerts</div>
+                <div style={{ color: '#9ca3af', marginBottom: '4px' }}>+ 50% budget breach</div>
+                <div style={{ color: '#9ca3af' }}>GPS > 1.5s</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 grid place-items-center ring-1 ring-white/20">
-            <span className="text-black/80 text-sm">SD</span>
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-white font-semibold tracking-tight">SoftDeploy</span>
-            <span className="text-xs text-white/50">QA & CI/CD Platform</span>
-          </div>
+      {/* Features Section */}
+      <div style={{ padding: '80px 48px', borderTop: '1px solid #30363d' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '16px' }}>
+            Accelerate delivery without compromising quality
+          </h2>
+          <p style={{ fontSize: '18px', color: '#9ca3af', maxWidth: '600px', margin: '0 auto' }}>
+            Built for modern development teams who need speed, reliability, and confidence in their deployments.
+          </p>
         </div>
-        <nav className="hidden md:flex gap-6 text-white/70 text-sm">
-          <a href="#features" className="hover:text-white">Features</a>
-          <a href="#roadmap" className="hover:text-white">Roadmap</a>
-          <a href="#tech" className="hover:text-white">Tech</a>
-          <a href="#integrations" className="hover:text-white">Integrations</a>
-          <a href="#dashboard" className="hover:text-white">Dashboard</a>
-        </nav>
-        <div className="flex gap-3">
-          <button className="rounded-xl px-3.5 py-2 text-sm bg-white/5 text-white ring-1 ring-white/15 hover:bg-white/10">Docs</button>
-          <button className="rounded-xl px-3.5 py-2 text-sm bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-semibold hover:brightness-95">Try Demo</button>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <Badge>QA-first automation</Badge>
-            <h1 className="mt-3 text-3xl sm:text-5xl font-semibold tracking-tight text-white">
-              Deliver high‑quality software faster
-            </h1>
-            <p className="mt-4 text-white/70 max-w-xl">
-              SoftDeploy automates your tests, integrates code continuously and deploys with confidence. Accelerate release cycles, improve code quality and respond to market changes quickly with built‑in security and performance checks.
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+          <div style={{
+            backgroundColor: '#161b22',
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            padding: '32px'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '20px' }}>⚡</span>
+            </div>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '12px' }}>Lightning Fast Deployments</h3>
+            <p style={{ color: '#9ca3af', lineHeight: '1.6' }}>
+              Deploy in minutes, not hours. Our optimized pipeline reduces deployment time by 80% compared to traditional CI/CD tools.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#demo" className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-semibold">
-                Try Demo
-              </a>
-              <a href="#features" className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/5 text-white ring-1 ring-white/15 hover:bg-white/10">
-                See How It Works
-              </a>
-            </div>
-            <div className="mt-8 grid grid-cols-3 gap-6">
-              <Stat label="Avg. deploy time" value="7 min"/>
-              <Stat label="Test pass rate" value="96%"/>
-              <Stat label="Teams onboarded" value="12"/>
-            </div>
           </div>
-
-          <Card className="lg:ml-auto w-full">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-xl bg-emerald-500/20 grid place-items-center">⏱</div>
-                <div>
-                  <h4 className="text-white font-medium leading-tight">Live Pipeline</h4>
-                  <p className="text-white/50 text-xs">Staging • last run 2m ago</p>
-                </div>
-              </div>
-              <button className="text-xs text-white/70 hover:text-white inline-flex items-center gap-1">View all ▶</button>
+          <div style={{
+            backgroundColor: '#161b22',
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            padding: '32px'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '20px' }}>🛡️</span>
             </div>
-            <div className="mt-4 grid sm:grid-cols-3 gap-3">
-              <Card>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-lg bg-white/10 grid place-items-center">🗓</div>
-                  <div>
-                    <p className="text-xs text-white/60">Scheduled</p>
-                    <p className="text-white font-medium">Nightly E2E</p>
-                  </div>
-                </div>
-                <div className="mt-3 h-2 w-full bg-white/10 rounded-full">
-                  <div className="h-2 bg-emerald-400 rounded-full w-4/5"/>
-                </div>
-                <p className="mt-2 text-xs text-emerald-300">Passed (24/30)</p>
-              </Card>
-              <Card>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-lg bg-white/10 grid place-items-center">🚀</div>
-                  <div>
-                    <p className="text-xs text-white/60">Deploy</p>
-                    <p className="text-white font-medium">Staging → Prod</p>
-                  </div>
-                </div>
-                <button className="mt-3 w-full rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-semibold py-2">One-click Deploy</button>
-                <p className="mt-2 text-xs text-white/60">Protected with approvals + rollback</p>
-              </Card>
-              <Card>
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-lg bg-white/10 grid place-items-center">🔔</div>
-                  <div>
-                    <p className="text-xs text-white/60">Alerts</p>
-                    <p className="text-white font-medium">Slack + Email</p>
-                  </div>
-                </div>
-                <ul className="mt-3 space-y-2 text-xs text-white/70">
-                  <li>• E2E summary sent to <span className="text-white">#qa-alerts</span></li>
-                  <li>• Perf budget breach (p95 &gt; 1.5s)</li>
-                  <li>• Failed smoke test on <span className="text-white">/checkout</span></li>
-                </ul>
-              </Card>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '12px' }}>Built-in Security</h3>
+            <p style={{ color: '#9ca3af', lineHeight: '1.6' }}>
+              Automatic security scanning, dependency checks, and compliance monitoring built into every deployment.
+            </p>
+          </div>
+          <div style={{
+            backgroundColor: '#161b22',
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            padding: '32px'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '24px'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '20px' }}>📊</span>
             </div>
-          </Card>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '12px' }}>Real-time Analytics</h3>
+            <p style={{ color: '#9ca3af', lineHeight: '1.6' }}>
+              Monitor performance, track deployments, and get insights into your development workflow with detailed analytics.
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* CTA Section */}
+      <div style={{ 
+        padding: '80px 48px', 
+        textAlign: 'center',
+        backgroundColor: '#161b22',
+        borderTop: '1px solid #30363d'
+      }}>
+        <h2 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '16px' }}>
+          Ready to accelerate your deployments?
+        </h2>
+        <p style={{ fontSize: '18px', color: '#9ca3af', marginBottom: '32px' }}>
+          Join thousands of developers who trust SoftDeploy with their critical deployments.
+        </p>
+        <Link to="/signup" style={{
+          background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+          color: 'black',
+          textDecoration: 'none',
+          padding: '16px 32px',
+          borderRadius: '8px',
+          fontWeight: '600',
+          fontSize: '18px',
+          display: 'inline-block'
+        }}>
+          Start Free Trial
+        </Link>
+      </div>
+    </div>
+  );
+}
+// Enhanced Login Page
+function LoginPage({ setIsAuthenticated, setUser }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Simulate login process
+    setTimeout(() => {
+      setLoading(false);
+      setIsAuthenticated(true);
+      setUser({ email, name: 'John Doe' });
+      navigate('/dashboard');
+    }, 1000);
+  };
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#0e1117',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.1), transparent, rgba(147, 51, 234, 0.1))',
+        zIndex: 0
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '400px',
+        zIndex: 1
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <Link to="/" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px',
+            textDecoration: 'none'
+          }}>
+            <div style={{
+              height: '40px',
+              width: '40px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '18px' }}>SD</span>
+            </div>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>SoftDeploy</span>
+          </Link>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: 'white', margin: '0 0 8px 0' }}>
+            Welcome back
+          </h1>
+          <p style={{ color: '#9ca3af', margin: 0 }}>Sign in to your deployment dashboard</p>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#d1d5db',
+                marginBottom: '8px'
+              }}>
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#d1d5db',
+                marginBottom: '8px'
+              }}>
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                background: loading ? '#6b7280' : 'linear-gradient(90deg, #10b981, #06b6d4)',
+                color: loading ? 'white' : 'black',
+                fontWeight: '600',
+                padding: '12px 16px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                transition: 'all 0.2s'
+              }}
+            >
+              {loading ? 'Signing in...' : 'Sign in to Dashboard'}
+            </button>
+          </form>
+          <p style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            fontSize: '14px',
+            color: '#9ca3af'
+          }}>
+            Don't have an account?{' '}
+            <Link to="/signup" style={{
+              fontWeight: '500',
+              color: '#60a5fa',
+              textDecoration: 'none'
+            }}>
+              Sign up for free
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
-function Features() {
-  const items = [
-    { title: "Automated test pipelines", desc: "Schedule unit, API, E2E and performance tests to run on every commit and nightly, catching issues early." },
-    { title: "Continuous deployment", desc: "Deploy confidently to dev, staging and production with one click. Approvals and rollbacks protect you against bad releases." },
-    { title: "Smart alerts", desc: "Get actionable Slack/email summaries with diffs, flaky-test hints and owners so the right person can fix issues fast." },
-    { title: "Dashboards & history", desc: "View pass rates, failure frequency and deployment history across environments to spot trends and drive improvement." },
-    { title: "Role-based access control", desc: "Permissions, approvals and audit events built in to keep your team secure and compliant." },
-    { title: "Built-in security", desc: "Integrate security checks directly into your pipeline to catch vulnerabilities early and improve performance." },
-  ];
+// Enhanced SignUp Page
+function SignUpPage({ setIsAuthenticated, setUser }) {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    setTimeout(() => {
+      setLoading(false);
+      setIsAuthenticated(true);
+      setUser({ email: formData.email, name: formData.fullName });
+      navigate('/dashboard');
+    }, 1000);
+  };
   return (
-    <Section id="features" title="Accelerate delivery without compromising quality" subtitle="Mature CI/CD pipelines that shorten deployment time from hours to minutes, enabling teams to react to customer needs quickly.">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {items.map((f, i) => <Feature key={i} {...f}/>)}
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#0e1117',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.1), transparent, rgba(29, 78, 216, 0.1))',
+        zIndex: 0
+      }} />
+      
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '400px',
+        zIndex: 1
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <Link to="/" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px',
+            textDecoration: 'none'
+          }}>
+            <div style={{
+              height: '40px',
+              width: '40px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '18px' }}>SD</span>
+            </div>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>SoftDeploy</span>
+          </Link>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: 'white', margin: '0 0 8px 0' }}>
+            Start deploying today
+          </h1>
+          <p style={{ color: '#9ca3af', margin: 0 }}>Create your free SoftDeploy account</p>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#d1d5db',
+                marginBottom: '8px'
+              }}>
+                Full Name
+              </label>
+              <input
+                name="fullName"
+                type="text"
+                value={formData.fullName}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#d1d5db',
+                marginBottom: '8px'
+              }}>
+                Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#d1d5db',
+                marginBottom: '8px'
+              }}>
+                Password
+              </label>
+              <input
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                placeholder="Create a password"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                background: loading ? '#6b7280' : 'linear-gradient(90deg, #10b981, #06b6d4)',
+                color: loading ? 'white' : 'black',
+                fontWeight: '600',
+                padding: '12px 16px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                transition: 'all 0.2s'
+              }}
+            >
+              {loading ? 'Creating account...' : 'Create free account'}
+            </button>
+          </form>
+          <p style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            fontSize: '14px',
+            color: '#9ca3af'
+          }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{
+              fontWeight: '500',
+              color: '#60a5fa',
+              textDecoration: 'none'
+            }}>
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
-    </Section>
+    </div>
   );
 }
-
-function HowItWorks() {
+// Complete Dashboard Page
+function DashboardPage({ isAuthenticated, user }) {
+  const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+  if (!isAuthenticated) {
+    return null;
+  }
   return (
-    <section id="how-it-works" className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
-      <h2 className="text-2xl font-semibold text-white">How SoftDeploy works</h2>
-      <p className="mt-2 text-white/70 max-w-3xl">
-        Connect your repo, define tests, and ship with guardrails. SoftDeploy automates build, test
-        and deploy steps so teams release faster with fewer regressions.
-      </p>
-
-      <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 list-none">
-        {[
-          { n: "1", title: "Connect your stack", desc: "Link GitHub/GitLab and your cloud environments (AWS/GCP/Azure)." },
-          { n: "2", title: "Define tests & schedules", desc: "Run unit, API, E2E and performance suites on every PR and nightly." },
-          { n: "3", title: "Gate & deploy safely", desc: "Auto-checks block risky merges; one-click deploy with approvals & rollback." },
-          { n: "4", title: "See results & improve", desc: "Dashboards, logs and alerts show pass-rate, failures and trends across envs." }
-        ].map(step => (
-          <li key={step.n} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-300 font-semibold">{step.n}</div>
-            <h3 className="text-base font-semibold text-white">{step.title}</h3>
-            <p className="mt-2 text-sm text-white/70">{step.desc}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-function Roadmap() {
-  return (
-    <section id="how-it-works" className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
-  <h2 className="text-2xl font-semibold text-white">How SoftDeploy works</h2>
-  <p className="mt-2 text-white/70 max-w-3xl">
-    Connect your repo, define tests, and ship with guardrails. SoftDeploy automates build, test
-    and deploy steps so teams release faster with fewer regressions.
-  </p>
-
-  <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 list-none counter-reset">
-    {[
-      {
-        n: "1",
-        title: "Connect your stack",
-        desc: "Link GitHub/GitLab and your cloud environments (AWS/GCP/Azure)."
-      },
-      {
-        n: "2",
-        title: "Define tests & schedules",
-        desc: "Run unit, API, E2E and performance suites on every PR and nightly."
-      },
-      {
-        n: "3",
-        title: "Gate & deploy safely",
-        desc: "Auto-checks block risky merges; one-click deploy with approvals & rollback."
-      },
-      {
-        n: "4",
-        title: "See results & improve",
-        desc: "Dashboards, logs and alerts show pass-rate, failures and trends across envs."
-      }
-    ].map(step => (
-      <li key={step.n} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-300 font-semibold">{step.n}</div>
-        <h3 className="text-base font-semibold text-white">{step.title}</h3>
-        <p className="mt-2 text-sm text-white/70">{step.desc}</p>
-      </li>
-    ))}
-  </ol>
-
-  <div className="mt-8 grid gap-4 sm:grid-cols-3">
-    {[
-      { k: "Faster releases", v: "Shorter cycle time with automated pipelines" },
-      { k: "Higher quality", v: "Issues caught earlier by CI tests" },
-      { k: "Lower risk", v: "Approvals, health checks & instant rollback" }
-    ].map(x => (
-      <div key={x.k} className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <div className="text-sm text-white/60">{x.k}</div>
-        <div className="text-lg font-semibold text-white">{x.v}</div>
+    <div style={{ backgroundColor: '#0e1117', color: 'white', minHeight: '100vh' }}>
+      {/* Dashboard Header */}
+      <nav style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 32px',
+        borderBottom: '1px solid #30363d',
+        backgroundColor: '#161b22'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+            <div style={{
+              height: '32px',
+              width: '32px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span style={{ color: 'black', fontWeight: 'bold', fontSize: '14px' }}>SD</span>
+            </div>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>SoftDeploy</span>
+          </Link>
+          
+          <div style={{ display: 'flex', gap: '24px' }}>
+            <button
+              onClick={() => setActiveTab('overview')}
+              style={{
+                background: activeTab === 'overview' ? '#10b981' : 'transparent',
+                color: activeTab === 'overview' ? 'black' : '#d1d5db',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('deployments')}
+              style={{
+                background: activeTab === 'deployments' ? '#10b981' : 'transparent',
+                color: activeTab === 'deployments' ? 'black' : '#d1d5db',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Deployments
+            </button>
+            <button
+              onClick={() => setActiveTab('pipelines')}
+              style={{
+                background: activeTab === 'pipelines' ? '#10b981' : 'transparent',
+                color: activeTab === 'pipelines' ? 'black' : '#d1d5db',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Pipelines
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              style={{
+                background: activeTab === 'settings' ? '#10b981' : 'transparent',
+                color: activeTab === 'settings' ? 'black' : '#d1d5db',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Settings
+            </button>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button style={{
+            background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+            color: 'black',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontWeight: '600',
+            cursor: 'pointer'
+          }}>
+            New Deployment
+          </button>
+          <div style={{ color: '#d1d5db', fontSize: '14px' }}>
+            Welcome, {user?.name || 'User'}
+          </div>
+        </div>
+      </nav>
+      {/* Dashboard Content */}
+      <div style={{ padding: '32px' }}>
+        {activeTab === 'overview' && <DashboardOverview />}
+        {activeTab === 'deployments' && <DeploymentsTab />}
+        {activeTab === 'pipelines' && <PipelinesTab />}
+        {activeTab === 'settings' && <SettingsTab />}
       </div>
-    ))}
-  </div>
-</section>
+    </div>
   );
 }
-
-function TechStack() {
+// Dashboard Overview Component
+function DashboardOverview() {
   return (
-    <section id="use-cases" className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
-  <h2 className="text-2xl font-semibold text-white">What teams use SoftDeploy for</h2>
-  <p className="mt-2 text-white/70 max-w-3xl">
-    Practical workflows that increase confidence on every release.
-  </p>
-
-  <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    {[
-      {
-        title: "PR checks that prevent regressions",
-        desc: "Run unit, API and E2E suites on every pull request; block merges when critical paths fail."
-      },
-      {
-        title: "Nightly E2E & API health",
-        desc: "Schedule Playwright/Cypress & API checks; trend pass-rate, p95 and error spikes over time."
-      },
-      {
-        title: "Performance budgets",
-        desc: "Catch slowdowns early with thresholds (e.g., p95, TTFB); alert on breaches."
-      },
-      {
-        title: "Staging → Prod with guardrails",
-        desc: "One-click deploy with approvals, /health probes and quick rollback if anything degrades."
-      },
-      {
-        title: "Incident-ready alerts",
-        desc: "Slack/email summaries with diffs, flaky-test hints and owners so the right person fixes fast."
-      },
-      {
-        title: "Audit & compliance",
-        desc: "Approvals, change logs and run history to satisfy audits and internal reviews."
-      }
-    ].map(card => (
-      <div key={card.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <h3 className="text-base font-semibold text-white">{card.title}</h3>
-        <p className="mt-2 text-sm text-white/70">{card.desc}</p>
+    <div>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>
+        Dashboard Overview
+      </h1>
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Total Deployments</div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#10b981' }}>247</div>
+          <div style={{ fontSize: '12px', color: '#9ca3af' }}>+12% from last month</div>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Success Rate</div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#10b981' }}>96.2%</div>
+          <div style={{ fontSize: '12px', color: '#9ca3af' }}>+2.1% from last month</div>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Avg Deploy Time</div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#10b981' }}>6.4min</div>
+          <div style={{ fontSize: '12px', color: '#9ca3af' }}>-1.2min from last month</div>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '8px' }}>Active Pipelines</div>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#10b981' }}>8</div>
+          <div style={{ fontSize: '12px', color: '#9ca3af' }}>2 running now</div>
+        </div>
       </div>
-    ))}
-  </div>
-</section>
-  );
-}
-
-function Integrations() {
-  const items = [
-    { title: "GitHub", desc: "Repos, PRs, status checks, Actions triggers." },
-    { title: "GitLab", desc: "Pipelines and status checks for self-hosted users." },
-    { title: "Docker", desc: "Spin up clean containers for each test run." },
-  ];
-  return (
-    <Section id="integrations" title="Integrations" subtitle="Connect your source control, runners, and messaging in minutes.">
-      <div className="grid sm:grid-cols-3 gap-4">
-        {items.map((it, i) => (
-          <Card key={i}>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-white/10">🔗</div>
+      {/* Recent Activity */}
+      <div style={{
+        backgroundColor: '#161b22',
+        border: '1px solid #30363d',
+        borderRadius: '12px',
+        padding: '24px'
+      }}>
+        <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Recent Deployments</h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { app: 'frontend-app', branch: 'main', status: 'success', time: '2 min ago' },
+            { app: 'api-service', branch: 'develop', status: 'success', time: '15 min ago' },
+            { app: 'mobile-backend', branch: 'feature/auth', status: 'failed', time: '1 hour ago' },
+            { app: 'analytics-service', branch: 'main', status: 'success', time: '2 hours ago' }
+          ].map((deployment, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '12px',
+              backgroundColor: '#0d1117',
+              border: '1px solid #30363d',
+              borderRadius: '8px'
+            }}>
               <div>
-                <h4 className="text-white font-medium leading-tight">{it.title}</h4>
-                <p className="text-white/60 text-sm">{it.desc}</p>
+                <div style={{ fontWeight: '500', fontSize: '14px' }}>{deployment.app}</div>
+                <div style={{ fontSize: '12px', color: '#9ca3af' }}>Branch: {deployment.branch}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{
+                  backgroundColor: deployment.status === 'success' ? '#10b981' : '#ef4444',
+                  color: deployment.status === 'success' ? 'black' : 'white',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  textTransform: 'uppercase'
+                }}>
+                  {deployment.status}
+                </span>
+                <span style={{ fontSize: '12px', color: '#9ca3af' }}>{deployment.time}</span>
               </div>
             </div>
-          </Card>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-function DemoDashboard() {
-  const [env, setEnv] = useState("staging");
-  return (
-    <Section id="dashboard" title="Manager-friendly Dashboard" subtitle="Monitor tests and deployments across environments at a glance.">
-      <div className="flex flex-wrap gap-3 mb-4">
-        {["dev","staging","prod"].map((e) => (
-          <button key={e} onClick={() => setEnv(e)}
-            className={`px-3 py-1.5 rounded-lg text-sm ring-1 ring-white/15 ${env===e?"bg-white text-black":"bg-white/5 text-white hover:bg-white/10"}`}>
-            {e.toUpperCase()}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-4">
-        <Card>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-white/10">✅</div>
-              <h4 className="text-white font-medium">Test Summary</h4>
-            </div>
-            <span className="text-xs text-white/60">{env}</span>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-            <div><p className="text-2xl font-semibold text-emerald-300">124</p><p className="text-xs text-white/60">Passed</p></div>
-            <div><p className="text-2xl font-semibold text-white">8</p><p className="text-xs text-white/60">Failed</p></div>
-            <div><p className="text-2xl font-semibold text-white">6</p><p className="text-xs text-white/60">Flaky</p></div>
-          </div>
-          <div className="mt-4 h-2 w-full bg-white/10 rounded-full">
-            <div className="h-2 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full" style={{width:"84%"}}/>
-          </div>
-          <p className="mt-2 text-xs text-white/60">Pass rate last 24h</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/10">🚚</div>
-            <h4 className="text-white font-medium">Recent Deployments</h4>
-          </div>
-          <ul className="mt-3 space-y-2 text-sm text-white/75">
-            <li className="flex items-center justify-between"><span>v1.8.2 • checkout-hotfix</span><span className="text-emerald-300">Success</span></li>
-            <li className="flex items-center justify-between"><span>v1.8.1 • perf-budget</span><span className="text-emerald-300">Success</span></li>
-            <li className="flex items-center justify-between"><span>v1.8.0 • feature-alerts</span><span className="text-yellow-300">Needs review</span></li>
-          </ul>
-          <button className="mt-4 w-full rounded-lg bg-white/5 text-white ring-1 ring-white/15 py-2 hover:bg-white/10 inline-flex items-center justify-center gap-2">
-            View pipeline
-          </button>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/10">🔔</div>
-            <h4 className="text-white font-medium">Latest Alerts</h4>
-          </div>
-          <div className="mt-3 space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-white/80">E2E summary posted to <span className="text-white">#qa-alerts</span></div>
-            <div className="flex items-center gap-2 text-white/80">Perf test exceeded p95 in <span className="text-white">/search</span></div>
-            <div className="flex items-center gap-2 text-white/80">Smoke test failed on <span className="text-white">/auth</span></div>
-          </div>
-        </Card>
-      </div>
-    </Section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h3 className="text-white font-medium">Ready to pilot SoftDeploy?</h3>
-          <p className="text-white/60 text-sm">Start free, invite your QA team, and ship with confidence.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="rounded-xl px-4 py-2 text-sm bg-white/5 text-white ring-1 ring-white/15 hover:bg-white/10">Contact Sales</button>
-          <button className="rounded-xl px-4 py-2 text-sm bg-gradient-to-r from-emerald-400 to-cyan-400 text-black font-semibold">Launch Demo</button>
+          ))}
         </div>
       </div>
-      <p className="mt-6 text-center text-white/40 text-xs">© {new Date().getFullYear()} SoftDeploy • Built for QA-first teams</p>
-    </footer>
-  );
-}
-
-export default function App() {
-  return (
-    <div className="min-h-screen w-full bg-[#141516] text-white">
-      <HeroCTA />
-      <Features />
-      <Roadmap />
-      <TechStack />
-      <Integrations />
-      <DemoDashboard />
-      <Footer />
     </div>
   );
 }
+// Deployments Tab Component
+function DeploymentsTab() {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold' }}>Deployments</h1>
+        <button style={{
+          background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+          color: 'black',
+          border: 'none',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontWeight: '600',
+          cursor: 'pointer'
+        }}>
+          New Deployment
+        </button>
+      </div>
+      <div style={{
+        backgroundColor: '#161b22',
+        border: '1px solid #30363d',
+        borderRadius: '12px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 150px 100px 120px 100px',
+          gap: '16px',
+          padding: '16px 24px',
+          borderBottom: '1px solid #30363d',
+          backgroundColor: '#0d1117'
+        }}>
+          <div style={{ fontWeight: '600', fontSize: '14px', color: '#d1d5db' }}>Application</div>
+          <div style={{ fontWeight: '600', fontSize: '14px', color: '#d1d5db' }}>Branch</div>
+          <div style={{ fontWeight: '600', fontSize: '14px', color: '#d1d5db' }}>Status</div>
+          <div style={{ fontWeight: '600', fontSize: '14px', color: '#d1d5db' }}>Environment</div>
+          <div style={{ fontWeight: '600', fontSize: '14px', color: '#d1d5db' }}>Time</div>
+        </div>
+        {[
+          { app: 'frontend-app', branch: 'main', status: 'success', env: 'production', time: '2m ago' },
+          { app: 'api-service', branch: 'develop', status: 'running', env: 'staging', time: '5m ago' },
+          { app: 'mobile-backend', branch: 'feature/auth', status: 'failed', env: 'development', time: '1h ago' },
+          { app: 'analytics-service', branch: 'main', status: 'success', env: 'production', time: '2h ago' },
+          { app: 'notification-service', branch: 'hotfix/email', status: 'success', env: 'production', time: '4h ago' }
+        ].map((deployment, i) => (
+          <div key={i} style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 150px 100px 120px 100px',
+            gap: '16px',
+            padding: '16px 24px',
+            borderBottom: i < 4 ? '1px solid #30363d' : 'none',
+            alignItems: 'center'
+          }}>
+            <div>
+              <div style={{ fontWeight: '500', fontSize: '14px' }}>{deployment.app}</div>
+            </div>
+            <div style={{ fontSize: '14px', color: '#9ca3af' }}>{deployment.branch}</div>
+            <div>
+              <span style={{
+                backgroundColor: 
+                  deployment.status === 'success' ? '#10b981' : 
+                  deployment.status === 'running' ? '#f59e0b' : '#ef4444',
+                color: 
+                  deployment.status === 'success' ? 'black' : 
+                  deployment.status === 'running' ? 'black' : 'white',
+                fontSize: '10px',
+                fontWeight: '600',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                textTransform: 'uppercase'
+              }}>
+                {deployment.status}
+              </span>
+            </div>
+            <div style={{ fontSize: '14px', color: '#9ca3af' }}>{deployment.env}</div>
+            <div style={{ fontSize: '14px', color: '#9ca3af' }}>{deployment.time}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+// Pipelines Tab Component
+function PipelinesTab() {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold' }}>CI/CD Pipelines</h1>
+        <button style={{
+          background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+          color: 'black',
+          border: 'none',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontWeight: '600',
+          cursor: 'pointer'
+        }}>
+          Create Pipeline
+        </button>
+      </div>
+      <div style={{ display: 'grid', gap: '24px' }}>
+        {[
+          { name: 'Frontend Production Pipeline', status: 'active', lastRun: '2 min ago', success: '96%' },
+          { name: 'API Staging Pipeline', status: 'running', lastRun: 'Running now', success: '94%' },
+          { name: 'Mobile App Pipeline', status: 'failed', lastRun: '1 hour ago', success: '89%' },
+          { name: 'Analytics Service Pipeline', status: 'active', lastRun: '2 hours ago', success: '98%' }
+        ].map((pipeline, i) => (
+          <div key={i} style={{
+            backgroundColor: '#161b22',
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>{pipeline.name}</h3>
+                <div style={{ fontSize: '14px', color: '#9ca3af' }}>Last run: {pipeline.lastRun}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{
+                  backgroundColor: 
+                    pipeline.status === 'active' ? '#10b981' : 
+                    pipeline.status === 'running' ? '#f59e0b' : '#ef4444',
+                  color: 
+                    pipeline.status === 'active' ? 'black' : 
+                    pipeline.status === 'running' ? 'black' : 'white',
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  textTransform: 'uppercase'
+                }}>
+                  {pipeline.status}
+                </span>
+                <div style={{ fontSize: '14px', color: '#9ca3af' }}>Success: {pipeline.success}</div>
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['Build', 'Test', 'Security Scan', 'Deploy'].map((stage, j) => (
+                <div key={j} style={{
+                  flex: 1,
+                  height: '8px',
+                  backgroundColor: j < 3 ? '#10b981' : '#30363d',
+                  borderRadius: '4px'
+                }} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+// Settings Tab Component
+function SettingsTab() {
+  return (
+    <div>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '32px' }}>Settings</h1>
+      
+      <div style={{ display: 'grid', gap: '24px', maxWidth: '600px' }}>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Account Settings</h3>
+          <div style={{ display: 'grid', gap: '16px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#d1d5db', marginBottom: '8px' }}>
+                Display Name
+              </label>
+              <input
+                type="text"
+                defaultValue="John Doe"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#d1d5db', marginBottom: '8px' }}>
+                Email
+              </label>
+              <input
+                type="email"
+                defaultValue="john@example.com"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0d1117',
+                  border: '1px solid #30363d',
+                  borderRadius: '6px',
+                  color: 'white',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Notification Preferences</h3>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {['Deployment Success', 'Deployment Failures', 'Pipeline Status', 'Security Alerts'].map((notification, i) => (
+              <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <input type="checkbox" defaultChecked style={{ width: '16px', height: '16px' }} />
+                <span style={{ fontSize: '14px', color: '#d1d5db' }}>{notification}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div style={{
+          backgroundColor: '#161b22',
+          border: '1px solid #30363d',
+          borderRadius: '12px',
+          padding: '24px'
+        }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#ef4444' }}>Danger Zone</h3>
+          <button style={{
+            backgroundColor: '#ef4444',
+            color: 'white',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer'
+          }}>
+            Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+// Features Page
+function FeaturesPage() {
+  return (
+    <div style={{ backgroundColor: '#0e1117', color: 'white', minHeight: '100vh', padding: '80px 48px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '16px' }}>
+            Features
+          </h1>
+          <p style={{ fontSize: '18px', color: '#9ca3af' }}>
+            Everything you need to deploy with confidence
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
+          {[
+            {
+              title: 'Automated CI/CD',
+              description: 'Set up continuous integration and deployment pipelines in minutes, not hours.',
+              icon: '🚀'
+            },
+            {
+              title: 'Security First',
+              description: 'Built-in security scanning, dependency checks, and compliance monitoring.',
+              icon: '🛡️'
+            },
+            {
+              title: 'Real-time Monitoring',
+              description: 'Monitor your deployments in real-time with detailed analytics and alerts.',
+              icon: '📊'
+            },
+            {
+              title: 'Team Collaboration',
+              description: 'Work together with your team using shared pipelines and deployment workflows.',
+              icon: '👥'
+            },
+            {
+              title: 'Multi-Cloud Support',
+              description: 'Deploy to any cloud provider with our unified deployment interface.',
+              icon: '☁️'
+            },
+            {
+              title: 'Rollback Protection',
+              description: 'Automatic rollbacks and deployment protection with health checks.',
+              icon: '🔄'
+            }
+          ].map((feature, i) => (
+            <div key={i} style={{
+              backgroundColor: '#161b22',
+              border: '1px solid #30363d',
+              borderRadius: '12px',
+              padding: '32px'
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>{feature.icon}</div>
+              <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '12px' }}>{feature.title}</h3>
+              <p style={{ color: '#9ca3af', lineHeight: '1.6' }}>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '64px' }}>
+          <Link to="/signup" style={{
+            background: 'linear-gradient(90deg, #10b981, #06b6d4)',
+            color: 'black',
+            textDecoration: 'none',
+            padding: '16px 32px',
+            borderRadius: '8px',
+            fontWeight: '600',
+            fontSize: '18px',
+            display: 'inline-block'
+          }}>
+            Get Started Today
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+// Pricing Page
+function PricingPage() {
+  return (
+    <div style={{ backgroundColor: '#0e1117', color: 'white', minHeight: '100vh', padding: '80px 48px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '16px' }}>
+            Simple, Transparent Pricing
+          </h1>
+          <p style={{ fontSize: '18px', color: '#9ca3af' }}>
+            Choose the plan that fits your team's needs
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
+          {[
+            {
+              name: 'Starter',
+              price: 'Free',
+              description: 'Perfect for personal projects',
+              features: ['5 deployments/month', '1 pipeline', 'Community support', 'Basic analytics']
+            },
+            {
+              name: 'Professional',
+              price: '$29/month',
+              description: 'Great for small teams',
+              features: ['Unlimited deployments', '10 pipelines', 'Priority support', 'Advanced analytics', 'Team collaboration']
+            },
+            {
+              name: 'Enterprise',
+              price: 'Custom',
+              description: 'For large organizations',
+              features: ['Everything in Professional', 'Unlimited pipelines', 'SSO integration', 'Dedicated support', 'Custom integrations']
+            }
+          ].map((plan, i) => (
+            <div key={i} style={{
+              backgroundColor: '#161b22',
+              border: '1px solid #30363d',
+              borderRadius: '12px',
+              padding: '32px',
+              textAlign: 'center'
+            }}>
+              <h3 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>{plan.name}</h3>
+              <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#10b981' }}>
+                {plan.price}
+              </div>
+              <p style={{ color: '#9ca3af', marginBottom: '24px' }}>{plan.description}</p>
+              
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px' }}>
+                {plan.features.map((feature, j) => (
+                  <li key={j} style={{ padding: '8px 0', color: '#d1d5db' }}>✓ {feature}</li>
+                ))}
+              </ul>
+              <button style={{
+                background: i === 1 ? 'linear-gradient(90deg, #10b981, #06b6d4)' : 'transparent',
+                color: i === 1 ? 'black' : 'white',
+                border: i === 1 ? 'none' : '1px solid #30363d',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                width: '100%'
+              }}>
+                {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+export default App;
