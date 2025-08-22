@@ -11,7 +11,16 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const user = { name: 'Test User', email, role: 'member' };
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // ✅ Define user object w/ hardcoded logic for test vs real user
+    const user = {
+      name: normalizedEmail === 'testuser@softdeploy.dev' ? 'Mike Scott' : 'Test User',
+      email: normalizedEmail,
+      role: normalizedEmail === 'testuser@softdeploy.dev' ? 'demo' : 'member',
+    };
+
     login(user);
     navigate('/dashboard');
   };
@@ -30,7 +39,6 @@ export default function Login() {
             <li>🧠 Let AI recommend auto-fixes</li>
             <li>🚀 Promote builds safely to production</li>
           </ul>
-
           <div className="mt-6 bg-white/5 border border-white/10 rounded-lg p-4">
             <h3 className="font-semibold text-white mb-2">🧪 Test Account</h3>
             <p className="text-sm text-white/70">Use this to try things out quickly:</p>
@@ -43,7 +51,6 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-xl p-8 w-full max-w-md backdrop-blur-sm shadow-lg">
           <h2 className="text-2xl font-semibold text-white mb-6">Log In</h2>
-
           <div className="space-y-4">
             <div>
               <label className="block text-white/70 text-sm">Email</label>
@@ -55,7 +62,6 @@ export default function Login() {
                 className="w-full mt-1 p-2.5 bg-[#1a1b1f] border border-white/10 rounded text-white"
               />
             </div>
-
             <div>
               <label className="block text-white/70 text-sm">Password</label>
               <input
@@ -67,13 +73,15 @@ export default function Login() {
               />
             </div>
           </div>
-
-          <button type="submit" className="w-full mt-6 bg-cyan-500 text-black py-2 rounded font-semibold hover:bg-cyan-400">
+          <button
+            type="submit"
+            className="w-full mt-6 bg-cyan-500 text-black py-2 rounded font-semibold hover:bg-cyan-400"
+          >
             Log In
           </button>
-
           <p className="text-sm text-white/50 mt-4 text-center">
-            Don’t have an account? <a href="/signup" className="text-cyan-400 hover:underline">Sign up</a>
+            Don’t have an account?{' '}
+            <a href="/signup" className="text-cyan-400 hover:underline">Sign up</a>
           </p>
         </form>
       </div>
