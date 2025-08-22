@@ -1,3 +1,4 @@
+// src/components/Navigation.jsx
 import { Link } from 'react-router-dom';
 
 function Navigation() {
@@ -14,31 +15,32 @@ function Navigation() {
       backdropFilter: 'blur(10px)',
       zIndex: 100
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          height: '32px',
-          width: '32px',
-          borderRadius: '8px',
-          background: 'linear-gradient(135deg, #10b981, #06b6d4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <span style={{ color: 'black', fontWeight: 'bold', fontSize: '14px' }}>SD</span>
-        </div>
-        <span style={{ fontSize: '20px', fontWeight: 'bold' }}>SoftDeploy</span>
-        <span style={{ 
-          fontSize: '12px', 
-          color: '#9ca3af',
-          backgroundColor: '#161b22',
-          padding: '2px 8px',
-          borderRadius: '12px',
-          marginLeft: '8px'
-        }}>
-          QA & CI/CD Platform
-        </span>
-      </div>
-      
+      {/* 👇 Replaced static block with Link */}
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+  <div style={{
+    height: '32px',
+    width: '32px',
+    borderRadius: '8px',
+    background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }}>
+    <span style={{ color: 'black', fontWeight: 'bold', fontSize: '14px' }}>SD</span>
+  </div>
+  <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>SoftDeploy</span>
+  <span style={{
+    fontSize: '12px',
+    color: '#9ca3af',
+    backgroundColor: '#161b22',
+    padding: '2px 8px',
+    borderRadius: '12px',
+    marginLeft: '8px'
+  }}>
+    QA & CI/CD Platform
+  </span>
+</Link>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
         <Link to="/features" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Features</Link>
         <Link to="/subscription" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Pricing</Link>

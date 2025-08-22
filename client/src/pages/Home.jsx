@@ -1,7 +1,9 @@
 // src/pages/Home.jsx
 import { Link } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
+    const { user } = useAuth();
   return (
     <main className="bg-[#0e1117] text-white min-h-screen">
       {/* Hero Section */}
@@ -40,7 +42,12 @@ export default function Home() {
             Open Dashboard
           </Link>
         </div>
-
+        
+        {!user && (
+          <div className="mt-10 bg-cyan-900/10 text-cyan-200 border border-cyan-400/30 rounded-lg px-6 py-4">
+    💡   Login or create an account to talk to your SoftDeploy AI Assistant.
+          </div>
+          )}
         {/* AI Assistant Bling */}
         <div className="absolute top-[10rem] right-[-3rem] hidden md:block opacity-20 pointer-events-none">
           <img src="/ai-agent-avatar-glow.svg" alt="AI Agent visual" className="w-[250px]" />

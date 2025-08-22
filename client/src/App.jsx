@@ -18,6 +18,7 @@ import IntegrationsPage from './pages/IntegrationsPage.jsx';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import RedirectIfAuthenticated from './components/RedirectIfAuthenticated.jsx'; // ✅ NEW
 import AIChatbot from './components/AIChatbot.jsx';
 import NavigationBar from './components/Navigation.jsx';
 
@@ -41,14 +42,30 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/marketing" element={<MarketingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/subscription" element={<SubscriptionPage />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
 
-          {/* Protected Routes */}
+          {/* 👇 Redirect if already logged in */}
+          <Route
+            path="/login"
+            element={
+              <RedirectIfAuthenticated>
+                <LoginPage />
+              </RedirectIfAuthenticated>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <RedirectIfAuthenticated>
+                <SignUpPage />
+              </RedirectIfAuthenticated>
+            }
+          />
+
+          {/* 🔒 Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -88,13 +105,18 @@ function App() {
             element={
               <main className="text-white text-center py-24 px-6">
                 <h1 className="text-3xl font-bold">404</h1>
-                <p className="text-white/70 mt-2">Page not found. Please check the URL or go back to <a href="/" className="underline text-cyan-400">home</a>.</p>
+                <p className="text-white/70 mt-2">
+                  Page not found. Please check the URL or go back to{' '}
+                  <a href="/" className="underline text-cyan-400">
+                    home
+                  </a>.
+                </p>
               </main>
             }
           />
         </Routes>
 
-        {/* Show AI Chatbot when user is logged in */}
+        {/* 🤖 AI Chatbot shown only when authenticated */}
         {user && <AIChatbot user={user} />}
       </div>
     </Router>
