@@ -1,67 +1,150 @@
 // src/pages/Dashboard.jsx
 import { useAuth } from '../context/AuthContext';
-import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { Dialog } from '@headlessui/react';
 
 function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // ===== Display name helpers =====
+  const displayName = useMemo(() => {
+    const full = user?.user_metadata?.full_name?.trim();
+    if (full) return full;
+    return user?.email || 'User';
+  }, [user]);
+
+  const firstName = useMemo(() => {
+    const full = user?.user_metadata?.full_name?.trim();
+    if (full) return full.split(' ')[0];
+    return (user?.email || 'User').split('@')[0];
+  }, [user]);
+
+  // ===== Data state =====
+  const [projects, setProjects] = useState([]);
+  const [testPlans, setTestPlans] = useState([]);
+
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [loadingTests, setLoadingTests] = useState(false);
+
+  // ===== Modal state =====
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [testTitle, setTestTitle] = useState('');
+  const [testResult, setTestResult] = useState('');
+  const [testOwner, setTestOwner] = useState('');
+
+  // redirect if no user
   useEffect(() => {
     if (!user) navigate('/');
   }, [user, navigate]);
 
+  // initial fetch
+  useEffect(() => {
+    if (user?.id) {
+      fetchProjects();
+      fetchTestPlans();
+    }
+  }, [user?.id]);
+
+  // ===== Queries =====
+  const fetchProjects = async () => {
+    try {
+      setLoadingProjects(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('last_deploy', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (err) {
+      console.error('fetchProjects:', err.message);
+      setProjects([]);
+    } finally {
+      setLoadingProjects(false);
+    }
+  };
+
+  const fetchTestPlans = async () => {
+    try {
+      setLoadingTests(true);
+      const { data, error } = await supabase
+        .from('test_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('ran_at', { ascending: false });
+
+      if (error) throw error;
+      setTestPlans(data || []);
+    } catch (err) {
+      console.error('fetchTestPlans:', err.message);
+      setTestPlans([]);
+    } finally {
+      setLoadingTests(false);
+    }
+  };
+
+  // ===== Mutations =====
+  const handleAddProject = async () => {
+    try {
+      const newProject = {
+        user_id: user.id,
+        name: `Project ${projects.length + 1}`,
+        status: 'Active',
+        deploys: 0,
+        last_deploy: null
+      };
+
+      const { error } = await supabase.from('projects').insert([newProject]);
+      if (error) throw error;
+      fetchProjects();
+    } catch (err) {
+      console.error('handleAddProject:', err.message);
+    }
+  };
+
+  const handleSubmitTestPlan = async () => {
+    if (!testTitle.trim() || !testResult.trim()) return;
+
+    try {
+      const newPlan = {
+        user_id: user.id,                        // 🔐 critical for RLS
+        title: testTitle.trim(),
+        result: testResult.trim(),
+        owner_name: (testOwner || displayName).trim(),
+        ran_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('test_plans')
+        .insert([newPlan])
+        .select();
+
+      if (error) throw error;
+      setTestPlans((prev) => (data ? [...data, ...prev] : prev));
+
+      // reset form
+      setTestTitle('');
+      setTestResult('');
+      setTestOwner('');
+      setIsTestModalOpen(false);
+    } catch (err) {
+      console.error('handleSubmitTestPlan:', err.message);
+      alert(`Failed to save test plan: ${err.message}`);
+    }
+  };
+
   if (!user) return null;
 
-  const isTestUser = user?.email?.trim().toLowerCase() === 'testuser@softdeploy.dev';
-
-  // 🔹 Dummy (test user only)
-  const demoStats = [
-    { label: 'Total Deployments', value: '127', change: '+12%', trend: 'up' },
-    { label: 'Success Rate', value: '98.4%', change: '+2.1%', trend: 'up' },
-    { label: 'Avg Deploy Time', value: '4.2 min', change: '-15%', trend: 'down' },
-    { label: 'Active Projects', value: '8', change: '+1', trend: 'up' },
-  ];
-
-  const demoDeployments = [
-    { id: '#1240', project: 'Login Gateway', status: 'Passed', duration: '9.93', time: '2 mins ago' },
-    { id: '#1239', project: 'Frontend App', status: 'Queued', duration: '3.75', time: '7 mins ago' },
-    { id: '#1238', project: 'API Service', status: 'Failed', duration: '6.41', time: '15 mins ago' },
-    { id: '#1237', project: 'Login Gateway', status: 'Running', duration: '4.12', time: '30 mins ago' },
-  ];
-
-  const demoProjects = [
-    { name: 'Frontend App', status: 'Active', deploys: 45, lastDeploy: '2 min ago' },
-    { name: 'API Service', status: 'Active', deploys: 32, lastDeploy: '15 min ago' },
-  ];
-
-  const demoTests = [
-    { title: 'Login Flow', status: '5 / 5 passed', owner: 'QA Team', lastRun: 'Today • 8:40am' },
-    { title: 'Checkout Flow', status: '6 / 8 passed', owner: 'Automation Bot', lastRun: 'Today • 9:10am' },
-  ];
-
-  // 🧼 Real user: Local state to simulate project list for now
-  const [realProjects, setRealProjects] = useState([]);
-
-  // Real user stats (placeholder logic)
-  const realStats = [
+  const stats = [
     { label: 'Total Deployments', value: '0', change: '-', trend: 'neutral' },
     { label: 'Success Rate', value: '-', change: '-', trend: 'neutral' },
     { label: 'Avg Deploy Time', value: '-', change: '-', trend: 'neutral' },
-    { label: 'Active Projects', value: realProjects.length.toString(), change: '+0', trend: 'neutral' },
+    { label: 'Active Projects', value: projects.length.toString(), change: '+0', trend: 'neutral' }
   ];
-
-  const stats = isTestUser ? demoStats : realStats;
-
-  const handleAddProject = () => {
-    const newProject = {
-      name: `New Project ${realProjects.length + 1}`,
-      status: 'Active',
-      deploys: 0,
-      lastDeploy: 'Just Created',
-    };
-    setRealProjects([newProject, ...realProjects]);
-  };
 
   return (
     <div className="min-h-screen bg-[#0e1117] text-white">
@@ -74,28 +157,23 @@ function Dashboard() {
             </div>
             <span className="text-xl font-bold">SoftDeploy</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-gray-300 hover:text-white">Projects</a>
-            <a href="#" className="text-gray-300 hover:text-white">Deployments</a>
-            <a href="#" className="text-gray-300 hover:text-white">Settings</a>
-          </nav>
           <div className="flex items-center gap-4">
-            <span className="text-sm hidden md:inline">{user.name}</span>
-            <button onClick={() => { logout(); navigate('/') }} className="text-sm text-gray-400 hover:text-white">Logout</button>
+            <span className="text-sm hidden md:inline">{displayName}</span>
+            <button
+              onClick={async () => { await logout(); navigate('/'); }}
+              className="text-sm text-gray-400 hover:text-white"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </header>
 
       {/* Body */}
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-10">
-        {/* Hello */}
         <div>
-          <h1 className="text-2xl font-bold">Welcome back, {user.name.split(' ')[0]}!</h1>
-          <p className="text-white/60">
-            {isTestUser
-              ? `Here's what's happening in your demo workspace.`
-              : `Build your first deployment or project in your workspace.`}
-          </p>
+          <h1 className="text-2xl font-bold">Welcome back, {firstName}!</h1>
+          <p className="text-white/60">Track your test plans and projects live in your workspace.</p>
         </div>
 
         {/* Stats */}
@@ -104,76 +182,25 @@ function Dashboard() {
             <div key={i} className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
               <p className="text-sm text-white/50">{stat.label}</p>
               <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
-              <p className={`text-sm mt-1 ${
-                stat.trend === 'up' ? 'text-green-400'
-                : stat.trend === 'down' ? 'text-red-400'
-                : 'text-gray-400'
-              }`}>
+              <p
+                className={`text-sm mt-1 ${
+                  stat.trend === 'up' ? 'text-green-400'
+                  : stat.trend === 'down' ? 'text-red-400'
+                  : 'text-gray-400'
+                }`}
+              >
                 {stat.change}
               </p>
             </div>
           ))}
         </div>
 
-        {/* 3 Column Panel */}
+        {/* Three-column panel */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Deployments */}
-          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-            <div className="flex justify-between items-center mb-3">
-              <Link to="/deployments" className="font-semibold hover:underline">📦 Deployments</Link>
-              <span className="text-xs text-cyan-500 cursor-pointer">More</span>
-            </div>
-            <div className="space-y-3">
-              {(isTestUser ? demoDeployments : []).length > 0 ? (
-                (isTestUser ? demoDeployments : []).map((d, i) => (
-                  <div key={i} className="bg-[#0d1117] p-3 rounded flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{d.project}</p>
-                      <p className="text-xs text-white/40">Build {d.id} • {d.time}</p>
-                    </div>
-                    <div className="text-sm text-right">
-                      <span className={`px-3 py-1 rounded-full ${
-                        d.status === 'Passed' ? 'bg-green-500/10 text-green-400'
-                        : d.status === 'Failed' ? 'bg-red-500/10 text-red-400'
-                        : 'bg-yellow-500/10 text-yellow-400 animate-pulse'
-                      }`}>
-                        {d.status}
-                      </span>
-                      <p className="text-xs text-white/40">{d.duration} min</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-white/50 text-sm">No deployments yet.</p>
-              )}
-            </div>
-          </section>
-
-          {/* Test Management */}
-          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-            <div className="flex justify-between items-center mb-3">
-              <Link to="/tests" className="font-semibold hover:underline">🧪 Test Plans</Link>
-              <span className="text-xs text-cyan-500 cursor-pointer">More</span>
-            </div>
-            <div className="space-y-3">
-              {(isTestUser ? demoTests : []).length > 0 ? (
-                (isTestUser ? demoTests : []).map((t, i) => (
-                  <div key={i} className="bg-[#0d1117] p-3 rounded">
-                    <p className="font-semibold">{t.title}</p>
-                    <p className="text-sm text-white/60">{t.status}</p>
-                    <p className="text-xs text-white/30">{t.owner} • {t.lastRun}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-white/50 text-sm">No test plans available.</p>
-              )}
-            </div>
-          </section>
-
           {/* Projects */}
           <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
             <div className="flex justify-between items-center mb-3">
-              <Link to="/projects" className="font-semibold hover:underline">🧱 Projects</Link>
+              <h2 className="font-semibold text-white">🧱 Projects</h2>
               <button
                 onClick={handleAddProject}
                 className="text-xs text-black bg-cyan-500 px-3 py-1 rounded hover:bg-cyan-400"
@@ -182,14 +209,20 @@ function Dashboard() {
               </button>
             </div>
             <div className="space-y-3">
-              {(isTestUser ? demoProjects : realProjects).length > 0 ? (
-                (isTestUser ? demoProjects : realProjects).map((project, idx) => (
-                  <div key={idx} className="bg-[#0d1117] p-3 rounded flex justify-between items-center">
+              {loadingProjects ? (
+                <p className="text-sm text-white/50 animate-pulse">Loading projects...</p>
+              ) : projects.length > 0 ? (
+                projects.map((project) => (
+                  <div key={project.id ?? project.name} className="bg-[#0d1117] p-3 rounded flex justify-between items-center">
                     <div>
                       <p className="font-medium">{project.name}</p>
-                      <p className="text-xs text-white/40">{project.deploys} deploys • {project.lastDeploy}</p>
+                      <p className="text-xs text-white/40">
+                        {project.deploys} deploys • {project.last_deploy || 'Just Created'}
+                      </p>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400">Active</span>
+                    <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded-full">
+                      {project.status || 'Active'}
+                    </span>
                   </div>
                 ))
               ) : (
@@ -197,8 +230,92 @@ function Dashboard() {
               )}
             </div>
           </section>
+
+          {/* Deployments */}
+          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-white">📦 Deployments</h2>
+              <span className="text-xs text-cyan-500">More</span>
+            </div>
+            <p className="text-white/50 text-sm">No deployments yet.</p>
+          </section>
+
+          {/* Test Plans */}
+          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-white">🧪 Test Plans</h2>
+              <button
+                onClick={() => setIsTestModalOpen(true)}
+                className="text-xs text-black bg-cyan-500 px-3 py-1 rounded hover:bg-cyan-400"
+              >
+                + New Test Plan
+              </button>
+            </div>
+            <div className="space-y-3">
+              {loadingTests ? (
+                <p className="text-sm text-white/50 animate-pulse">Loading test plans...</p>
+              ) : testPlans.length > 0 ? (
+                testPlans.map((t) => (
+                  <div key={t.id ?? `${t.title}-${t.ran_at}`} className="bg-[#0d1117] p-3 rounded">
+                    <p className="font-semibold">{t.title}</p>
+                    <p className="text-white/70 text-sm">{t.result}</p>
+                    <p className="text-white/30 text-xs">
+                      {(t.owner_name || displayName)} • {t.ran_at ? new Date(t.ran_at).toLocaleString() : ''}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-white/50 text-sm">No test plans yet.</p>
+              )}
+            </div>
+          </section>
         </div>
       </main>
+
+      {/* Test Plan Modal */}
+      <Dialog open={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-[#161b22] w-full max-w-md p-6 rounded-lg border border-white/10 text-white shadow-xl">
+            <Dialog.Title className="text-lg font-semibold mb-4">New Test Plan</Dialog.Title>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">Title</label>
+                <input
+                  value={testTitle}
+                  onChange={(e) => setTestTitle(e.target.value)}
+                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
+                  placeholder="e.g. Checkout Flow"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Result</label>
+                <input
+                  value={testResult}
+                  onChange={(e) => setTestResult(e.target.value)}
+                  placeholder="e.g. 8/10 passed"
+                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Owner</label>
+                <input
+                  value={testOwner}
+                  onChange={(e) => setTestOwner(e.target.value)}
+                  placeholder="e.g. QA Team"
+                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
+                />
+              </div>
+              <button
+                onClick={handleSubmitTestPlan}
+                className="mt-4 w-full py-2 bg-cyan-500 text-black rounded hover:bg-cyan-400 font-semibold"
+              >
+                Save Test Plan
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
     </div>
   );
 }

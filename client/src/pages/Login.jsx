@@ -1,28 +1,29 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Login() {
-  const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [status, setStatus] = useState({ loading: false, error: '' });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus({ loading: true, error: '' });
 
-    const normalizedEmail = email.trim().toLowerCase();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password
+      });
+      if (error) throw error;
 
-    // ✅ Define user object w/ hardcoded logic for test vs real user
-    const user = {
-      name: normalizedEmail === 'testuser@softdeploy.dev' ? 'Mike Scott' : 'Test User',
-      email: normalizedEmail,
-      role: normalizedEmail === 'testuser@softdeploy.dev' ? 'demo' : 'member',
-    };
-
-    login(user);
-    navigate('/dashboard');
+      setStatus({ loading: false, error: '' });
+      navigate('/dashboard'); // redirect after login
+    } catch (err) {
+      setStatus({ loading: false, error: err.message ?? 'Login failed' });
+    }
   };
 
   return (
@@ -49,14 +50,20 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-xl p-8 w-full max-w-md backdrop-blur-sm shadow-lg">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/5 border border-white/10 rounded-xl p-8 w-full max-w-md backdrop-blur-sm shadow-lg"
+        >
           <h2 className="text-2xl font-semibold text-white mb-6">Log In</h2>
+
+          {!!status.error && <p className="text-red-400 text-sm mb-4">{status.error}</p>}
+
           <div className="space-y-4">
             <div>
               <label className="block text-white/70 text-sm">Email</label>
               <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
                 type="email"
                 className="w-full mt-1 p-2.5 bg-[#1a1b1f] border border-white/10 rounded text-white"
@@ -65,23 +72,26 @@ export default function Login() {
             <div>
               <label className="block text-white/70 text-sm">Password</label>
               <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
                 type="password"
                 className="w-full mt-1 p-2.5 bg-[#1a1b1f] border border-white/10 rounded text-white"
               />
             </div>
           </div>
+
           <button
             type="submit"
-            className="w-full mt-6 bg-cyan-500 text-black py-2 rounded font-semibold hover:bg-cyan-400"
+            disabled={status.loading}
+            className="w-full mt-6 bg-cyan-500 text-black py-2 rounded font-semibold hover:bg-cyan-400 disabled:opacity-60"
           >
-            Log In
+            {status.loading ? 'Logging in…' : 'Log In'}
           </button>
+
           <p className="text-sm text-white/50 mt-4 text-center">
             Don’t have an account?{' '}
-            <a href="/signup" className="text-cyan-400 hover:underline">Sign up</a>
+            <Link to="/signup" className="text-cyan-400 hover:underline">Sign up</Link>
           </p>
         </form>
       </div>

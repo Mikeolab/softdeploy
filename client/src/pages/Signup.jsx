@@ -1,22 +1,56 @@
 // src/pages/Signup.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { supabase } from "../lib/supabaseClient"; // ⬅️ make sure this file exists
 
 export default function SignupPage() {
-  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({ fullName: "", email: "", password: "" });
+  const [status, setStatus] = useState({ loading: false, error: "", success: "" });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus({ loading: true, error: "", success: "" });
 
-    login({ name, email, role: "member" });
-    navigate("/dashboard");
+    try {
+      // 1) Create auth user
+      const { data: signData, error: signErr } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { full_name: form.fullName }
+        }
+      });
+      if (signErr) throw signErr;
+
+      const user = signData.user;
+
+      // If email confirmation is ON, user will be null until verified
+      if (!user) {
+        setStatus({
+          loading: false,
+          error: "",
+          success: "Account created. Please check your email to confirm before logging in."
+        });
+        return;
+      }
+
+      // 2) Upsert profile row
+      const { error: profErr } = await supabase.from("profiles").upsert({
+        id: user.id,
+        email: form.email,
+        full_name: form.fullName
+      });
+      if (profErr) throw profErr;
+
+      setStatus({ loading: false, error: "", success: "Account created successfully!" });
+      navigate("/dashboard");
+    } catch (err) {
+      setStatus({ loading: false, error: err.message ?? "Sign up failed", success: "" });
+    }
   };
 
   return (
@@ -62,13 +96,20 @@ export default function SignupPage() {
         >
           <h2 className="text-white text-2xl font-semibold mb-6">Sign Up</h2>
 
+          {!!status.error && (
+            <div className="mb-4 text-sm text-red-400">{status.error}</div>
+          )}
+          {!!status.success && (
+            <div className="mb-4 text-sm text-emerald-400">{status.success}</div>
+          )}
+
           <div className="space-y-5">
             <div>
               <label className="block text-white/70 text-sm mb-1">Full Name</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={form.fullName}
+                onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                 required
                 placeholder="e.g. Ani Dev"
                 className="w-full px-4 py-2 rounded-md bg-[#1d1f24] text-white border border-white/10 focus:ring-2 focus:ring-cyan-500 outline-none"
@@ -79,8 +120,8 @@ export default function SignupPage() {
               <label className="block text-white/70 text-sm mb-1">Email</label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 required
                 placeholder="you@company.com"
                 className="w-full px-4 py-2 rounded-md bg-[#1d1f24] text-white border border-white/10 focus:ring-2 focus:ring-cyan-500 outline-none"
@@ -91,8 +132,8 @@ export default function SignupPage() {
               <label className="block text-white/70 text-sm mb-1">Password</label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
                 className="w-full px-4 py-2 rounded-md bg-[#1d1f24] text-white border border-white/10 focus:ring-2 focus:ring-cyan-500 outline-none"
               />
@@ -100,17 +141,18 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-md font-semibold bg-cyan-500 hover:bg-cyan-400 transition transform hover:-translate-y-[1px]"
+              disabled={status.loading}
+              className="w-full py-2.5 rounded-md font-semibold bg-cyan-500 hover:bg-cyan-400 transition transform hover:-translate-y-[1px] disabled:opacity-60"
             >
-              Create Account
+              {status.loading ? "Creating…" : "Create Account"}
             </button>
           </div>
 
           <div className="text-white/60 text-sm text-center mt-4">
             Already have an account?{" "}
-            <a href="/login" className="text-cyan-400 hover:text-cyan-300 underline">
+            <Link to="/login" className="text-cyan-400 hover:text-cyan-300 underline">
               Log in
-            </a>
+            </Link>
           </div>
         </form>
       </section>
