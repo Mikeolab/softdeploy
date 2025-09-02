@@ -1,6 +1,7 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 
 // Pages
 import Home from './pages/Home.jsx';
@@ -8,118 +9,98 @@ import MarketingPage from './pages/MarketingPage.jsx';
 import LoginPage from './pages/Login.jsx';
 import SignUpPage from './pages/Signup.jsx';
 import DashboardPage from './pages/Dashboard.jsx';
+import ProjectsPage from './pages/Projects.jsx';
+import ProjectDetailPage from './pages/ProjectDetail.jsx';
+import TestManagementPage from './pages/TestManagement.jsx';
 import JobsPage from './pages/Jobs.jsx';
 import DeployPage from './pages/Deploy.jsx';
 import RunsPage from './pages/Runs.jsx';
 import FeaturesPage from './pages/FeaturesPage.jsx';
+import IntegrationsPage from './pages/IntegrationsPage.jsx';
 import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
-import IntegrationsPage from './pages/IntegrationsPage.jsx';
+import SettingsPage from './pages/Settings.jsx';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import RedirectIfAuthenticated from './components/RedirectIfAuthenticated.jsx'; // ✅ NEW
+import RedirectIfAuthenticated from './components/RedirectIfAuthenticated.jsx';
 import AIChatbot from './components/AIChatbot.jsx';
 import NavigationBar from './components/Navigation.jsx';
+import Sidebar from './components/Sidebar.jsx';
 
 function App() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0e1117] text-white text-xl font-semibold">
-        Loading your workspace...
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white text-xl font-semibold">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+          Loading your workspace...
+        </div>
       </div>
     );
   }
 
   return (
-    <Router>
-      <div className="bg-[#0e1117] min-h-screen">
-        {!user && <NavigationBar />}
+    <ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+          {!user && <NavigationBar />}
 
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/marketing" element={<MarketingPage />} />
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/subscription" element={<SubscriptionPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/integrations" element={<IntegrationsPage />} />
-
-          {/* 👇 Redirect if already logged in */}
-          <Route
-            path="/login"
-            element={
-              <RedirectIfAuthenticated>
-                <LoginPage />
-              </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <RedirectIfAuthenticated>
-                <SignUpPage />
-              </RedirectIfAuthenticated>
-            }
-          />
-
-          {/* 🔒 Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/jobs"
-            element={
-              <ProtectedRoute>
-                <JobsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/deploy"
-            element={
-              <ProtectedRoute>
-                <DeployPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/runs"
-            element={
-              <ProtectedRoute>
-                <RunsPage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* 404 Not Found */}
-          <Route
-            path="*"
-            element={
-              <main className="text-white text-center py-24 px-6">
-                <h1 className="text-3xl font-bold">404</h1>
-                <p className="text-white/70 mt-2">
-                  Page not found. Please check the URL or go back to{' '}
-                  <a href="/" className="underline text-cyan-400">
-                    home
-                  </a>.
-                </p>
+          {/* Layout for authenticated users */}
+          {user && (
+            <div className="relative">
+              <Sidebar />
+              <main className="w-full transition-all duration-300 lg:pl-16">
+                <Routes>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/projects" element={<ProjectsPage />} />
+                  <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+                  <Route path="/test-management/:projectId" element={<TestManagementPage />} />
+                  <Route path="/jobs" element={<JobsPage />} />
+                  <Route path="/deploy" element={<DeployPage />} />
+                  <Route path="/runs" element={<RunsPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/" element={<DashboardPage />} />
+                </Routes>
               </main>
-            }
-          />
-        </Routes>
+            </div>
+          )}
 
-        {/* 🤖 AI Chatbot shown only when authenticated */}
-        {user && <AIChatbot user={user} />}
-      </div>
-    </Router>
+          {/* Public routes */}
+          {!user && (
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/marketing" element={<MarketingPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/subscription" element={<SubscriptionPage />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route
+                path="/login"
+                element={
+                  <RedirectIfAuthenticated>
+                    <LoginPage />
+                  </RedirectIfAuthenticated>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <RedirectIfAuthenticated>
+                    <SignUpPage />
+                  </RedirectIfAuthenticated>
+                }
+              />
+            </Routes>
+          )}
+
+          {/* 🤖 AI Chatbot shown only when authenticated */}
+          {user && <AIChatbot user={user} />}
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

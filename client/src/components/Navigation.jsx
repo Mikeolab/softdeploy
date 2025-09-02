@@ -1,75 +1,56 @@
 // src/components/Navigation.jsx
 import { Link } from 'react-router-dom';
+import { 
+  BookOpenIcon, 
+  PlayIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 
 function Navigation() {
   return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '16px 48px',
-      borderBottom: '1px solid #30363d',
-      position: 'sticky',
-      top: 0,
-      backgroundColor: 'rgba(14, 17, 23, 0.95)',
-      backdropFilter: 'blur(10px)',
-      zIndex: 100
-    }}>
-      {/* 👇 Replaced static block with Link */}
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-  <div style={{
-    height: '32px',
-    width: '32px',
-    borderRadius: '8px',
-    background: 'linear-gradient(135deg, #10b981, #06b6d4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }}>
-    <span style={{ color: 'black', fontWeight: 'bold', fontSize: '14px' }}>SD</span>
-  </div>
-  <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>SoftDeploy</span>
-  <span style={{
-    fontSize: '12px',
-    color: '#9ca3af',
-    backgroundColor: '#161b22',
-    padding: '2px 8px',
-    borderRadius: '12px',
-    marginLeft: '8px'
-  }}>
-    QA & CI/CD Platform
-  </span>
-</Link>
+    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo and Brand */}
+          <Link to="/" className="flex items-center gap-3 text-decoration-none">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">SD</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">SoftDeploy</span>
+              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
+                QA & CI/CD Platform
+              </span>
+            </div>
+          </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-        <Link to="/features" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Features</Link>
-        <Link to="/subscription" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Pricing</Link>
-        <Link to="#" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Tech</Link>
-        <Link to="#" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Integrations</Link>
-        <Link to="/dashboard" style={{ color: '#d1d5db', textDecoration: 'none', fontSize: '14px' }}>Dashboard</Link>
-        
-        <div style={{ display: 'flex', gap: '12px', marginLeft: '24px' }}>
-          <Link to="#" style={{
-            color: '#d1d5db',
-            textDecoration: 'none',
-            fontSize: '14px',
-            padding: '8px 16px',
-            border: '1px solid #30363d',
-            borderRadius: '6px'
-          }}>
-            Docs
-          </Link>
-          <Link to="/login" style={{
-            background: 'linear-gradient(90deg, #10b981, #06b6d4)',
-            color: 'black',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: '600',
-            padding: '8px 16px',
-            borderRadius: '6px'
-          }}>
-            Try Demo
-          </Link>
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
+              Features
+            </Link>
+            <Link to="/subscription" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
+              Pricing
+            </Link>
+            <Link to="/integrations" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
+              Integrations
+            </Link>
+            <Link to="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
+              Dashboard
+            </Link>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex items-center gap-3">
+            <Link to="/docs" className="hidden md:flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              <BookOpenIcon className="h-4 w-4" />
+              Docs
+            </Link>
+            <Link to="/login" className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-sm font-semibold rounded-lg transition-all duration-300 transform hover:scale-105">
+              <PlayIcon className="h-4 w-4" />
+              Try Demo
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

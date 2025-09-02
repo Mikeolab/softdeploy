@@ -3,10 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Dialog } from '@headlessui/react';
 
 function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // ===== Display name helpers =====
@@ -25,297 +24,267 @@ function Dashboard() {
   // ===== Data state =====
   const [projects, setProjects] = useState([]);
   const [testPlans, setTestPlans] = useState([]);
-
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [loadingTests, setLoadingTests] = useState(false);
-
-  // ===== Modal state =====
-  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [testTitle, setTestTitle] = useState('');
-  const [testResult, setTestResult] = useState('');
-  const [testOwner, setTestOwner] = useState('');
-
-  // redirect if no user
-  useEffect(() => {
-    if (!user) navigate('/');
-  }, [user, navigate]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // initial fetch
   useEffect(() => {
     if (user?.id) {
-      fetchProjects();
-      fetchTestPlans();
+      fetchDashboardData();
     }
   }, [user?.id]);
 
   // ===== Queries =====
-  const fetchProjects = async () => {
+  const fetchDashboardData = async () => {
     try {
-      setLoadingProjects(true);
-      const { data, error } = await supabase
+      setLoading(true);
+      
+      // Fetch projects count
+      const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
-        .select('*')
+        .select('id, name')
         .eq('user_id', user.id)
-        .order('last_deploy', { ascending: false });
+        .order('id', { ascending: false })
+        .limit(5);
 
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (err) {
-      console.error('fetchProjects:', err.message);
-      setProjects([]);
-    } finally {
-      setLoadingProjects(false);
-    }
-  };
-
-  const fetchTestPlans = async () => {
-    try {
-      setLoadingTests(true);
-      const { data, error } = await supabase
+      if (projectsError) throw projectsError;
+      
+      // Fetch test plans count
+      const { data: testData, error: testError } = await supabase
         .from('test_plans')
-        .select('*')
+        .select('id, title, result, ran_at')
         .eq('user_id', user.id)
-        .order('ran_at', { ascending: false });
+        .order('ran_at', { ascending: false })
+        .limit(5);
 
-      if (error) throw error;
-      setTestPlans(data || []);
+      if (testError) throw testError;
+
+      // Calculate recent activity
+      const activity = [
+        ...(projectsData || []).map(project => ({
+          type: 'project',
+          title: `Created project "${project.name}"`,
+          time: new Date().toISOString(), // Use current time since we don't have created_at
+          icon: '📁'
+        })),
+        ...(testData || []).map(test => ({
+          type: 'test',
+          title: `Completed test management "${test.title}"`,
+          time: test.ran_at,
+          icon: '🧪'
+        }))
+      ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
+
+      setProjects(projectsData || []);
+      setTestPlans(testData || []);
+      setRecentActivity(activity);
     } catch (err) {
-      console.error('fetchTestPlans:', err.message);
-      setTestPlans([]);
+      console.error('fetchDashboardData:', err.message);
     } finally {
-      setLoadingTests(false);
+      setLoading(false);
     }
   };
-
-  // ===== Mutations =====
-  const handleAddProject = async () => {
-    try {
-      const newProject = {
-        user_id: user.id,
-        name: `Project ${projects.length + 1}`,
-        status: 'Active',
-        deploys: 0,
-        last_deploy: null
-      };
-
-      const { error } = await supabase.from('projects').insert([newProject]);
-      if (error) throw error;
-      fetchProjects();
-    } catch (err) {
-      console.error('handleAddProject:', err.message);
-    }
-  };
-
-  const handleSubmitTestPlan = async () => {
-    if (!testTitle.trim() || !testResult.trim()) return;
-
-    try {
-      const newPlan = {
-        user_id: user.id,                        // 🔐 critical for RLS
-        title: testTitle.trim(),
-        result: testResult.trim(),
-        owner_name: (testOwner || displayName).trim(),
-        ran_at: new Date().toISOString()
-      };
-
-      const { data, error } = await supabase
-        .from('test_plans')
-        .insert([newPlan])
-        .select();
-
-      if (error) throw error;
-      setTestPlans((prev) => (data ? [...data, ...prev] : prev));
-
-      // reset form
-      setTestTitle('');
-      setTestResult('');
-      setTestOwner('');
-      setIsTestModalOpen(false);
-    } catch (err) {
-      console.error('handleSubmitTestPlan:', err.message);
-      alert(`Failed to save test plan: ${err.message}`);
-    }
-  };
-
-  if (!user) return null;
 
   const stats = [
-    { label: 'Total Deployments', value: '0', change: '-', trend: 'neutral' },
-    { label: 'Success Rate', value: '-', change: '-', trend: 'neutral' },
-    { label: 'Avg Deploy Time', value: '-', change: '-', trend: 'neutral' },
-    { label: 'Active Projects', value: projects.length.toString(), change: '+0', trend: 'neutral' }
+    { 
+      label: 'Active Projects', 
+      value: projects.length.toString(), 
+      change: '+0', 
+      trend: 'neutral',
+      link: '/projects',
+      icon: '📁',
+      color: 'from-blue-500 to-cyan-500'
+    },
+    { 
+      label: 'Total Test Plans', 
+      value: testPlans.length.toString(), 
+      change: '+0', 
+      trend: 'neutral',
+      link: '/projects',
+      icon: '🧪',
+      color: 'from-green-500 to-emerald-500'
+    },
+    { 
+      label: 'Success Rate', 
+      value: testPlans.length > 0 ? '85%' : '-', 
+      change: '+5%', 
+      trend: 'up',
+      link: '/projects',
+      icon: '📊',
+      color: 'from-purple-500 to-pink-500'
+    },
+    { 
+      label: 'Avg Deploy Time', 
+      value: '2.3m', 
+      change: '-0.5m', 
+      trend: 'down',
+      link: '/projects',
+      icon: '⚡',
+      color: 'from-orange-500 to-red-500'
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Create New Project',
+      description: 'Start a new project with AI-powered workflows',
+      icon: '🚀',
+      link: '/projects',
+      action: 'Create',
+      color: 'from-cyan-500 to-blue-500'
+    },
+    {
+      title: 'View Projects',
+      description: 'Manage your existing projects and deployments',
+      icon: '📁',
+      link: '/projects',
+      action: 'View',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      title: 'Test Management',
+      description: 'Create and manage test plans for your projects',
+      icon: '🧪',
+      link: '/projects',
+      action: 'Manage',
+      color: 'from-purple-500 to-pink-500'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-[#0e1117] text-white">
+    <div className="min-h-screen p-6 space-y-8 animate-fade-in">
       {/* Header */}
-      <header className="bg-[#161b22] border-b border-[#30363d]">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center py-4">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 grid place-items-center">
-              <span className="text-black font-bold text-sm">SD</span>
-            </div>
-            <span className="text-xl font-bold">SoftDeploy</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm hidden md:inline">{displayName}</span>
-            <button
-              onClick={async () => { await logout(); navigate('/'); }}
-              className="text-sm text-gray-400 hover:text-white"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Welcome back, {firstName}! 👋
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Your AI-powered development workspace overview
+        </p>
+      </div>
 
-      {/* Body */}
-      <main className="max-w-7xl mx-auto px-6 py-10 space-y-10">
-        <div>
-          <h1 className="text-2xl font-bold">Welcome back, {firstName}!</h1>
-          <p className="text-white/60">Track your test plans and projects live in your workspace.</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-              <p className="text-sm text-white/50">{stat.label}</p>
-              <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
-              <p
-                className={`text-sm mt-1 ${
-                  stat.trend === 'up' ? 'text-green-400'
-                  : stat.trend === 'down' ? 'text-red-400'
-                  : 'text-gray-400'
-                }`}
-              >
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <Link 
+            key={i} 
+            to={stat.link}
+            className="group glass-card hover-lift p-6 rounded-xl cursor-pointer"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
+                <span className="text-2xl">{stat.icon}</span>
+              </div>
+              <span className={`text-sm font-medium ${
+                stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
+                stat.trend === 'down' ? 'text-red-600 dark:text-red-400' :
+                'text-gray-500 dark:text-gray-400'
+              }`}>
                 {stat.change}
-              </p>
+              </span>
             </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+              {stat.value}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {stat.label}
+            </p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {quickActions.map((action, i) => (
+            <Link
+              key={i}
+              to={action.link}
+              className="group glass-card hover-lift p-6 rounded-xl cursor-pointer"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-lg bg-gradient-to-r ${action.color}`}>
+                  <span className="text-2xl">{action.icon}</span>
+                </div>
+                <span className="text-sm text-cyan-600 dark:text-cyan-400 group-hover:text-cyan-500 transition-colors">
+                  {action.action} →
+                </span>
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+                {action.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {action.description}
+              </p>
+            </Link>
           ))}
         </div>
+      </div>
 
-        {/* Three-column panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Projects */}
-          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="font-semibold text-white">🧱 Projects</h2>
-              <button
-                onClick={handleAddProject}
-                className="text-xs text-black bg-cyan-500 px-3 py-1 rounded hover:bg-cyan-400"
-              >
-                + New Project
-              </button>
-            </div>
-            <div className="space-y-3">
-              {loadingProjects ? (
-                <p className="text-sm text-white/50 animate-pulse">Loading projects...</p>
-              ) : projects.length > 0 ? (
-                projects.map((project) => (
-                  <div key={project.id ?? project.name} className="bg-[#0d1117] p-3 rounded flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{project.name}</p>
-                      <p className="text-xs text-white/40">
-                        {project.deploys} deploys • {project.last_deploy || 'Just Created'}
-                      </p>
-                    </div>
-                    <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded-full">
-                      {project.status || 'Active'}
-                    </span>
+      {/* Recent Activity */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Recent Activity
+          </h2>
+          <Link to="/projects" className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors">
+            View all →
+          </Link>
+        </div>
+        
+        <div className="glass-card p-6 rounded-xl">
+          {loading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-8 h-8 shimmer rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 shimmer rounded w-3/4"></div>
+                    <div className="h-3 shimmer rounded w-1/2"></div>
                   </div>
-                ))
-              ) : (
-                <p className="text-white/50 text-sm">No projects yet.</p>
-              )}
+                </div>
+              ))}
             </div>
-          </section>
-
-          {/* Deployments */}
-          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="font-semibold text-white">📦 Deployments</h2>
-              <span className="text-xs text-cyan-500">More</span>
-            </div>
-            <p className="text-white/50 text-sm">No deployments yet.</p>
-          </section>
-
-          {/* Test Plans */}
-          <section className="bg-[#161b22] p-5 rounded-lg border border-[#30363d]">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="font-semibold text-white">🧪 Test Plans</h2>
-              <button
-                onClick={() => setIsTestModalOpen(true)}
-                className="text-xs text-black bg-cyan-500 px-3 py-1 rounded hover:bg-cyan-400"
-              >
-                + New Test Plan
-              </button>
-            </div>
-            <div className="space-y-3">
-              {loadingTests ? (
-                <p className="text-sm text-white/50 animate-pulse">Loading test plans...</p>
-              ) : testPlans.length > 0 ? (
-                testPlans.map((t) => (
-                  <div key={t.id ?? `${t.title}-${t.ran_at}`} className="bg-[#0d1117] p-3 rounded">
-                    <p className="font-semibold">{t.title}</p>
-                    <p className="text-white/70 text-sm">{t.result}</p>
-                    <p className="text-white/30 text-xs">
-                      {(t.owner_name || displayName)} • {t.ran_at ? new Date(t.ran_at).toLocaleString() : ''}
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity, i) => (
+                <div key={i} className="flex items-center gap-4 animate-slide-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+                    <span className="text-sm">{activity.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {activity.title}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(activity.time).toLocaleString()}
                     </p>
                   </div>
-                ))
-              ) : (
-                <p className="text-white/50 text-sm">No test plans yet.</p>
-              )}
+                </div>
+              ))}
             </div>
-          </section>
-        </div>
-      </main>
-
-      {/* Test Plan Modal */}
-      <Dialog open={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-[#161b22] w-full max-w-md p-6 rounded-lg border border-white/10 text-white shadow-xl">
-            <Dialog.Title className="text-lg font-semibold mb-4">New Test Plan</Dialog.Title>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm mb-1">Title</label>
-                <input
-                  value={testTitle}
-                  onChange={(e) => setTestTitle(e.target.value)}
-                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
-                  placeholder="e.g. Checkout Flow"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Result</label>
-                <input
-                  value={testResult}
-                  onChange={(e) => setTestResult(e.target.value)}
-                  placeholder="e.g. 8/10 passed"
-                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Owner</label>
-                <input
-                  value={testOwner}
-                  onChange={(e) => setTestOwner(e.target.value)}
-                  placeholder="e.g. QA Team"
-                  className="w-full p-2 rounded bg-[#0d1117] border border-white/20"
-                />
-              </div>
-              <button
-                onClick={handleSubmitTestPlan}
-                className="mt-4 w-full py-2 bg-cyan-500 text-black rounded hover:bg-cyan-400 font-semibold"
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-4">🎉</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Welcome to SoftDeploy!
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Start by creating your first project to see activity here
+              </p>
+              <Link 
+                to="/projects"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
               >
-                Save Test Plan
-              </button>
+                Create Your First Project
+              </Link>
             </div>
-          </Dialog.Panel>
+          )}
         </div>
-      </Dialog>
+      </div>
     </div>
   );
 }

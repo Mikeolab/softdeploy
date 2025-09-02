@@ -2,11 +2,21 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { 
+  EnvelopeIcon, 
+  LockClosedIcon, 
+  EyeIcon, 
+  EyeSlashIcon,
+  CommandLineIcon,
+  BeakerIcon,
+  RocketLaunchIcon
+} from '@heroicons/react/24/outline';
 
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [status, setStatus] = useState({ loading: false, error: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,73 +37,140 @@ export default function Login() {
   };
 
   return (
-    <main className="bg-[#0e1117] min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row gap-10">
-        <div className="text-white md:w-1/2 space-y-4">
-          <span className="text-xs px-3 py-1 rounded-full border border-white/10 text-white/60 bg-white/5 inline-block">
-            Welcome Back
-          </span>
-          <h1 className="text-3xl font-bold">Log in to SoftDeploy</h1>
-          <p className="text-white/70">Your workspace for AI-powered QA and observability.</p>
-          <ul className="text-sm text-white/60 space-y-2">
-            <li>📈 View test insights in real-time</li>
-            <li>🧠 Let AI recommend auto-fixes</li>
-            <li>🚀 Promote builds safely to production</li>
-          </ul>
-          <div className="mt-6 bg-white/5 border border-white/10 rounded-lg p-4">
-            <h3 className="font-semibold text-white mb-2">🧪 Test Account</h3>
-            <p className="text-sm text-white/70">Use this to try things out quickly:</p>
-            <div className="mt-2 text-sm space-y-1">
-              <p><strong>Email:</strong> testuser@softdeploy.dev</p>
-              <p><strong>Password:</strong> password1234</p>
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-10 items-center">
+        {/* Left Side - Info */}
+        <div className="lg:w-1/2 space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-full text-cyan-700 dark:text-cyan-300 text-sm font-medium">
+              <CommandLineIcon className="h-4 w-4" />
+              Welcome Back
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+              Log in to <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">SoftDeploy</span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+              Your workspace for AI-powered CI/CD and intelligent testing workflows.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">What you'll get:</h3>
+            <div className="space-y-3">
+              {[
+                { icon: BeakerIcon, text: "AI-powered test automation and intelligent bug detection" },
+                { icon: RocketLaunchIcon, text: "One-click deployments with automatic rollback" },
+                { icon: CommandLineIcon, text: "Real-time monitoring and performance insights" }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
+                    <item.icon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  </div>
+                  <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Test Account Info */}
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <BeakerIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+              Try It Out
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Use this test account to explore SoftDeploy:
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-700 dark:text-gray-300">Email:</span>
+                <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">testuser@softdeploy.dev</code>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-700 dark:text-gray-300">Password:</span>
+                <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">password1234</code>
+              </div>
             </div>
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white/5 border border-white/10 rounded-xl p-8 w-full max-w-md backdrop-blur-sm shadow-lg"
-        >
-          <h2 className="text-2xl font-semibold text-white mb-6">Log In</h2>
-
-          {!!status.error && <p className="text-red-400 text-sm mb-4">{status.error}</p>}
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-white/70 text-sm">Email</label>
-              <input
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                required
-                type="email"
-                className="w-full mt-1 p-2.5 bg-[#1a1b1f] border border-white/10 rounded text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-white/70 text-sm">Password</label>
-              <input
-                value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                required
-                type="password"
-                className="w-full mt-1 p-2.5 bg-[#1a1b1f] border border-white/10 rounded text-white"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={status.loading}
-            className="w-full mt-6 bg-cyan-500 text-black py-2 rounded font-semibold hover:bg-cyan-400 disabled:opacity-60"
+        {/* Right Side - Form */}
+        <div className="lg:w-1/2 w-full max-w-md">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl"
           >
-            {status.loading ? 'Logging in…' : 'Log In'}
-          </button>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign In</h2>
 
-          <p className="text-sm text-white/50 mt-4 text-center">
-            Don’t have an account?{' '}
-            <Link to="/signup" className="text-cyan-400 hover:underline">Sign up</Link>
-          </p>
-        </form>
+            {!!status.error && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-700 dark:text-red-400 text-sm">{status.error}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                    required
+                    type="email"
+                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder="Enter your email"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    value={form.password}
+                    onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                    required
+                    type={showPassword ? "text" : "password"}
+                    className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={status.loading}
+              className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {status.loading ? 'Signing in...' : 'Sign In'}
+            </button>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-6 text-center">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium hover:underline">
+                Create one now
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
     </main>
   );
