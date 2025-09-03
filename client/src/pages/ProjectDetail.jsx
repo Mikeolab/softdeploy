@@ -72,7 +72,7 @@ function ProjectDetail() {
         // Don't throw error for test plans, just set empty array
         setTestPlans([]);
       } else {
-        setTestPlans(testData || []);
+      setTestPlans(testData || []);
       }
     } catch (err) {
       console.error('fetchProjectData:', err.message);
@@ -142,208 +142,208 @@ function ProjectDetail() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">
-              Active
-            </span>
+                 Active
+               </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Project ID: {project.id}
-            </span>
+                 Project ID: {project.id}
+               </span>
+             </div>
           </div>
-        </div>
-        <div className="flex gap-3">
-          <button
+          <div className="flex gap-3">
+            <button
             onClick={() => setActiveTab('test-management')}
             className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-          >
-            + New Test Plan
-          </button>
+            >
+              + New Test Plan
+            </button>
           <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            Deploy
-          </button>
+              Deploy
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {stats.map((stat, i) => (
           <div key={i} className="glass-card p-5 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">{stat.icon}</span>
-            </div>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">{stat.icon}</span>
+              </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stat.value}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{stat.label}</p>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
 
-      {/* Tabs */}
+        {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
-                activeTab === tab.id
+          <nav className="flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+                  activeTab === tab.id
                   ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+                }`}
+              >
+                <span>{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-      {/* Tab Content */}
-      <div className="min-h-[400px]">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Test Plans */}
+        {/* Tab Content */}
+        <div className="min-h-[400px]">
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Test Plans */}
               <div className="glass-card p-6 rounded-xl">
-                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Recent Test Plans</h3>
-                  <button
+                    <button
                     onClick={() => setActiveTab('test-management')}
                     className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
-                  >
-                    View all →
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {testPlans.slice(0, 3).map((test) => (
+                    >
+                      View all →
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {testPlans.slice(0, 3).map((test) => (
                     <div key={test.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <p className="font-semibold text-gray-900 dark:text-white">{test.title}</p>
                       <p className="text-gray-600 dark:text-gray-300 text-sm">{test.result}</p>
                       <p className="text-gray-500 dark:text-gray-400 text-xs">
-                        {test.owner_name} • {test.ran_at ? new Date(test.ran_at).toLocaleString() : ''}
-                      </p>
-                    </div>
-                  ))}
-                  {testPlans.length === 0 && (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">No test plans yet.</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Recent Deployments */}
-              <div className="glass-card p-6 rounded-xl">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Recent Deployments</h3>
-                  <button
-                    onClick={() => setActiveTab('deployments')}
-                    className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
-                  >
-                    View all →
-                  </button>
-                </div>
-                <div className="text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">No deployments yet.</p>
-                  <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
-                    Deploy Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'test-management' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Test Management</h2>
-              <button
-                onClick={() => navigate(`/test-management/${projectId}`)}
-                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-              >
-                + Create Test Plan
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              {testPlans.length > 0 ? (
-                testPlans.map((test) => (
-                  <div key={test.id} className="glass-card p-4 rounded-xl">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-semibold text-lg text-gray-900 dark:text-white">{test.title}</p>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{test.result}</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
                           {test.owner_name} • {test.ran_at ? new Date(test.ran_at).toLocaleString() : ''}
                         </p>
                       </div>
-                      <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">
-                        Passed
-                      </span>
-                    </div>
+                    ))}
+                    {testPlans.length === 0 && (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No test plans yet.</p>
+                    )}
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🧪</div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No test plans yet</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">Create your first test plan to start testing your project</p>
-                  <button
-                    onClick={() => navigate(`/test-management/${projectId}`)}
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-                  >
-                    Create Test Plan
-                  </button>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
 
-        {activeTab === 'deployments' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Deployments</h2>
-              <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
-                Deploy Now
-              </button>
-            </div>
-            
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📦</div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No deployments yet</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">Deploy your project to see deployment history and metrics</p>
-              <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
-                Deploy Now
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Project Settings</h2>
-            
-            <div className="glass-card p-6 rounded-xl">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Project Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Name</label>
-                  <input
-                    value={project.name}
-                    className="w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project ID</label>
-                  <input
-                    value={project.id}
-                    className="w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                    readOnly
-                  />
+                {/* Recent Deployments */}
+              <div className="glass-card p-6 rounded-xl">
+                  <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Recent Deployments</h3>
+                    <button
+                      onClick={() => setActiveTab('deployments')}
+                    className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
+                    >
+                      View all →
+                    </button>
+                  </div>
+                  <div className="text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">No deployments yet.</p>
+                  <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
+                      Deploy Now
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+
+        {activeTab === 'test-management' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Test Management</h2>
+                <button
+                onClick={() => navigate(`/test-management/${projectId}`)}
+                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
+                >
+                + Create Test Plan
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                {testPlans.length > 0 ? (
+                  testPlans.map((test) => (
+                  <div key={test.id} className="glass-card p-4 rounded-xl">
+                      <div className="flex items-start justify-between">
+                        <div>
+                        <p className="font-semibold text-lg text-gray-900 dark:text-white">{test.title}</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{test.result}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+                            {test.owner_name} • {test.ran_at ? new Date(test.ran_at).toLocaleString() : ''}
+                          </p>
+                        </div>
+                      <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">
+                          Passed
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🧪</div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No test plans yet</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">Create your first test plan to start testing your project</p>
+                    <button
+                    onClick={() => navigate(`/test-management/${projectId}`)}
+                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
+                    >
+                      Create Test Plan
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'deployments' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Deployments</h2>
+              <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
+                  Deploy Now
+                </button>
+              </div>
+              
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No deployments yet</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">Deploy your project to see deployment history and metrics</p>
+              <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold">
+                  Deploy Now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="space-y-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Project Settings</h2>
+              
+            <div className="glass-card p-6 rounded-xl">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Project Information</h3>
+                <div className="space-y-4">
+                                     <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Name</label>
+                     <input
+                       value={project.name}
+                    className="w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                       readOnly
+                     />
+                   </div>
+                   <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project ID</label>
+                     <input
+                       value={project.id}
+                    className="w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                       readOnly
+                     />
+                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
     </div>
   );
 }

@@ -184,8 +184,8 @@ export default function IntegrationsPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          ))}
+          </div>
+        ))}
         </div>
 
         {/* Custom Integration Section */}

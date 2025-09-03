@@ -1,0 +1,31 @@
+{
+  "name": "test-execution-server",
+  "version": "1.0.0",
+  "description": "Real test execution server for SoftDeploy",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "puppeteer": "^24.18.0",
+    "axios": "^1.6.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "testing",
+    "automation",
+    "cypress",
+    "playwright",
+    "selenium",
+    "puppeteer"
+  ],
+  "author": "SoftDeploy",
+  "license": "MIT"
+}

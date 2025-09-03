@@ -463,7 +463,7 @@ function Deploy() {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div>
+              <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Auto Rollback
                     </label>
@@ -497,9 +497,9 @@ function Deploy() {
               </div>
             </div>
           </Dialog.Panel>
-        </div>
+          </div>
       </Dialog>
-    </div>
+      </div>
   );
 }
 

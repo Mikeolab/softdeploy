@@ -1,574 +1,336 @@
-// src/lib/testExecutor.js
-// Advanced test executor using Puppeteer for real browser automation
+
 
 class TestExecutor {
   constructor() {
     this.isRunning = false;
-    this.currentTest = null;
-    this.results = [];
+    this.currentExecution = null;
     this.variables = {};
+    this.serverUrl = 'http://localhost:3001';
+    this.ws = null;
+    this.executionId = null;
   }
 
-  // Initialize Puppeteer browser
-  async initializeBrowser() {
-    try {
-      // Dynamic import to avoid SSR issues
-      const puppeteer = await import('puppeteer');
-      const browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-      return browser;
-    } catch (error) {
-      console.error('Failed to initialize browser:', error);
-      throw new Error('Browser initialization failed');
+  // Connect to WebSocket for real-time updates
+  connectWebSocket() {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return;
     }
-  }
 
-  // Execute API test step
-  async executeApiStep(step, onProgress) {
-    const startTime = Date.now();
+    this.ws = new WebSocket('ws://localhost:3001');
     
-    try {
-      onProgress(`Executing API step: ${step.name}`, 'info');
-      
-      const { method = 'GET', url, headers = {}, params = {}, body } = step.config;
-      
-      // Build URL with query parameters
-      let fullUrl = url;
-      if (Object.keys(params).length > 0) {
-        const urlParams = new URLSearchParams(params);
-        fullUrl += `?${urlParams.toString()}`;
-      }
-
-      // Prepare request options
-      const requestOptions = {
-        method: method.toUpperCase(),
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers
-        }
-      };
-
-      // Add body for POST/PUT/PATCH requests
-      if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && body) {
-        requestOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
-      }
-
-      // Make the request
-      const response = await fetch(fullUrl, requestOptions);
-      const responseText = await response.text();
-      let responseData;
-      
-      try {
-        responseData = JSON.parse(responseText);
-      } catch {
-        responseData = responseText;
-      }
-
-      const duration = Date.now() - startTime;
-      
-      // Validate response
-      const validation = step.config.validation;
-      let success = true;
-      let message = `API call successful: ${response.status}`;
-
-      if (validation) {
-        if (validation.statusCode && response.status !== parseInt(validation.statusCode)) {
-          success = false;
-          message = `Status code mismatch: expected ${validation.statusCode}, got ${response.status}`;
-        }
-        
-        if (validation.responseTime && duration > validation.responseTime) {
-          success = false;
-          message = `Response time exceeded: ${duration}ms > ${validation.responseTime}ms`;
-        }
-      }
-
-      // Extract variables if specified
-      if (step.config.extraction) {
-        const { variableName, jsonPath } = step.config.extraction;
-        if (variableName && jsonPath && responseData) {
-          const value = this.extractValueFromJsonPath(responseData, jsonPath);
-          this.variables[variableName] = value;
-          onProgress(`Extracted variable ${variableName}: ${value}`, 'info');
-        }
-      }
-
-      onProgress(`API step completed: ${message}`, success ? 'success' : 'error');
-      
-      return {
-        success,
-        message,
-        duration,
-        response: {
-          status: response.status,
-          data: responseData,
-          headers: Object.fromEntries(response.headers.entries())
-        }
-      };
-
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      onProgress(`API step failed: ${error.message}`, 'error');
-      
-      return {
-        success: false,
-        message: error.message,
-        duration,
-        error: error.toString()
-      };
-    }
-  }
-
-  // Execute functional test step using Puppeteer
-  async executeFunctionalStep(step, browser, onProgress) {
-    const startTime = Date.now();
+    this.ws.onopen = () => {
+      console.log('Connected to test execution server');
+    };
     
-    try {
-      onProgress(`Executing functional step: ${step.name}`, 'info');
-      
-      const page = await browser.newPage();
-      
-      // Set viewport
-      await page.setViewport({ width: 1280, height: 720 });
-      
-      const { type, config } = step;
-      
-      switch (type) {
-        case 'navigation':
-          await page.goto(config.url, { waitUntil: 'networkidle2' });
-          onProgress(`Navigated to: ${config.url}`, 'success');
-          break;
-          
-        case 'interaction':
-          await this.performInteraction(page, config, onProgress);
-          break;
-          
-        case 'assertion':
-          await this.performAssertion(page, config, onProgress);
-          break;
-          
-        default:
-          throw new Error(`Unknown step type: ${type}`);
-      }
-      
-      await page.close();
-      
-      const duration = Date.now() - startTime;
-      onProgress(`Functional step completed successfully`, 'success');
-      
-      return {
-        success: true,
-        message: `Step executed successfully`,
-        duration
-      };
-
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      onProgress(`Functional step failed: ${error.message}`, 'error');
-      
-      return {
-        success: false,
-        message: error.message,
-        duration,
-        error: error.toString()
-      };
-    }
-  }
-
-  // Perform browser interactions
-  async performInteraction(page, config, onProgress) {
-    const { action, selector, value, options = {} } = config;
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      this.handleServerMessage(message);
+    };
     
-    // Wait for element to be available
-    await page.waitForSelector(selector, { timeout: options.timeout || 5000 });
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
     
-    switch (action) {
-      case 'click':
-        await page.click(selector);
-        onProgress(`Clicked element: ${selector}`, 'info');
-        break;
-        
-      case 'type':
-        await page.type(selector, value || '');
-        onProgress(`Typed into element: ${selector}`, 'info');
-        break;
-        
-      case 'select':
-        await page.select(selector, value);
-        onProgress(`Selected option in: ${selector}`, 'info');
-        break;
-        
-      case 'check':
-        await page.check(selector);
-        onProgress(`Checked element: ${selector}`, 'info');
-        break;
-        
-      case 'uncheck':
-        await page.uncheck(selector);
-        onProgress(`Unchecked element: ${selector}`, 'info');
-        break;
-        
-      case 'hover':
-        await page.hover(selector);
-        onProgress(`Hovered over element: ${selector}`, 'info');
-        break;
-        
-      case 'scroll':
-        await page.evaluate((sel) => {
-          document.querySelector(sel).scrollIntoView();
-        }, selector);
-        onProgress(`Scrolled to element: ${selector}`, 'info');
-        break;
-        
-      default:
-        throw new Error(`Unknown action: ${action}`);
-    }
-  }
-
-  // Perform browser assertions
-  async performAssertion(page, config, onProgress) {
-    const { assertion, selector, expectedValue, timeout = 5000 } = config;
-    
-    // Wait for element to be available
-    await page.waitForSelector(selector, { timeout });
-    
-    switch (assertion) {
-      case 'visible':
-        const isVisible = await page.isVisible(selector);
-        if (!isVisible) {
-          throw new Error(`Element ${selector} is not visible`);
-        }
-        onProgress(`Element is visible: ${selector}`, 'info');
-        break;
-        
-      case 'exists':
-        const exists = await page.$(selector);
-        if (!exists) {
-          throw new Error(`Element ${selector} does not exist`);
-        }
-        onProgress(`Element exists: ${selector}`, 'info');
-        break;
-        
-      case 'contains':
-        const text = await page.textContent(selector);
-        if (!text.includes(expectedValue)) {
-          throw new Error(`Element ${selector} does not contain "${expectedValue}"`);
-        }
-        onProgress(`Element contains text: ${selector}`, 'info');
-        break;
-        
-      case 'has_class':
-        const hasClass = await page.evaluate((sel, cls) => {
-          return document.querySelector(sel).classList.contains(cls);
-        }, selector, expectedValue);
-        if (!hasClass) {
-          throw new Error(`Element ${selector} does not have class "${expectedValue}"`);
-        }
-        onProgress(`Element has class: ${selector}`, 'info');
-        break;
-        
-      case 'has_value':
-        const inputValue = await page.inputValue(selector);
-        if (inputValue !== expectedValue) {
-          throw new Error(`Element ${selector} value is "${inputValue}", expected "${expectedValue}"`);
-        }
-        onProgress(`Element has value: ${selector}`, 'info');
-        break;
-        
-      default:
-        throw new Error(`Unknown assertion: ${assertion}`);
-    }
-  }
-
-  // Execute performance test step
-  async executePerformanceStep(step, onProgress) {
-    const startTime = Date.now();
-    
-    try {
-      onProgress(`Executing performance step: ${step.name}`, 'info');
-      
-      const { type, config } = step;
-      
-      switch (type) {
-        case 'loadTest':
-          return await this.executeLoadTest(config, onProgress);
-          
-        case 'stressTest':
-          return await this.executeStressTest(config, onProgress);
-          
-        default:
-          throw new Error(`Unknown performance test type: ${type}`);
-      }
-
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      onProgress(`Performance step failed: ${error.message}`, 'error');
-      
-      return {
-        success: false,
-        message: error.message,
-        duration,
-        error: error.toString()
-      };
-    }
-  }
-
-  // Execute load test
-  async executeLoadTest(config, onProgress) {
-    const { virtualUsers = 10, duration = 60, targetUrl } = config;
-    const startTime = Date.now();
-    
-    onProgress(`Starting load test: ${virtualUsers} users for ${duration}s`, 'info');
-    
-    const results = [];
-    const promises = [];
-    
-    // Simulate concurrent users
-    for (let i = 0; i < virtualUsers; i++) {
-      const promise = this.simulateUser(targetUrl, duration, i, onProgress);
-      promises.push(promise);
-    }
-    
-    // Wait for all users to complete
-    const userResults = await Promise.all(promises);
-    
-    // Calculate metrics
-    const totalRequests = userResults.reduce((sum, r) => sum + r.requests, 0);
-    const totalErrors = userResults.reduce((sum, r) => sum + r.errors, 0);
-    const avgResponseTime = userResults.reduce((sum, r) => sum + r.avgResponseTime, 0) / userResults.length;
-    
-    const testDuration = Date.now() - startTime;
-    
-    onProgress(`Load test completed: ${totalRequests} requests, ${totalErrors} errors`, 'success');
-    
-    return {
-      success: totalErrors === 0,
-      message: `Load test: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms`,
-      duration: testDuration,
-      metrics: {
-        totalRequests,
-        totalErrors,
-        avgResponseTime,
-        requestsPerSecond: totalRequests / (duration / 1000)
-      }
+    this.ws.onclose = () => {
+      console.log('Disconnected from test execution server');
     };
   }
 
-  // Simulate a single user
-  async simulateUser(url, duration, userId, onProgress) {
-    const startTime = Date.now();
-    let requests = 0;
-    let errors = 0;
-    let totalResponseTime = 0;
-    
-    while (Date.now() - startTime < duration * 1000) {
-      try {
-        const requestStart = Date.now();
-        const response = await fetch(url);
-        const requestDuration = Date.now() - requestStart;
-        
-        totalResponseTime += requestDuration;
-        requests++;
-        
-        if (!response.ok) {
-          errors++;
-        }
-        
-        // Wait between requests
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-      } catch (error) {
-        errors++;
-        totalResponseTime += 5000; // Assume 5s timeout for failed requests
-      }
-    }
-    
-    return {
-      requests,
-      errors,
-      avgResponseTime: requests > 0 ? totalResponseTime / requests : 0
-    };
-  }
-
-  // Execute stress test
-  async executeStressTest(config, onProgress) {
-    const { maxUsers = 100, stepSize = 10, stepDuration = 30, targetUrl } = config;
-    const startTime = Date.now();
-    
-    onProgress(`Starting stress test: up to ${maxUsers} users`, 'info');
-    
-    const results = [];
-    
-    for (let users = stepSize; users <= maxUsers; users += stepSize) {
-      onProgress(`Stress test step: ${users} users`, 'info');
-      
-      const stepResult = await this.executeLoadTest({
-        virtualUsers: users,
-        duration: stepDuration,
-        targetUrl
-      }, onProgress);
-      
-      results.push({
-        users,
-        ...stepResult.metrics
-      });
-      
-      // Check if we should stop due to high error rate
-      if (stepResult.metrics.totalErrors / stepResult.metrics.totalRequests > 0.1) {
-        onProgress(`Stopping stress test: error rate too high`, 'warning');
-        break;
-      }
-    }
-    
-    const testDuration = Date.now() - startTime;
-    
-    return {
-      success: true,
-      message: `Stress test completed: tested up to ${results.length * stepSize} users`,
-      duration: testDuration,
-      results
-    };
-  }
-
-  // Extract value from JSON using path
-  extractValueFromJsonPath(obj, path) {
-    try {
-      const keys = path.replace(/^\$\./, '').split('.');
-      let result = obj;
-      
-      for (const key of keys) {
-        if (result && typeof result === 'object' && key in result) {
-          result = result[key];
-        } else {
-          return null;
-        }
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('JSON path extraction failed:', error);
-      return null;
+  // Handle messages from server
+  handleServerMessage(message) {
+    // This will be handled by the component that uses testExecutor
+    if (this.onMessageCallback) {
+      this.onMessageCallback(message);
     }
   }
 
-  // Execute complete test suite
+  // Set callback for server messages
+  setMessageCallback(callback) {
+    this.onMessageCallback = callback;
+  }
+
   async executeTestSuite(testSuite, onProgress) {
     if (this.isRunning) {
       throw new Error('Test execution already in progress');
     }
 
     this.isRunning = true;
-    this.currentTest = testSuite;
-    this.results = [];
     this.variables = {};
+    this.executionId = null;
 
     try {
-      onProgress(`Starting test suite: ${testSuite.name}`, 'info');
+      // Connect to WebSocket for real-time updates
+      this.connectWebSocket();
       
-      let browser = null;
-      if (testSuite.testType === 'functional') {
-        browser = await this.initializeBrowser();
+      // Set up message handling
+      this.setMessageCallback((message) => {
+        if (message.executionId === this.executionId) {
+          this.handleExecutionMessage(message, onProgress);
+        }
+      });
+
+      onProgress(`Starting test suite: ${testSuite.name}`, 'info');
+      onProgress(`Test type: ${testSuite.testType}, Tool: ${testSuite.tool}`, 'info');
+
+      // Send test suite to server for execution
+      const response = await fetch(`${this.serverUrl}/api/execute-test-suite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ testSuite })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      this.executionId = result.executionId;
+      onProgress(`Test execution started with ID: ${this.executionId}`, 'info');
+
+      // Poll for completion
+      return await this.pollExecutionStatus(onProgress);
+
+    } catch (error) {
+      onProgress(`Test suite failed: ${error.message}`, 'error');
+      return {
+        success: false,
+        error: error.message
+      };
+    } finally {
+      this.isRunning = false;
+      this.executionId = null;
+    }
+  }
+
+  // Handle real-time messages from server
+  handleExecutionMessage(message, onProgress) {
+    switch (message.type) {
+      case 'execution_started':
+        onProgress(`Test execution started: ${message.testSuite}`, 'info');
+        break;
+        
+      case 'browser_initialized':
+        onProgress('Browser initialized for functional testing', 'info');
+        break;
+        
+      case 'step_started':
+        onProgress(`Executing step ${message.stepIndex}: ${message.stepName}`, 'info');
+        break;
+        
+      case 'step_completed':
+        const status = message.success ? 'PASS' : 'FAIL';
+        onProgress(`Step ${message.stepIndex} completed: ${status} (${message.duration}ms)`, 
+                  message.success ? 'success' : 'error');
+        if (message.message) {
+          onProgress(`  ${message.message}`, message.success ? 'info' : 'error');
+        }
+        break;
+        
+      case 'execution_completed':
+        const result = message.finalResult;
+        onProgress(`Test suite completed: ${result.passedSteps}/${result.totalSteps} steps passed in ${result.totalTime}ms`, 
+                  result.success ? 'success' : 'error');
+        break;
+        
+      case 'execution_failed':
+        onProgress(`Test execution failed: ${message.error}`, 'error');
+        break;
+        
+      case 'execution_stopped':
+        onProgress(`Test execution stopped: ${message.reason}`, 'warning');
+        break;
+    }
+  }
+
+  // Poll for execution completion
+  async pollExecutionStatus(onProgress) {
+    if (!this.executionId) {
+      throw new Error('No execution ID available');
+    }
+
+    return new Promise((resolve, reject) => {
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`${this.serverUrl}/api/execution-status/${this.executionId}`);
+          
+          if (!response.ok) {
+            clearInterval(pollInterval);
+            reject(new Error(`Failed to get execution status: ${response.status}`));
+            return;
+          }
+
+          const status = await response.json();
+          
+          if (status.status === 'completed') {
+            clearInterval(pollInterval);
+            resolve(status.finalResult);
+          } else if (status.status === 'failed') {
+            clearInterval(pollInterval);
+            reject(new Error(status.error || 'Execution failed'));
+          }
+          // Continue polling if still running
+          
+        } catch (error) {
+          clearInterval(pollInterval);
+          reject(error);
+        }
+      }, 1000); // Poll every second
+
+      // Timeout after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        reject(new Error('Execution timeout'));
+      }, 300000);
+    });
+  }
+
+  stopExecution() {
+    if (this.executionId) {
+      fetch(`${this.serverUrl}/api/stop-execution/${this.executionId}`, {
+        method: 'POST'
+      }).catch(error => {
+        console.error('Failed to stop execution:', error);
+      });
+    }
+    this.isRunning = false;
+  }
+
+  getStatus() {
+    return {
+      isRunning: this.isRunning,
+      executionId: this.executionId,
+      variables: this.variables
+    };
+  }
+
+  // Fallback methods for when server is not available
+  async executeApiStep(step, onProgress) {
+    try {
+      onProgress(`Executing API step: ${step.name}`, 'info');
+      
+      const url = new URL(step.config.url);
+      
+      // Add query parameters
+      if (step.config.params) {
+        Object.entries(step.config.params).forEach(([key, value]) => {
+          url.searchParams.append(key, value);
+        });
+      }
+
+      // Prepare headers
+      const headers = { 'Content-Type': 'application/json' };
+      if (step.config.headers) {
+        Object.assign(headers, step.config.headers);
+      }
+
+      // Prepare request body
+      let body = null;
+      if (step.config.body && ['POST', 'PUT', 'PATCH'].includes(step.config.method)) {
+        body = JSON.stringify(step.config.body);
+      }
+
+      // Add authentication
+      if (step.config.auth) {
+        if (step.config.auth.type === 'bearer') {
+          headers['Authorization'] = `Bearer ${step.config.auth.token}`;
+        } else if (step.config.auth.type === 'basic') {
+          const credentials = btoa(`${step.config.auth.username}:${step.config.auth.password}`);
+          headers['Authorization'] = `Basic ${credentials}`;
+        }
       }
 
       const startTime = Date.now();
-      let totalSteps = testSuite.steps.length;
-      let passedSteps = 0;
-      let failedSteps = 0;
+      const response = await fetch(url.toString(), {
+        method: step.config.method,
+        headers,
+        body
+      });
+      const endTime = Date.now();
+      const responseTime = endTime - startTime;
 
-      for (let i = 0; i < testSuite.steps.length; i++) {
-        const step = testSuite.steps[i];
+      // Extract response data
+      const responseText = await response.text();
+      let responseData = null;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        // Not JSON, use text
+      }
+
+      // Validate response
+      let validationResults = [];
+      if (step.config.validation) {
+        if (step.config.validation.statusCode && response.status !== step.config.validation.statusCode) {
+          validationResults.push(`Status code mismatch: expected ${step.config.validation.statusCode}, got ${response.status}`);
+        }
         
-        onProgress(`Executing step ${i + 1}/${totalSteps}: ${step.name}`, 'info');
-        
-        let result;
-        
-        switch (testSuite.testType) {
-          case 'api':
-            result = await this.executeApiStep(step, onProgress);
-            break;
-            
-          case 'functional':
-            result = await this.executeFunctionalStep(step, browser, onProgress);
-            break;
-            
-          case 'performance':
-            result = await this.executePerformanceStep(step, onProgress);
-            break;
-            
-          default:
-            throw new Error(`Unknown test type: ${testSuite.testType}`);
+        if (step.config.validation.responseTime && responseTime > step.config.validation.responseTime) {
+          validationResults.push(`Response time too slow: ${responseTime}ms > ${step.config.validation.responseTime}ms`);
         }
 
-        result.stepNumber = i + 1;
-        result.stepName = step.name;
-        this.results.push(result);
-
-        if (result.success) {
-          passedSteps++;
-        } else {
-          failedSteps++;
-          // Optionally stop on first failure
-          if (testSuite.stopOnFailure) {
-            onProgress(`Stopping on first failure`, 'warning');
-            break;
+        if (step.config.validation.jsonPath && responseData) {
+          const value = this.extractValueFromJsonPath(responseData, step.config.validation.jsonPath);
+          if (value !== step.config.validation.expectedValue) {
+            validationResults.push(`JSON path validation failed: expected ${step.config.validation.expectedValue}, got ${value}`);
           }
         }
       }
 
-      if (browser) {
-        await browser.close();
+      // Extract variables
+      if (step.config.extractVariables && responseData) {
+        Object.entries(step.config.extractVariables).forEach(([varName, jsonPath]) => {
+          const value = this.extractValueFromJsonPath(responseData, jsonPath);
+          this.variables[varName] = value;
+          onProgress(`Extracted variable ${varName}: ${value}`, 'info');
+        });
       }
 
-      const totalDuration = Date.now() - startTime;
-      const success = failedSteps === 0;
+      const isSuccess = validationResults.length === 0;
+      onProgress(`API step completed: ${isSuccess ? 'PASS' : 'FAIL'} (${responseTime}ms)`, isSuccess ? 'success' : 'error');
+      
+      if (validationResults.length > 0) {
+        validationResults.forEach(result => onProgress(`  - ${result}`, 'error'));
+      }
 
-      const finalResult = {
-        success,
-        testSuite: testSuite.name,
-        summary: {
-          total: totalSteps,
-          passed: passedSteps,
-          failed: failedSteps,
-          duration: totalDuration
-        },
-        steps: this.results,
-        variables: this.variables
+      return {
+        success: isSuccess,
+        status: response.status,
+        responseTime,
+        responseData,
+        validationResults
       };
 
-      onProgress(`Test suite completed: ${passedSteps}/${totalSteps} passed`, success ? 'success' : 'error');
-      
-      return finalResult;
-
     } catch (error) {
-      onProgress(`Test suite failed: ${error.message}`, 'error');
-      throw error;
-    } finally {
-      this.isRunning = false;
-      this.currentTest = null;
+      onProgress(`API step failed: ${error.message}`, 'error');
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 
-  // Stop current execution
-  stopExecution() {
-    this.isRunning = false;
-    if (this.currentTest) {
-      this.currentTest = null;
+  extractValueFromJsonPath(obj, path) {
+    const keys = path.split('.');
+    let current = obj;
+    
+    for (const key of keys) {
+      if (current && typeof current === 'object' && key in current) {
+        current = current[key];
+      } else {
+        return undefined;
+      }
     }
-  }
-
-  // Get execution status
-  getStatus() {
-    return {
-      isRunning: this.isRunning,
-      currentTest: this.currentTest?.name || null,
-      results: this.results
-    };
+    
+    return current;
   }
 }
 
-// Create singleton instance
 const testExecutor = new TestExecutor();
-
 export default testExecutor;
