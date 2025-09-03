@@ -17,6 +17,7 @@ import DeployPage from './pages/Deploy.jsx';
 import RunsPage from './pages/Runs.jsx';
 import FeaturesPage from './pages/FeaturesPage.jsx';
 import IntegrationsPage from './pages/IntegrationsPage.jsx';
+import PricingPage from './pages/PricingPage.jsx';
 import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
 import SettingsPage from './pages/Settings.jsx';
@@ -46,7 +47,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-          {!user && <NavigationBar />}
+          {/* NavigationBar removed to prevent duplication with Home page header */}
 
           {/* Layout for authenticated users */}
           {user && (
@@ -74,6 +75,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/marketing" element={<MarketingPage />} />
               <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />

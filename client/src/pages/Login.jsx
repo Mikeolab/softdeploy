@@ -71,27 +71,6 @@ export default function Login() {
               ))}
             </div>
           </div>
-
-          {/* Test Account Info */}
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <BeakerIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              Try It Out
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Use this test account to explore SoftDeploy:
-            </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700 dark:text-gray-300">Email:</span>
-                <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">testuser@softdeploy.dev</code>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700 dark:text-gray-300">Password:</span>
-                <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">password1234</code>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Side - Form */}

@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
 import { Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useEffect, useState } from 'react';
 import { 
   PlayIcon, 
@@ -12,11 +13,14 @@ import {
   ShieldCheckIcon,
   BoltIcon,
   CodeBracketIcon,
-  CommandLineIcon
+  CommandLineIcon,
+  SunIcon,
+  MoonIcon
 } from '@heroicons/react/24/outline';
 
 export default function Home() {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Animation for CI/CD flow
@@ -36,6 +40,69 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Header with Navigation */}
+      <header className="relative z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 grid place-items-center">
+                <span className="text-white font-bold text-sm">SD</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">SoftDeploy</span>
+            </Link>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link to="/features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Features
+              </Link>
+              <Link to="/pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Pricing
+              </Link>
+              <Link to="/integrations" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Integrations
+              </Link>
+              <Link to="/docs" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Docs
+              </Link>
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-4">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <SunIcon className="h-5 w-5 text-yellow-500" />
+                ) : (
+                  <MoonIcon className="h-5 w-5 text-gray-600" />
+                )}
+              </button>
+
+              {/* Auth Buttons */}
+              <div className="hidden sm:flex items-center gap-3">
+                <Link
+                  to="/login"
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Animated Background */}
