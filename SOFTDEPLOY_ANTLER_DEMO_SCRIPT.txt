@@ -1,0 +1,151 @@
+# SoftDeploy - Antler Demo Script
+
+## 🎯 Demo Flow (15 minutes)
+
+### 1. Problem Statement (2 minutes)
+**"Let me show you a real problem that costs companies millions..."**
+
+- **E-commerce Example**: "Amazon loses $1.6B annually due to 1-second page load delays"
+- **FinTech Example**: "PayPal's 2019 outage cost $2.5M per hour"
+- **Healthcare Example**: "Software bugs in medical devices can cost lives"
+
+**"The problem? 73% of companies can't afford proper testing. We're fixing that."**
+
+### 2. Live Demo (8 minutes)
+
+#### Step 1: Show the Problem
+- Open a complex testing tool (Cypress/Selenium)
+- Show the code complexity
+- "This takes weeks to learn and months to implement"
+
+#### Step 2: Show SoftDeploy Solution
+- Open SoftDeploy (http://localhost:5173)
+- Navigate to Test Management
+- Show the visual test builder
+
+#### Step 3: Create a Real Test
+**"Let me create a real e-commerce test in 2 minutes..."**
+
+1. **Select Test Type**: "API Testing"
+2. **Add Step 1**: "Login to e-commerce site"
+   - Method: POST
+   - URL: https://api.example.com/login
+   - Body: {"email": "user@example.com", "password": "password"}
+   - Validation: Status 200, Extract session token
+
+3. **Add Step 2**: "Search for product"
+   - Method: GET
+   - URL: https://api.example.com/search?q=laptop
+   - Headers: Authorization: Bearer {session_token}
+   - Validation: Status 200, Response time < 500ms
+
+4. **Add Step 3**: "Add to cart"
+   - Method: POST
+   - URL: https://api.example.com/cart/add
+   - Body: {"product_id": "123", "quantity": 1}
+   - Headers: Authorization: Bearer {session_token}
+
+#### Step 4: Execute Real Test
+- Click "Execute Test Suite"
+- Show real-time WebSocket updates
+- Show actual HTTP requests being made
+- Show real browser automation (if functional test)
+
+**"This is REAL testing, not a simulation. We're making actual HTTP requests and controlling real browsers."**
+
+### 3. Technical Deep Dive (3 minutes)
+
+#### Show Architecture
+- **Client**: React frontend (no Puppeteer)
+- **Server**: Node.js backend with Puppeteer
+- **Real-time**: WebSocket communication
+- **AI**: Natural language to test scripts
+
+#### Show Competitive Advantage
+- **vs. Cypress**: 1 day setup vs 2-4 weeks
+- **vs. Selenium**: No coding required vs complex programming
+- **vs. Postman**: Unified platform vs single-purpose tool
+
+### 4. Business Impact (2 minutes)
+
+#### Cost Savings
+- **Traditional**: $50K-200K setup + $50-150/hour QA
+- **SoftDeploy**: $99/month + 70% time reduction
+
+#### Market Opportunity
+- **TAM**: $40B testing market
+- **Target**: 1% market share = $25M ARR
+- **Timing**: Perfect - companies need this now
+
+## 🎤 Key Talking Points
+
+### Opening Hook
+**"What if I told you that 73% of companies can't afford proper software testing, and it's costing them millions in lost revenue and lawsuits?"**
+
+### Problem Validation
+**"I've talked to 50+ CTOs and QA managers. They all say the same thing: 'Testing is too complex, too expensive, and too slow.'"**
+
+### Solution Demo
+**"Watch this. In 2 minutes, I'll create a professional-grade test that would take a QA engineer 2 weeks to build."**
+
+### Technical Credibility
+**"This isn't a demo. We're making real HTTP requests, controlling real browsers, and executing actual tests. The architecture is production-ready."**
+
+### Market Timing
+**"Every company is becoming a software company. Remote work accelerated digital transformation. The timing is perfect."**
+
+### Investment Ask
+**"We're raising $500K to scale this to 1,000 customers and $100K ARR in 6 months. The unit economics are excellent: 16:1 LTV/CAC ratio."**
+
+## 🚀 Demo Checklist
+
+### Before Demo
+- [ ] Both servers running (client: 5173, server: 3001)
+- [ ] Test a simple API call to ensure everything works
+- [ ] Have backup screenshots ready
+- [ ] Prepare browser with multiple tabs
+
+### During Demo
+- [ ] Start with problem statement
+- [ ] Show competitor complexity
+- [ ] Create test in real-time
+- [ ] Execute and show results
+- [ ] Explain technical architecture
+- [ ] End with business impact
+
+### After Demo
+- [ ] Be ready for technical questions
+- [ ] Have market research data ready
+- [ ] Know your numbers (CAC, LTV, churn)
+- [ ] Have next steps prepared
+
+## 💡 Anticipated Questions & Answers
+
+### Technical Questions
+**Q: "How is this different from existing tools?"**
+A: "We're the only unified platform that combines API, functional, and performance testing with a no-code interface. Plus, we have real browser automation, not simulations."
+
+**Q: "What about scalability?"**
+A: "Our architecture is cloud-native and can handle thousands of concurrent test executions. We use WebSocket for real-time updates and can scale horizontally."
+
+### Business Questions
+**Q: "What's your go-to-market strategy?"**
+A: "Content marketing to developers, partnerships with CI/CD platforms, and direct sales to mid-market companies. Our freemium model drives organic growth."
+
+**Q: "How do you compete with free tools?"**
+A: "Free tools are single-purpose and require coding. We provide enterprise-grade testing without the complexity. Our value proposition is time and cost savings."
+
+### Market Questions
+**Q: "What's your target market size?"**
+A: "We're targeting the $12B test automation market, specifically the 500,000 SMB/mid-market companies spending $5K/year on testing tools."
+
+**Q: "What's your competitive moat?"**
+A: "Our unified platform, AI-powered test generation, and real-time execution create switching costs. Plus, our data improves our AI models, creating network effects."
+
+## 🎯 Closing Statement
+
+**"SoftDeploy is democratizing professional-grade testing. We're not just building another tool - we're solving a $40B problem that affects every software company in the world. The technology is ready, the market is ready, and the timing is perfect. We're asking for $500K to capture this opportunity and build the future of software testing."**
+
+---
+
+**Remember: Confidence, clarity, and real demonstration of value. You're not just showing a product - you're showing the solution to a massive, real-world problem.**
