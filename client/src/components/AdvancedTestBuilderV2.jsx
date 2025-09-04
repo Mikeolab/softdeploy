@@ -1493,7 +1493,7 @@ export default function AdvancedTestBuilderV2() {
                 <ExclamationTriangleIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
               )}
               <span className="font-medium text-gray-900 dark:text-white">
-                {testResults.testSuite}
+                {testResults.testSuite || testSuite.name || 'Test Suite'}
               </span>
               <span className={`text-xs px-2 py-1 rounded ${
                 testResults.success 
@@ -1505,17 +1505,17 @@ export default function AdvancedTestBuilderV2() {
             </div>
             
             <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-              <div>Total Steps: {testResults.summary.total}</div>
-              <div>Passed: {testResults.summary.passed}</div>
-              <div>Failed: {testResults.summary.failed}</div>
-              <div>Duration: {testResults.summary.duration}ms</div>
+              <div>Total Steps: {testResults.totalSteps || testResults.summary?.total || 0}</div>
+              <div>Passed: {testResults.passedSteps || testResults.summary?.passed || 0}</div>
+              <div>Failed: {testResults.failedSteps || testResults.summary?.failed || 0}</div>
+              <div>Duration: {testResults.totalTime || testResults.summary?.duration || 0}ms</div>
             </div>
             
             {/* Step Results */}
             <div className="mt-4 space-y-2">
               <h4 className="font-medium text-gray-900 dark:text-white">Step Details:</h4>
-              {testResults.steps.map((step) => (
-                <div key={step.stepNumber} className={`p-2 rounded text-sm ${
+              {(testResults.results || testResults.steps || []).map((step, index) => (
+                <div key={step.stepIndex || step.stepNumber || index} className={`p-2 rounded text-sm ${
                   step.success 
                     ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' 
                     : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
@@ -1526,10 +1526,20 @@ export default function AdvancedTestBuilderV2() {
                     ) : (
                       <ExclamationTriangleIcon className="h-4 w-4" />
                     )}
-                    <span className="font-medium">Step {step.stepNumber}: {step.stepName}</span>
-                    <span className="text-xs">({step.duration}ms)</span>
+                    <span className="font-medium">
+                      Step {step.stepIndex || step.stepNumber || index + 1}: {step.stepName || step.name || 'Unknown Step'}
+                    </span>
+                    <span className="text-xs">({step.duration || 0}ms)</span>
                   </div>
-                  <p className="ml-6 text-xs">{step.message}</p>
+                  <p className="ml-6 text-xs">{step.message || 'No message'}</p>
+                  {step.responseData && (
+                    <details className="ml-6 text-xs mt-1">
+                      <summary className="cursor-pointer text-blue-600 dark:text-blue-400">View Response Data</summary>
+                      <pre className="mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto max-h-32">
+                        {JSON.stringify(step.responseData, null, 2)}
+                      </pre>
+                    </details>
+                  )}
                 </div>
               ))}
             </div>
