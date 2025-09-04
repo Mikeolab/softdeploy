@@ -5,9 +5,19 @@ class TestExecutor {
     this.isRunning = false;
     this.currentExecution = null;
     this.variables = {};
-    this.serverUrl = 'http://localhost:3001';
+    // Use environment-aware server URL
+    this.serverUrl = this.getServerUrl();
     this.ws = null;
     this.executionId = null;
+  }
+
+  getServerUrl() {
+    // Check if we're in production/staging
+    if (window.location.hostname.includes('onrender.com')) {
+      return 'https://devops-real-app-staging.onrender.com';
+    }
+    // Default to localhost for development
+    return 'http://localhost:3001';
   }
 
   // Connect to WebSocket for real-time updates
@@ -16,7 +26,9 @@ class TestExecutor {
       return;
     }
 
-    this.ws = new WebSocket('ws://localhost:3001');
+    // Use environment-aware WebSocket URL
+    const wsUrl = this.serverUrl.replace('http://', 'ws://').replace('https://', 'wss://');
+    this.ws = new WebSocket(wsUrl);
     
     this.ws.onopen = () => {
       console.log('Connected to test execution server');
