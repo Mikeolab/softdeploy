@@ -88,45 +88,45 @@ export default function FeaturesPage() {
             Core Features
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Everything your engineering team needs to build, test, deploy, and scale faster.
-          </p>
+        Everything your engineering team needs to build, test, deploy, and scale faster.
+      </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            {
+        {[
+          {
               icon: RocketLaunchIcon,
-              title: "One-click Deployments",
+            title: "One-click Deployments",
               description: "Push code to staging or production with pre-flight health checks and rollback on failure.",
               color: "from-blue-500 to-cyan-500"
-            },
-            {
+          },
+          {
               icon: BeakerIcon,
-              title: "Live Test Logging",
+            title: "Live Test Logging",
               description: "Stream real-time Cypress, Playwright or unit test logs directly in your dashboard.",
               color: "from-green-500 to-emerald-500"
-            },
-            {
+          },
+          {
               icon: ClockIcon,
-              title: "Scheduled Test Runs",
+            title: "Scheduled Test Runs",
               description: "Run E2E/API tests every night (or afternoon). Visualized pass history included.",
               color: "from-purple-500 to-pink-500"
-            },
-            {
+          },
+          {
               icon: BellIcon,
-              title: "Slack & Email Notifications",
+            title: "Slack & Email Notifications",
               description: "Critical updates reach your team instantly with actionable summaries and diff insights.",
               color: "from-orange-500 to-red-500"
-            },
-            {
+          },
+          {
               icon: LightBulbIcon,
-              title: "AI Failure Insights",
+            title: "AI Failure Insights",
               description: "Catch flakiness and receive smart fixes when deployments or tests break.",
               color: "from-yellow-500 to-amber-500"
-            },
-            {
+          },
+          {
               icon: CodeBracketIcon,
-              title: "GitHub/GitLab Pipelines",
+            title: "GitHub/GitLab Pipelines",
               description: "CI/CD integration for every team with YAML or visual pipeline creation.",
               color: "from-indigo-500 to-purple-500"
             },
@@ -144,8 +144,8 @@ export default function FeaturesPage() {
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {feature.description}
               </p>
-            </div>
-          ))}
+          </div>
+        ))}
         </div>
 
         {/* CTA Section */}

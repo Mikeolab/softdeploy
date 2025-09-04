@@ -8,6 +8,9 @@ const puppeteer = require('puppeteer');
 const axios = require('axios');
 const WebSocket = require('ws');
 
+// Import Cypress integration functions directly
+const { executeCypressTest, generateCypressScript } = require('./cypressIntegration');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -46,14 +49,68 @@ app.post('/api/execute-test-suite', async (req, res) => {
   try {
     const { testSuite } = req.body;
     
-    console.log(`Executing test suite: ${testSuite.name}`);
-    console.log(`Test type: ${testSuite.testType}, Tool: ${testSuite.tool}`);
+    console.log('🚀 [SERVER] Received test suite execution request');
+    console.log('📋 Test Suite Details:', {
+      name: testSuite.name,
+      type: testSuite.testType,
+      tool: testSuite.tool,
+      steps: testSuite.steps?.length || 0,
+      baseUrl: testSuite.baseUrl
+    });
+    
+    // Enhanced validation
+    if (!testSuite || !testSuite.name || !testSuite.testType) {
+      console.error('❌ [SERVER] Invalid test suite data received');
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid test suite data: name and testType are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Validate test type
+    const validTestTypes = ['API', 'Functional', 'Performance'];
+    if (!validTestTypes.includes(testSuite.testType)) {
+      console.error('❌ [SERVER] Invalid test type:', testSuite.testType);
+      return res.status(400).json({
+        success: false,
+        message: `Invalid test type: ${testSuite.testType}. Valid types are: ${validTestTypes.join(', ')}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Validate tool ID
+    const validTools = ['axios', 'puppeteer', 'k6', 'cypress', 'playwright'];
+    if (testSuite.toolId && !validTools.includes(testSuite.toolId)) {
+      console.error('❌ [SERVER] Invalid tool ID:', testSuite.toolId);
+      return res.status(400).json({
+        success: false,
+        message: `Invalid tool ID: ${testSuite.toolId}. Valid tools are: ${validTools.join(', ')}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Validate base URL format
+    if (testSuite.baseUrl) {
+      try {
+        new URL(testSuite.baseUrl);
+      } catch (error) {
+        console.error('❌ [SERVER] Invalid base URL:', testSuite.baseUrl);
+        return res.status(400).json({
+          success: false,
+          message: `Invalid base URL: ${testSuite.baseUrl}`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
     
     const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log(`🆔 [SERVER] Generated execution ID: ${executionId}`);
     
     // Start execution in background
     executeTestSuite(testSuite, executionId);
     
+    console.log('✅ [SERVER] Test suite execution started successfully');
     res.json({
       success: true,
       executionId,
@@ -62,10 +119,21 @@ app.post('/api/execute-test-suite', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error starting test suite:', error);
+    console.error('❌ [SERVER] Error starting test suite:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+    
     res.status(500).json({
       success: false,
       message: `Execution error: ${error.message}`,
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      },
       timestamp: new Date().toISOString()
     });
   }
@@ -105,6 +173,15 @@ async function executeTestSuite(testSuite, executionId) {
   const results = [];
   let browser = null;
   
+  console.log(`🧪 [SERVER] Starting test suite execution: ${testSuite.name}`);
+  console.log(`📊 [SERVER] Execution details:`, {
+    executionId,
+    testType: testSuite.testType,
+    tool: testSuite.tool,
+    stepsCount: testSuite.steps?.length || 0,
+    baseUrl: testSuite.baseUrl
+  });
+  
   try {
     // Initialize status
     executionStatus.set(executionId, {
@@ -123,12 +200,14 @@ async function executeTestSuite(testSuite, executionId) {
     
     // Initialize browser for functional tests
     if (testSuite.testType === 'Functional') {
+      console.log('🌐 [SERVER] Initializing browser for functional tests...');
       browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
       });
       activeBrowsers.set(executionId, browser);
       
+      console.log('✅ [SERVER] Browser initialized successfully');
       broadcast({
         type: 'browser_initialized',
         executionId
@@ -161,9 +240,24 @@ async function executeTestSuite(testSuite, executionId) {
       if (testSuite.testType === 'API') {
         stepResult = await executeApiStep(step);
       } else if (testSuite.testType === 'Functional') {
-        stepResult = await executeFunctionalStep(step, browser);
+        if (testSuite.tool === 'Cypress') {
+          // Execute entire test suite with Cypress
+          const cypressResult = await executeCypressTest(testSuite, executionId);
+          return cypressResult; // Return early for Cypress
+        } else {
+          stepResult = await executeFunctionalStep(step, browser);
+        }
       } else if (testSuite.testType === 'Performance') {
         stepResult = await executePerformanceStep(step);
+      }
+      
+      // Ensure stepResult has the required properties
+      if (!stepResult) {
+        stepResult = {
+          success: false,
+          duration: 0,
+          message: 'Step execution failed - no result returned'
+        };
       }
       
       results.push({
@@ -262,40 +356,68 @@ async function executeApiStep(step) {
   const startTime = Date.now();
   
   try {
-    const url = new URL(step.config.url);
+    console.log('🔧 [SERVER] Executing API step:', step);
+    
+    // Handle both step.url and step.config.url formats
+    const stepUrl = step.url || step.config?.url;
+    const stepMethod = step.action || step.config?.method || 'GET';
+    const stepHeaders = step.headers || step.config?.headers || {};
+    const stepParams = step.params || step.config?.params || {};
+    const stepBody = step.body || step.config?.body;
+    const stepAuth = step.auth || step.config?.auth;
+    
+    if (!stepUrl) {
+      throw new Error('No URL provided for API step');
+    }
+    
+    // Construct full URL with base URL if needed
+    let fullUrl = stepUrl;
+    if (!stepUrl.startsWith('http')) {
+      // Assume it's a relative URL, we'll need baseUrl from testSuite
+      // For now, use a default base URL
+      fullUrl = `https://jsonplaceholder.typicode.com${stepUrl}`;
+    }
+    
+    const url = new URL(fullUrl);
     
     // Add query parameters
-    if (step.config.params) {
-      Object.entries(step.config.params).forEach(([key, value]) => {
+    if (stepParams) {
+      Object.entries(stepParams).forEach(([key, value]) => {
         url.searchParams.append(key, value);
       });
     }
     
     // Prepare headers
     const headers = { 'Content-Type': 'application/json' };
-    if (step.config.headers) {
-      Object.assign(headers, step.config.headers);
+    if (stepHeaders) {
+      Object.assign(headers, stepHeaders);
     }
     
     // Prepare request body
     let body = null;
-    if (step.config.body && ['POST', 'PUT', 'PATCH'].includes(step.config.method)) {
-      body = JSON.stringify(step.config.body);
+    if (stepBody && ['POST', 'PUT', 'PATCH'].includes(stepMethod)) {
+      body = JSON.stringify(stepBody);
     }
     
     // Add authentication
-    if (step.config.auth) {
-      if (step.config.auth.type === 'bearer') {
-        headers['Authorization'] = `Bearer ${step.config.auth.token}`;
-      } else if (step.config.auth.type === 'basic') {
-        const credentials = Buffer.from(`${step.config.auth.username}:${step.config.auth.password}`).toString('base64');
+    if (stepAuth) {
+      if (stepAuth.type === 'bearer') {
+        headers['Authorization'] = `Bearer ${stepAuth.token}`;
+      } else if (stepAuth.type === 'basic') {
+        const credentials = Buffer.from(`${stepAuth.username}:${stepAuth.password}`).toString('base64');
         headers['Authorization'] = `Basic ${credentials}`;
       }
     }
     
+    console.log('🌐 [SERVER] Making API request:', {
+      method: stepMethod,
+      url: url.toString(),
+      headers
+    });
+    
     // Make real HTTP request
     const response = await axios({
-      method: step.config.method,
+      method: stepMethod,
       url: url.toString(),
       headers,
       data: body,
@@ -306,17 +428,43 @@ async function executeApiStep(step) {
     
     // Validate response
     let validationResults = [];
-    if (step.config.validation) {
-      if (step.config.validation.statusCode && response.status !== step.config.validation.statusCode) {
-        validationResults.push(`Status code mismatch: expected ${step.config.validation.statusCode}, got ${response.status}`);
-      }
-      
-      if (step.config.validation.responseTime && duration > step.config.validation.responseTime) {
-        validationResults.push(`Response time too slow: ${duration}ms > ${step.config.validation.responseTime}ms`);
+    const validation = step.validation || step.config?.validation;
+    
+    // Check expected status code
+    const expectedStatus = step.expectedStatus || validation?.statusCode;
+    if (expectedStatus && response.status !== expectedStatus) {
+      validationResults.push(`Status code mismatch: expected ${expectedStatus}, got ${response.status}`);
+    }
+    
+    // Check response time
+    const expectedResponseTime = validation?.responseTime;
+    if (expectedResponseTime && duration > expectedResponseTime) {
+      validationResults.push(`Response time too slow: ${duration}ms > ${expectedResponseTime}ms`);
+    }
+    
+    // Check expected response data
+    const expectedResponse = step.expectedResponse || validation?.responseData;
+    if (expectedResponse) {
+      try {
+        const responseData = response.data;
+        for (const [key, expectedValue] of Object.entries(expectedResponse)) {
+          if (responseData[key] !== expectedValue) {
+            validationResults.push(`Response data mismatch for '${key}': expected ${expectedValue}, got ${responseData[key]}`);
+          }
+        }
+      } catch (error) {
+        validationResults.push(`Response validation error: ${error.message}`);
       }
     }
     
     const isSuccess = validationResults.length === 0;
+    
+    console.log('✅ [SERVER] API step completed:', {
+      success: isSuccess,
+      status: response.status,
+      duration: `${duration}ms`,
+      validationResults
+    });
     
     return {
       success: isSuccess,
@@ -329,6 +477,12 @@ async function executeApiStep(step) {
     
   } catch (error) {
     const duration = Date.now() - startTime;
+    
+    console.error('❌ [SERVER] API step failed:', {
+      error: error.message,
+      duration: `${duration}ms`,
+      step: step
+    });
     
     return {
       success: false,
@@ -402,6 +556,14 @@ async function executeFunctionalStep(step, browser) {
       }
     }
     
+    // Ensure result is defined
+    if (!result) {
+      result = {
+        success: false,
+        message: `Unknown step type: ${step.type}`
+      };
+    }
+    
     await page.close();
     
     const duration = Date.now() - startTime;
@@ -457,6 +619,13 @@ async function executePerformanceStep(step) {
         }
       };
     }
+    
+    // Default return for unknown performance step types
+    return {
+      success: false,
+      duration: Date.now() - startTime,
+      message: `Unknown performance step type: ${step.type}`
+    };
     
   } catch (error) {
     const duration = Date.now() - startTime;

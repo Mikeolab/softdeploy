@@ -23,7 +23,9 @@ import {
   CodeBracketIcon,
   WrenchScrewdriverIcon,
   KeyIcon,
-  VariableIcon
+  VariableIcon,
+  ServerIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 import { 
   TEST_TOOLS, 
@@ -65,6 +67,149 @@ export default function AdvancedTestBuilderV2() {
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
 
+  // Sample test templates
+  const sampleTests = {
+    api: {
+      name: "E-commerce API Test",
+      description: "Test basic e-commerce API endpoints",
+      testType: "API",
+      toolCategory: "internal",
+      toolId: "axios",
+      baseUrl: "https://jsonplaceholder.typicode.com",
+      steps: [
+        {
+          name: "Get all posts",
+          action: "GET",
+          url: "/posts",
+          headers: { "Content-Type": "application/json" },
+          expectedStatus: 200
+        },
+        {
+          name: "Get specific post",
+          action: "GET", 
+          url: "/posts/1",
+          headers: { "Content-Type": "application/json" },
+          expectedStatus: 200,
+          expectedResponse: { userId: 1 }
+        },
+        {
+          name: "Create new post",
+          action: "POST",
+          url: "/posts",
+          headers: { "Content-Type": "application/json" },
+          body: {
+            title: "Test Post",
+            body: "This is a test post",
+            userId: 1
+          },
+          expectedStatus: 201
+        }
+      ]
+    },
+    functional: {
+      name: "Google Search Flow",
+      description: "Test Google search functionality",
+      testType: "Functional",
+      toolCategory: "internal", 
+      toolId: "puppeteer",
+      baseUrl: "https://www.google.com",
+      steps: [
+        {
+          name: "Navigate to Google",
+          type: "navigation",
+          config: {
+            url: "https://www.google.com"
+          }
+        },
+        {
+          name: "Search for 'test automation'",
+          type: "interaction",
+          config: {
+            selector: "input[name='q']",
+            action: "type",
+            value: "test automation"
+          }
+        },
+        {
+          name: "Click search button",
+          type: "interaction",
+          config: {
+            selector: "input[value='Google Search']",
+            action: "click"
+          }
+        },
+        {
+          name: "Verify results page",
+          type: "assertion",
+          config: {
+            selector: "#search",
+            assertion: "visible"
+          }
+        }
+      ]
+    },
+    performance: {
+      name: "API Load Test",
+      description: "Test API performance under load",
+      testType: "Performance",
+      toolCategory: "external",
+      toolId: "k6",
+      baseUrl: "https://jsonplaceholder.typicode.com",
+      steps: [
+        {
+          name: "Load test posts endpoint",
+          type: "load",
+          config: {
+            url: "/posts",
+            method: "GET",
+            duration: "30s",
+            vus: 10
+          }
+        },
+        {
+          name: "Stress test users endpoint", 
+          type: "stress",
+          config: {
+            url: "/users",
+            method: "GET",
+            duration: "60s",
+            stages: [
+              { duration: "10s", target: 5 },
+              { duration: "20s", target: 20 },
+              { duration: "30s", target: 0 }
+            ]
+          }
+        }
+      ]
+    }
+  };
+
+  // Load sample test
+  const loadSampleTest = (type) => {
+    const sample = sampleTests[type];
+    if (sample) {
+      setTestSuite(sample);
+      console.log(`📋 Loaded sample ${type} test:`, sample);
+    }
+  };
+
+  // Clear form
+  const clearForm = () => {
+    setTestSuite({
+      name: '',
+      description: '',
+      testType: '',
+      toolCategory: '',
+      toolId: '',
+      baseUrl: '',
+      variables: {},
+      steps: []
+    });
+    setTestResults(null);
+    setExecutionLogs([]);
+    console.log('🧹 Form cleared');
+  };
+
   // Load saved tests
   useEffect(() => {
     const saved = localStorage.getItem('advancedTestsV2');
@@ -100,6 +245,14 @@ export default function AdvancedTestBuilderV2() {
       return;
     }
 
+    console.log('🚀 Starting test execution:', {
+      name: testSuite.name,
+      type: testSuite.testType,
+      tool: testSuite.toolId,
+      steps: testSuite.steps.length,
+      baseUrl: testSuite.baseUrl
+    });
+
     setIsRunning(true);
     setTestResults(null);
     setExecutionLogs([]);
@@ -114,6 +267,10 @@ export default function AdvancedTestBuilderV2() {
           type // 'info', 'success', 'error', 'warning'
         };
         
+        // Console logging for debugging
+        const consolePrefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '📝';
+        console.log(`${consolePrefix} [${new Date().toLocaleTimeString()}] ${message}`);
+        
         setExecutionLogs(prev => [...prev, log]);
         
         // Auto-scroll to bottom
@@ -125,8 +282,17 @@ export default function AdvancedTestBuilderV2() {
         }, 100);
       };
 
+      onProgress(`Starting test suite: ${testSuite.name}`, 'info');
+      onProgress(`Test type: ${testSuite.testType}, Tool: ${testSuite.toolId}`, 'info');
+      onProgress(`Base URL: ${testSuite.baseUrl}`, 'info');
+      onProgress(`Total steps: ${testSuite.steps.length}`, 'info');
+
       // Execute the test suite
       const result = await testExecutor.executeTestSuite(testSuite, onProgress);
+      
+      console.log('📊 Test execution completed:', result);
+      onProgress(`Test execution completed with ${result.success ? 'SUCCESS' : 'FAILURE'}`, result.success ? 'success' : 'error');
+      
       setTestResults(result);
       
       // Save results to localStorage
@@ -140,8 +306,30 @@ export default function AdvancedTestBuilderV2() {
       localStorage.setItem('testResultsV2', JSON.stringify(savedResults));
 
     } catch (error) {
-      console.error('Test execution failed:', error);
+      console.error('❌ Test execution failed:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        testSuite: testSuite.name,
+        testType: testSuite.testType,
+        toolId: testSuite.toolId
+      });
+      
+      const onProgress = (message, type = 'info') => {
+        const log = {
+          id: Date.now() + Math.random(),
+          timestamp: new Date().toISOString(),
+          message,
+          type
+        };
+        setExecutionLogs(prev => [...prev, log]);
+      };
+      
       onProgress(`Test execution failed: ${error.message}`, 'error');
+      onProgress(`Error type: ${error.name}`, 'error');
+      if (error.stack) {
+        onProgress(`Stack trace: ${error.stack.split('\n').slice(0, 3).join(' ')}`, 'error');
+      }
       
       setTestResults({
         success: false,
@@ -153,10 +341,16 @@ export default function AdvancedTestBuilderV2() {
           duration: 0
         },
         steps: [],
-        error: error.message
+        error: error.message,
+        errorDetails: {
+          name: error.name,
+          stack: error.stack,
+          timestamp: new Date().toISOString()
+        }
       });
     } finally {
       setIsRunning(false);
+      console.log('🏁 Test execution finished');
     }
   };
 
@@ -746,6 +940,85 @@ export default function AdvancedTestBuilderV2() {
 
   return (
     <div className="space-y-6">
+      {/* Sample Tests Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <SparklesIcon className="h-5 w-5" />
+          Sample Tests
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Choose a sample test to get started quickly, then customize it to your needs
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('api')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <ServerIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  API Test
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">E-commerce API endpoints</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Test GET, POST endpoints with validation
+            </p>
+            <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+              <span>3 steps</span>
+              <span>•</span>
+              <span>Ready to run</span>
+            </div>
+          </div>
+
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('functional')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                  Functional Test
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Google search flow</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Navigate, interact, and assert on web pages
+            </p>
+            <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+              <span>4 steps</span>
+              <span>•</span>
+              <span>Browser automation</span>
+            </div>
+          </div>
+
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('performance')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  Performance Test
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">API load testing</p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Load and stress test API endpoints
+            </p>
+            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+              <span>2 steps</span>
+              <span>•</span>
+              <span>K6 integration</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Test Suite Configuration */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -1101,53 +1374,63 @@ export default function AdvancedTestBuilderV2() {
       )}
 
       {/* Action Buttons */}
-      {testSuite.toolId && (
-        <div className="flex gap-3">
-          <button
-            onClick={executeTest}
-            disabled={!testSuite.baseUrl || testSuite.steps.length === 0 || isRunning}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <PlayIcon className="h-4 w-4" />
-            {isRunning ? 'Running...' : 'Execute Test Suite'}
-          </button>
-          
-          {isRunning && (
+      <div className="flex gap-3 flex-wrap">
+        {testSuite.toolId && (
+          <>
             <button
-              onClick={() => testExecutor.stopExecution()}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              onClick={executeTestSuite}
+              disabled={!testSuite.baseUrl || testSuite.steps.length === 0 || isRunning}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              Stop Execution
+              <PlayIcon className="h-4 w-4" />
+              {isRunning ? 'Running...' : 'Execute Test Suite'}
             </button>
-          )}
+            
+            {isRunning && (
+              <button
+                onClick={() => testExecutor.stopExecution()}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                Stop Execution
+              </button>
+            )}
+          </>
+        )}
+        
+        <button
+          onClick={clearForm}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+        >
+          <TrashIcon className="h-4 w-4" />
+          Clear Form
+        </button>
           
-          <button
-            onClick={saveTest}
-            disabled={!testSuite.name || !testSuite.testType || !testSuite.toolId}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <DocumentTextIcon className="h-4 w-4" />
-            Save Test Suite
-          </button>
+        <button
+          onClick={saveTest}
+          disabled={!testSuite.name || !testSuite.testType || !testSuite.toolId}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <DocumentTextIcon className="h-4 w-4" />
+          Save Test Suite
+        </button>
 
-          {testSuite.toolCategory === 'external' && (
-            <button
-              onClick={() => {
-                const script = generateScript();
-                if (script) {
-                  navigator.clipboard.writeText(script);
-                  alert('Script copied to clipboard!');
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-            >
-              <CodeBracketIcon className="h-4 w-4" />
-              Generate Script
-            </button>
-          )}
-        </div>
-      )}
+        {testSuite.toolCategory === 'external' && (
+          <button
+            onClick={() => {
+              const script = generateScript();
+              if (script) {
+                navigator.clipboard.writeText(script);
+                alert('Script copied to clipboard!');
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            <CodeBracketIcon className="h-4 w-4" />
+            Generate Script
+          </button>
+        )}
+      </div>
 
       {/* Real-time Execution Logs */}
       {(isRunning || executionLogs.length > 0) && (

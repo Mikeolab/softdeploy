@@ -120,6 +120,26 @@ class TestExecutor {
         onProgress('Browser initialized for functional testing', 'info');
         break;
         
+      case 'cypress_output':
+        onProgress(`📝 Cypress: ${message.message}`, 'info');
+        break;
+        
+      case 'cypress_error':
+        onProgress(`❌ Cypress Error: ${message.message}`, 'error');
+        break;
+        
+      case 'cypress_complete':
+        if (message.result.success) {
+          onProgress(`✅ Cypress test completed successfully!`, 'success');
+        } else {
+          onProgress(`❌ Cypress test failed with exit code: ${message.result.exitCode}`, 'error');
+        }
+        onProgress(`📊 Output: ${message.result.output}`, 'info');
+        if (message.result.errorOutput) {
+          onProgress(`⚠️ Errors: ${message.result.errorOutput}`, 'warning');
+        }
+        break;
+        
       case 'step_started':
         onProgress(`Executing step ${message.stepIndex}: ${message.stepName}`, 'info');
         break;
