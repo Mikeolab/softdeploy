@@ -30,9 +30,11 @@ const TestManagement = () => {
   };
 
   const handleBackToFolders = () => {
+    console.log('🔙 [DEBUG] Going back to folders view');
     setSelectedFolder(null);
     setCurrentView('folders');
     navigate('/test-management');
+    console.log('✅ [DEBUG] Navigation state updated');
   };
 
   const handleRunTest = (testSuite) => {
@@ -62,6 +64,14 @@ const TestManagement = () => {
       </div>
     );
   }
+
+  // Debug logging
+  console.log('🔍 [DEBUG] TestManagement render:', {
+    currentView,
+    selectedFolder: selectedFolder?.name,
+    selectedTestSuite: selectedTestSuite?.name,
+    user: user?.email
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
