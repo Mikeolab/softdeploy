@@ -29,10 +29,20 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   });
 
   useEffect(() => {
-    // Load test suites for this folder
-    const savedSuites = JSON.parse(localStorage.getItem(`testSuites_${folder.id}`) || '[]');
+    console.log('🔍 [DEBUG] TestSuiteConfiguration loading for folder:', folder.name);
+    
+    // Load test suites for this folder - check both formats
+    let savedSuites = JSON.parse(localStorage.getItem(`testSuites_${folder.id}`) || '[]');
+    
+    // If no suites found, check if folder has testSuites property (from sample data)
+    if (savedSuites.length === 0 && folder.testSuites && folder.testSuites.length > 0) {
+      console.log('📁 [DEBUG] Using folder testSuites:', folder.testSuites.length);
+      savedSuites = folder.testSuites;
+    }
+    
+    console.log('✅ [DEBUG] Loaded test suites:', savedSuites.length);
     setTestSuites(savedSuites);
-  }, [folder.id]);
+  }, [folder.id, folder.testSuites]);
 
   const saveTestSuite = () => {
     if (!newSuite.name.trim()) return;

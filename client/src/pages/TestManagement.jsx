@@ -20,7 +20,29 @@ const TestManagement = () => {
       navigate('/login');
       return;
     }
-  }, [user, navigate]);
+    
+    // Debug: Log current state
+    console.log('🔍 [DEBUG] TestManagement useEffect:', {
+      folderId,
+      currentView,
+      selectedFolder: selectedFolder?.name
+    });
+    
+    // Handle URL-based navigation
+    if (folderId && !selectedFolder) {
+      // Try to find folder by ID from localStorage
+      const savedFolders = JSON.parse(localStorage.getItem('testFolders') || '[]');
+      const folder = savedFolders.find(f => f.id === folderId);
+      if (folder) {
+        console.log('📁 [DEBUG] Found folder from URL:', folder.name);
+        setSelectedFolder(folder);
+        setCurrentView('folder');
+      } else {
+        console.log('❌ [DEBUG] Folder not found, going back to folders');
+        navigate('/test-management');
+      }
+    }
+  }, [user, navigate, folderId, selectedFolder]);
 
   const handleFolderSelect = (folder) => {
     setSelectedFolder(folder);
