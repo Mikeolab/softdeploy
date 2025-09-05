@@ -66,6 +66,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   const [showToolDetails, setShowToolDetails] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
+  const [notification, setNotification] = useState(null);
 
   // Sample test templates - Professional comprehensive test suites
   const getSampleTests = (projectName = '') => {
@@ -385,12 +386,19 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     };
   };
 
+  // Show notification
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   // Load sample test
   const loadSampleTest = (type) => {
     const sampleTests = getSampleTests(projectName);
     const sample = sampleTests[type];
     if (sample) {
       setTestSuite(sample);
+      showNotification(`Loaded ${type} test suite with ${sample.steps.length} steps`, 'success');
       console.log(`📋 Loaded sample ${type} test for project:`, projectName, sample);
     }
   };
@@ -423,7 +431,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   // Save test to localStorage
   const saveTest = () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId) {
-      alert('Please fill in all required fields');
+      showNotification('Please fill in all required fields', 'error');
       return;
     }
 
@@ -437,13 +445,13 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     const updatedTests = [...savedTests, testToSave];
     localStorage.setItem('advancedTestsV2', JSON.stringify(updatedTests));
     setSavedTests(updatedTests);
-    alert('Test suite saved successfully!');
+    showNotification('Test suite saved successfully!', 'success');
   };
 
   // Execute test suite
   const executeTestSuite = async () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId || testSuite.steps.length === 0) {
-      alert('Please fill in all required fields and add at least one step');
+      showNotification('Please fill in all required fields and add at least one step', 'error');
       return;
     }
 
@@ -497,7 +505,31 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       
       setTestResults(result);
       
-      // Save results to localStorage
+      // Automatically save test run to history
+      const testRun = {
+        id: `run_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        testSuiteName: testSuite.name,
+        testType: testSuite.testType,
+        toolId: testSuite.toolId,
+        status: result.success ? 'completed' : 'failed',
+        totalSteps: result.totalSteps || 0,
+        passedSteps: result.passedSteps || 0,
+        failedSteps: result.failedSteps || 0,
+        totalTime: result.totalTime || 0,
+        results: result,
+        executedAt: new Date().toISOString(),
+        projectName: projectName || 'Unknown Project'
+      };
+
+      // Save to localStorage
+      const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      savedRuns.unshift(testRun); // Add to beginning for newest first
+      localStorage.setItem('testRunsV2', JSON.stringify(savedRuns));
+
+      // Show success notification
+      showNotification(`Test run completed! ${result.passedSteps || 0}/${result.totalSteps || 0} steps passed`, result.success ? 'success' : 'error');
+      
+      // Save results to localStorage (legacy)
       const savedResults = JSON.parse(localStorage.getItem('testResultsV2') || '[]');
       savedResults.push({
         ...result,
@@ -509,7 +541,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       
       // Trigger a custom event to notify other components
       window.dispatchEvent(new CustomEvent('testRunCompleted', {
-        detail: { result, testSuite }
+        detail: { result, testSuite, testRun }
       }));
 
     } catch (error) {
@@ -580,7 +612,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   // Add step to test suite
   const addStep = () => {
     if (!currentStep.name || !currentStep.type) {
-      alert('Please fill in step name and type');
+      showNotification('Please fill in step name and type', 'error');
       return;
     }
 
@@ -614,7 +646,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   // Execute test suite
   const executeTest = async () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId || testSuite.steps.length === 0) {
-      alert('Please fill in all required fields and add at least one step');
+      showNotification('Please fill in all required fields and add at least one step', 'error');
       return;
     }
 
@@ -1152,6 +1184,22 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
 
   return (
     <div className="space-y-6">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          notification.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : notification.type === 'error' 
+            ? 'bg-red-500 text-white' 
+            : 'bg-blue-500 text-white'
+        }`}>
+          <div className="flex items-center gap-2">
+            {notification.type === 'success' && <CheckIcon className="h-5 w-5" />}
+            {notification.type === 'error' && <ExclamationTriangleIcon className="h-5 w-5" />}
+            <span>{notification.message}</span>
+          </div>
+        </div>
+      )}
 
       {/* Test Suite Configuration */}
       <div className="space-y-4">
@@ -1401,7 +1449,6 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
             </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Variables Management */}
