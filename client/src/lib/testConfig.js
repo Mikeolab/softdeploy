@@ -38,7 +38,20 @@ export const TEST_TOOLS = {
           'Visual testing'
         ],
         installation: 'npm install cypress --save-dev',
-        setup: 'npx cypress open'
+        setup: 'npx cypress open',
+        quickTest: {
+          enabled: true,
+          name: 'Quick Cypress Test',
+          description: 'Paste your Cypress script and run it instantly',
+          placeholder: `describe('My Test Suite', () => {
+  it('should visit the homepage', () => {
+    cy.visit('https://example.com')
+    cy.contains('Welcome').should('be.visible')
+  })
+})`,
+          language: 'javascript',
+          fileExtension: '.cy.js'
+        }
       },
       k6: {
         id: 'k6',
@@ -54,7 +67,59 @@ export const TEST_TOOLS = {
           'Cloud execution'
         ],
         installation: 'npm install k6 --save-dev',
-        setup: 'k6 run script.js'
+        setup: 'k6 run script.js',
+        quickTest: {
+          enabled: true,
+          name: 'Quick k6 Test',
+          description: 'Paste your k6 script and run load testing instantly',
+          placeholder: `import http from 'k6/http';
+import { check } from 'k6';
+
+export let options = {
+  vus: 10,
+  duration: '30s',
+};
+
+export default function() {
+  let response = http.get('https://httpbin.org/get');
+  check(response, {
+    'status is 200': (r) => r.status === 200,
+    'response time < 500ms': (r) => r.timings.duration < 500,
+  });
+}`,
+          language: 'javascript',
+          fileExtension: '.js'
+        }
+      },
+      playwright: {
+        id: 'playwright',
+        name: 'Playwright',
+        description: 'End-to-end testing framework',
+        icon: '🎭',
+        capabilities: ['functional', 'e2e'],
+        features: [
+          'Multi-browser support',
+          'Mobile testing',
+          'API testing',
+          'Visual testing',
+          'Auto-waiting'
+        ],
+        installation: 'npm install playwright',
+        setup: 'npx playwright test',
+        quickTest: {
+          enabled: true,
+          name: 'Quick Playwright Test',
+          description: 'Paste your Playwright script and run it instantly',
+          placeholder: `import { test, expect } from '@playwright/test';
+
+test('homepage has title', async ({ page }) => {
+  await page.goto('https://example.com');
+  await expect(page).toHaveTitle(/Example Domain/);
+  await expect(page.locator('h1')).toBeVisible();
+});`,
+          language: 'javascript',
+          fileExtension: '.spec.js'
+        }
       },
       jmeter: {
         id: 'jmeter',

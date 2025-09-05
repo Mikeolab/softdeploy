@@ -113,15 +113,311 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    activeExecutions: activeExecutors.size,
-    version: 'real-execution-v1.0'
-  });
+// API endpoint for Quick Test execution
+app.post('/api/execute-quick-test', async (req, res) => {
+  try {
+    const { toolId, script, language, fileExtension } = req.body;
+    
+    console.log('🚀 [QUICK TEST] Received quick test execution request');
+    console.log('📋 Quick Test Details:', {
+      toolId,
+      language,
+      fileExtension,
+      scriptLength: script?.length || 0
+    });
+    
+    // Validate input
+    if (!toolId || !script) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tool ID and script are required',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Validate tool
+    const validTools = ['cypress', 'k6', 'playwright'];
+    if (!validTools.includes(toolId)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid tool: ${toolId}. Valid tools are: ${validTools.join(', ')}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Execute based on tool
+    let result;
+    const startTime = Date.now();
+
+    try {
+      switch (toolId) {
+        case 'cypress':
+          result = await executeCypressQuickTest(script);
+          break;
+        case 'k6':
+          result = await executeK6QuickTest(script);
+          break;
+        case 'playwright':
+          result = await executePlaywrightQuickTest(script);
+          break;
+        default:
+          throw new Error(`Unsupported tool: ${toolId}`);
+      }
+
+      const duration = Date.now() - startTime;
+
+      console.log('✅ [QUICK TEST] Execution completed:', {
+        toolId,
+        success: result.success,
+        duration
+      });
+
+      return res.json({
+        success: result.success,
+        summary: result.summary,
+        duration: `${duration}ms`,
+        tests: result.tests,
+        output: result.output,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (executionError) {
+      console.error('❌ [QUICK TEST] Execution failed:', executionError.message);
+      
+      return res.status(500).json({
+        success: false,
+        error: executionError.message,
+        output: executionError.output || '',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ [QUICK TEST] Unexpected error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
+
+// Execute Cypress Quick Test
+async function executeCypressQuickTest(script) {
+  const fs = require('fs').promises;
+  const path = require('path');
+  const { exec } = require('child_process');
+  const util = require('util');
+  const execAsync = util.promisify(exec);
+
+  try {
+    // Create temporary directory for Cypress test
+    const tempDir = path.join(__dirname, 'temp', `cypress_${Date.now()}`);
+    await fs.mkdir(tempDir, { recursive: true });
+    
+    // Create cypress.json config
+    const cypressConfig = {
+      "baseUrl": "https://example.com",
+      "viewportWidth": 1280,
+      "viewportHeight": 720,
+      "defaultCommandTimeout": 10000,
+      "requestTimeout": 10000,
+      "responseTimeout": 10000
+    };
+    
+    await fs.writeFile(
+      path.join(tempDir, 'cypress.json'),
+      JSON.stringify(cypressConfig, null, 2)
+    );
+    
+    // Create test file
+    const testFile = path.join(tempDir, 'quick-test.cy.js');
+    await fs.writeFile(testFile, script);
+    
+    // Execute Cypress test
+    console.log('🧪 [CYPRESS] Executing test...');
+    const { stdout, stderr } = await execAsync(
+      `npx cypress run --spec "${testFile}" --headless --browser chrome`,
+      { 
+        cwd: tempDir,
+        timeout: 60000,
+        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+      }
+    );
+    
+    // Parse results
+    const output = stdout + stderr;
+    const success = !output.includes('failing') && !output.includes('failed') && output.includes('passing');
+    
+    // Extract test results
+    const testMatch = output.match(/(\d+) passing|(\d+) failing/);
+    const tests = {
+      total: 0,
+      passed: 0,
+      failed: 0
+    };
+    
+    if (testMatch) {
+      tests.passed = parseInt(testMatch[1]) || 0;
+      tests.failed = parseInt(testMatch[2]) || 0;
+      tests.total = tests.passed + tests.failed;
+    }
+    
+    // Clean up
+    await fs.rm(tempDir, { recursive: true, force: true });
+    
+    return {
+      success,
+      summary: success ? 'Cypress test executed successfully' : 'Cypress test failed',
+      tests,
+      output: output.substring(0, 2000) // Limit output size
+    };
+    
+  } catch (error) {
+    console.error('❌ [CYPRESS] Quick test failed:', error.message);
+    return {
+      success: false,
+      summary: `Cypress test failed: ${error.message}`,
+      tests: { total: 0, passed: 0, failed: 1 },
+      output: error.message
+    };
+  }
+}
+
+// Execute k6 Quick Test
+async function executeK6QuickTest(script) {
+  const fs = require('fs').promises;
+  const path = require('path');
+  const { exec } = require('child_process');
+  const util = require('util');
+  const execAsync = util.promisify(exec);
+
+  try {
+    // Create temporary directory for k6 test
+    const tempDir = path.join(__dirname, 'temp', `k6_${Date.now()}`);
+    await fs.mkdir(tempDir, { recursive: true });
+    
+    // Create test file
+    const testFile = path.join(tempDir, 'quick-test.js');
+    await fs.writeFile(testFile, script);
+    
+    // Execute k6 test
+    console.log('🧪 [K6] Executing load test...');
+    const { stdout, stderr } = await execAsync(
+      `k6 run "${testFile}"`,
+      { 
+        cwd: tempDir,
+        timeout: 120000, // 2 minutes for load tests
+        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+      }
+    );
+    
+    // Parse results
+    const output = stdout + stderr;
+    const success = !output.includes('error') && output.includes('checks');
+    
+    // Extract metrics
+    const checksMatch = output.match(/checks\s*:\s*(\d+)%?\s*(\d+)\/(\d+)/);
+    const tests = {
+      total: 0,
+      passed: 0,
+      failed: 0
+    };
+    
+    if (checksMatch) {
+      tests.passed = parseInt(checksMatch[2]) || 0;
+      tests.total = parseInt(checksMatch[3]) || 0;
+      tests.failed = tests.total - tests.passed;
+    }
+    
+    // Clean up
+    await fs.rm(tempDir, { recursive: true, force: true });
+    
+    return {
+      success,
+      summary: success ? 'k6 load test executed successfully' : 'k6 load test failed',
+      tests,
+      output: output.substring(0, 2000) // Limit output size
+    };
+    
+  } catch (error) {
+    console.error('❌ [K6] Quick test failed:', error.message);
+    return {
+      success: false,
+      summary: `k6 test failed: ${error.message}`,
+      tests: { total: 0, passed: 0, failed: 1 },
+      output: error.message
+    };
+  }
+}
+
+// Execute Playwright Quick Test
+async function executePlaywrightQuickTest(script) {
+  const fs = require('fs').promises;
+  const path = require('path');
+  const { exec } = require('child_process');
+  const util = require('util');
+  const execAsync = util.promisify(exec);
+
+  try {
+    // Create temporary directory for Playwright test
+    const tempDir = path.join(__dirname, 'temp', `playwright_${Date.now()}`);
+    await fs.mkdir(tempDir, { recursive: true });
+    
+    // Create test file
+    const testFile = path.join(tempDir, 'quick-test.spec.js');
+    await fs.writeFile(testFile, script);
+    
+    // Execute Playwright test
+    console.log('🧪 [PLAYWRIGHT] Executing test...');
+    const { stdout, stderr } = await execAsync(
+      `npx playwright test "${testFile}" --reporter=line`,
+      { 
+        cwd: tempDir,
+        timeout: 60000,
+        maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+      }
+    );
+    
+    // Parse results
+    const output = stdout + stderr;
+    const success = !output.includes('failed') && !output.includes('error') && output.includes('passed');
+    
+    // Extract test results
+    const testMatch = output.match(/(\d+) passed|(\d+) failed/);
+    const tests = {
+      total: 0,
+      passed: 0,
+      failed: 0
+    };
+    
+    if (testMatch) {
+      tests.passed = parseInt(testMatch[1]) || 0;
+      tests.failed = parseInt(testMatch[2]) || 0;
+      tests.total = tests.passed + tests.failed;
+    }
+    
+    // Clean up
+    await fs.rm(tempDir, { recursive: true, force: true });
+    
+    return {
+      success,
+      summary: success ? 'Playwright test executed successfully' : 'Playwright test failed',
+      tests,
+      output: output.substring(0, 2000) // Limit output size
+    };
+    
+  } catch (error) {
+    console.error('❌ [PLAYWRIGHT] Quick test failed:', error.message);
+    return {
+      success: false,
+      summary: `Playwright test failed: ${error.message}`,
+      tests: { total: 0, passed: 0, failed: 1 },
+      output: error.message
+    };
+  }
+}
 
 // API endpoint to execute a complete test suite (WebSocket-based)
 app.post('/api/execute-test-suite', async (req, res) => {

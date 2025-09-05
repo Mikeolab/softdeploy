@@ -38,6 +38,7 @@ import {
 } from '../lib/testConfig';
 import testExecutor from '../lib/testExecutor';
 import websocketTestExecutor from '../lib/websocketTestExecutor';
+import QuickTestModal from './QuickTestModal';
 
 export default function AdvancedTestBuilderV2({ projectName = '', initialTestSuite = null, onTestComplete = null }) {
   const [testSuite, setTestSuite] = useState({
@@ -68,6 +69,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
   const [notification, setNotification] = useState(null);
+  const [quickTestModal, setQuickTestModal] = useState({ isOpen: false, tool: null });
 
   // Sample test templates - Professional comprehensive test suites
   const getSampleTests = (projectName = '') => {
@@ -652,7 +654,44 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
     }
   };
 
-    // Stop test execution
+    // Execute Quick Test for external tools
+  const executeQuickTest = async (quickTestData) => {
+    try {
+      console.log('🚀 Executing Quick Test:', quickTestData);
+      
+      // Send to server for execution
+      const response = await fetch('/api/execute-quick-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(quickTestData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 Quick Test result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Quick Test execution failed:', error);
+      throw error;
+    }
+  };
+
+  // Open Quick Test modal
+  const openQuickTest = (tool) => {
+    if (tool.quickTest?.enabled) {
+      setQuickTestModal({ isOpen: true, tool });
+    } else {
+      showNotification(`${tool.name} Quick Test is not available`, 'error');
+    }
+  };
+
+  // Stop test execution
   const stopExecution = () => {
     websocketTestExecutor.stopExecution();
     setIsRunning(false);
@@ -1463,25 +1502,37 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
               <h4 className="font-medium text-gray-900 dark:text-white mb-3">Available External Tools:</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {Object.values(TEST_TOOLS.external.tools).map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => setTestSuite(prev => ({ ...prev, toolCategory: 'external', toolId: tool.id }))}
-                    className={`p-3 border rounded-lg text-left transition-all ${
-                      testSuite.toolId === tool.id
-                        ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{tool.icon}</span>
-                      <span className="font-medium text-gray-900 dark:text-white text-sm">
-                        {tool.name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {tool.description}
-                    </p>
-                  </button>
+                  <div key={tool.id} className="space-y-2">
+                    <button
+                      onClick={() => setTestSuite(prev => ({ ...prev, toolCategory: 'external', toolId: tool.id }))}
+                      className={`w-full p-3 border rounded-lg text-left transition-all ${
+                        testSuite.toolId === tool.id
+                          ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">{tool.icon}</span>
+                        <span className="font-medium text-gray-900 dark:text-white text-sm">
+                          {tool.name}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {tool.description}
+                      </p>
+                    </button>
+                    
+                    {/* Quick Test Button */}
+                    {tool.quickTest?.enabled && (
+                      <button
+                        onClick={() => openQuickTest(tool)}
+                        className="w-full flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                      >
+                        <CodeBracketIcon className="h-4 w-4" />
+                        Quick Test
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -2016,6 +2067,14 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
           </div>
         </div>
       )}
+
+      {/* Quick Test Modal */}
+      <QuickTestModal
+        isOpen={quickTestModal.isOpen}
+        onClose={() => setQuickTestModal({ isOpen: false, tool: null })}
+        tool={quickTestModal.tool}
+        onExecute={executeQuickTest}
+      />
     </div>
   );
 }
