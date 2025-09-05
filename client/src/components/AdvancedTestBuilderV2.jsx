@@ -73,13 +73,13 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     const isTcall = projectName.toLowerCase().includes('tcall');
     
     return {
-      api: {
-        name: `${projectName || 'Project'} Comprehensive API Test Suite`,
-        description: `Professional API testing suite with 10 comprehensive steps covering all CRUD operations, authentication, validation, and error handling`,
-        testType: "API",
-        toolCategory: "internal",
-        toolId: "axios",
-        baseUrl: isTcall ? 'https://jsonplaceholder.typicode.com' : 'https://jsonplaceholder.typicode.com',
+              api: {
+          name: `${projectName || 'Project'} Comprehensive API Test Suite`,
+          description: `Professional API testing suite with 10 comprehensive steps covering all CRUD operations, authentication, validation, and error handling`,
+          testType: "API",
+          toolCategory: "internal",
+          toolId: "axios",
+          baseUrl: isTcall ? 'https://api.tcall.ai' : 'https://jsonplaceholder.typicode.com',
         steps: [
           {
             name: "1. Health Check & Connectivity",

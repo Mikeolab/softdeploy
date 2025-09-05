@@ -35,7 +35,8 @@ app.post('/api/execute-test-suite', async (req, res) => {
       name: testSuite.name,
       testType: testSuite.testType,
       tool: testSuite.toolId || testSuite.tool,
-      steps: testSuite.steps?.length || 0
+      steps: testSuite.steps?.length || 0,
+      baseUrl: testSuite.baseUrl
     });
     
     // Validate test suite
@@ -106,11 +107,15 @@ async function executeTestSuite(testSuite, executionId) {
   console.log(`🧪 Starting test suite execution: ${testSuite.name}`);
   console.log(`📊 Test type: ${testSuite.testType}, Tool: ${testSuite.toolId || testSuite.tool}`);
   console.log(`📋 Total steps: ${totalSteps}`);
+  console.log(`🌐 Base URL: ${testSuite.baseUrl}`);
+  console.log(`🆔 Execution ID: ${executionId}`);
   
   try {
     for (let i = 0; i < testSuite.steps.length; i++) {
       const step = testSuite.steps[i];
       console.log(`🔄 Executing step ${i + 1}/${totalSteps}: ${step.name}`);
+      console.log(`📝 Step type: ${step.type}`);
+      console.log(`⚙️ Step config:`, JSON.stringify(step.config, null, 2));
       
       let stepResult;
       
@@ -147,12 +152,19 @@ async function executeTestSuite(testSuite, executionId) {
         error: stepResult.error || null
       });
       
+      const stepDuration = Date.now() - stepStartTime;
+      console.log(`✅ Step ${i + 1} completed in ${stepDuration}ms`);
+      console.log(`📊 Step result:`, JSON.stringify(stepResult, null, 2));
+      
       if (stepResult.success) {
         passedSteps++;
-        console.log(`✅ Step ${i + 1} passed: ${step.name}`);
+        console.log(`✅ Step ${i + 1} PASSED: ${step.name} - ${stepResult.message}`);
       } else {
         failedSteps++;
-        console.log(`❌ Step ${i + 1} failed: ${step.name} - ${stepResult.message}`);
+        console.log(`❌ Step ${i + 1} FAILED: ${step.name} - ${stepResult.message}`);
+        if (stepResult.error) {
+          console.log(`🔍 Step ${i + 1} ERROR DETAILS:`, stepResult.error);
+        }
       }
     }
     
@@ -374,6 +386,11 @@ async function executeFunctionalStep(step) {
 // Execute performance test step
 async function executePerformanceStep(step, testSuite) {
   const startTime = Date.now();
+  
+  console.log(`🚀 PERFORMANCE TEST EXECUTION`);
+  console.log(`🔧 Tool: ${testSuite.toolId || testSuite.tool || 'inbuilt'} (Using inbuilt performance simulation)`);
+  console.log(`📊 Step: ${step.name}`);
+  console.log(`⚙️ Config:`, JSON.stringify(step.config, null, 2));
   
   try {
     if (step.type === 'loadTest' || step.type === 'load') {

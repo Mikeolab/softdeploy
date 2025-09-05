@@ -83,7 +83,7 @@ class TestExecutor {
       });
 
       onProgress(`Starting test suite: ${testSuite.name}`, 'info');
-      onProgress(`Test type: ${testSuite.testType}, Tool: ${testSuite.tool}`, 'info');
+      onProgress(`Test type: ${testSuite.testType}, Tool: ${testSuite.toolId || testSuite.tool}`, 'info');
 
       // Send test suite to server for execution
       const response = await fetch(`${this.serverUrl}/api/execute-test-suite`, {
