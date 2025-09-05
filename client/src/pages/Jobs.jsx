@@ -27,33 +27,12 @@ function Jobs() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      // For now, we'll use a mock structure since we don't have a jobs table
-      // In a real app, you'd fetch from a jobs table
-      const mockJobs = [
-        {
-          id: 1,
-          name: 'Daily E2E Tests',
-          description: 'End-to-end tests for critical user flows',
-          schedule: 'daily',
-          status: 'active',
-          lastRun: new Date(Date.now() - 86400000).toISOString(),
-          nextRun: new Date(Date.now() + 86400000).toISOString(),
-          successRate: 95
-        },
-        {
-          id: 2,
-          name: 'Weekly Performance Tests',
-          description: 'Load testing and performance validation',
-          schedule: 'weekly',
-          status: 'active',
-          lastRun: new Date(Date.now() - 604800000).toISOString(),
-          nextRun: new Date(Date.now() + 86400000).toISOString(),
-          successRate: 88
-        }
-      ];
-      setJobs(mockJobs);
+      // Fetch jobs from Supabase (when jobs table is created)
+      // For now, return empty array to show clean state
+      setJobs([]);
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      setJobs([]);
     } finally {
       setLoading(false);
     }

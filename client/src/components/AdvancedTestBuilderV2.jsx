@@ -38,7 +38,7 @@ import {
 } from '../lib/testConfig';
 import testExecutor from '../lib/testExecutor';
 
-export default function AdvancedTestBuilderV2() {
+export default function AdvancedTestBuilderV2({ projectName = '' }) {
   const [testSuite, setTestSuite] = useState({
     name: '',
     description: '',
@@ -67,129 +67,106 @@ export default function AdvancedTestBuilderV2() {
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
 
-  // Sample test templates
-  const sampleTests = {
-    api: {
-      name: "E-commerce API Test",
-      description: "Test basic e-commerce API endpoints",
-      testType: "API",
-      toolCategory: "internal",
-      toolId: "axios",
-      baseUrl: "https://jsonplaceholder.typicode.com",
-      steps: [
-        {
-          name: "Get all posts",
-          action: "GET",
-          url: "/posts",
-          headers: { "Content-Type": "application/json" },
-          expectedStatus: 200
-        },
-        {
-          name: "Get specific post",
-          action: "GET", 
-          url: "/posts/1",
-          headers: { "Content-Type": "application/json" },
-          expectedStatus: 200,
-          expectedResponse: { userId: 1 }
-        },
-        {
-          name: "Create new post",
-          action: "POST",
-          url: "/posts",
-          headers: { "Content-Type": "application/json" },
-          body: {
-            title: "Test Post",
-            body: "This is a test post",
-            userId: 1
+  // Sample test templates - now dynamic based on project
+  const getSampleTests = (projectName = '') => {
+    const baseUrl = projectName.toLowerCase().includes('tcall') 
+      ? 'https://api.tcall.ai' 
+      : 'https://jsonplaceholder.typicode.com';
+    
+    return {
+      api: {
+        name: `${projectName || 'Project'} API Test`,
+        description: `Test API endpoints for ${projectName || 'your project'}`,
+        testType: "API",
+        toolCategory: "internal",
+        toolId: "axios",
+        baseUrl: baseUrl,
+        steps: [
+          {
+            name: "Health check",
+            type: "request",
+            config: {
+              url: "/health",
+              method: "GET",
+              validation: {
+                statusCode: 200,
+                responseTime: 5000
+              }
+            }
           },
-          expectedStatus: 201
-        }
-      ]
-    },
-    functional: {
-      name: "Google Search Flow",
-      description: "Test Google search functionality",
-      testType: "Functional",
-      toolCategory: "internal", 
-      toolId: "puppeteer",
-      baseUrl: "https://www.google.com",
-      steps: [
-        {
-          name: "Navigate to Google",
-          type: "navigation",
-          config: {
-            url: "https://www.google.com"
+          {
+            name: "Get data",
+            type: "request",
+            config: {
+              url: "/api/data",
+              method: "GET",
+              validation: {
+                statusCode: 200,
+                responseTime: 5000
+              }
+            }
           }
-        },
-        {
-          name: "Search for 'test automation'",
-          type: "interaction",
-          config: {
-            selector: "input[name='q'], textarea[name='q'], input[title='Search'], input[aria-label*='Search'], .gLFyf",
-            action: "type",
-            value: "test automation"
+        ]
+      },
+      functional: {
+        name: `${projectName || 'Project'} Functional Test`,
+        description: `Test user interface for ${projectName || 'your project'}`,
+        testType: "Functional",
+        toolCategory: "internal",
+        toolId: "puppeteer",
+        baseUrl: projectName.toLowerCase().includes('tcall') 
+          ? 'https://tcall.ai' 
+          : 'https://www.google.com',
+        steps: [
+          {
+            name: "Navigate to homepage",
+            type: "navigation",
+            config: {
+              url: projectName.toLowerCase().includes('tcall') 
+                ? 'https://tcall.ai' 
+                : 'https://www.google.com'
+            }
+          },
+          {
+            name: "Verify page loads",
+            type: "assertion",
+            config: {
+              selector: "body",
+              assertion: "visible"
+            }
           }
-        },
-        {
-          name: "Click search button",
-          type: "interaction",
-          config: {
-            selector: "input[value='Google Search'], button[aria-label*='Search'], .gNO89b, .Tg7LZd",
-            action: "click"
+        ]
+      },
+      performance: {
+        name: `${projectName || 'Project'} Performance Test`,
+        description: `Test performance of ${projectName || 'your project'}`,
+        testType: "Performance",
+        toolCategory: "external",
+        toolId: "k6",
+        baseUrl: baseUrl,
+        steps: [
+          {
+            name: "Load test",
+            type: "loadTest",
+            config: {
+              url: "/api/data",
+              method: "GET",
+              duration: 10,
+              users: 5
+            }
           }
-        },
-        {
-          name: "Verify results page",
-          type: "assertion",
-          config: {
-            selector: "#search, #rso, .g, .tF2Cxc",
-            assertion: "visible"
-          }
-        }
-      ]
-    },
-    performance: {
-      name: "API Load Test",
-      description: "Test API performance under load",
-      testType: "Performance",
-      toolCategory: "external",
-      toolId: "k6",
-      baseUrl: "https://jsonplaceholder.typicode.com",
-      steps: [
-        {
-          name: "Load test posts endpoint",
-          type: "load",
-          config: {
-            url: "/posts",
-            method: "GET",
-            duration: "30s",
-            vus: 10
-          }
-        },
-        {
-          name: "Stress test users endpoint", 
-          type: "stress",
-          config: {
-            url: "/users",
-            method: "GET",
-            duration: "60s",
-            stages: [
-              { duration: "10s", target: 5 },
-              { duration: "20s", target: 20 },
-              { duration: "30s", target: 0 }
-            ]
-          }
-        }
-      ]
-    }
+        ]
+      }
+    };
   };
 
   // Load sample test
   const loadSampleTest = (type) => {
+    const sampleTests = getSampleTests(projectName);
     const sample = sampleTests[type];
     if (sample) {
       setTestSuite(sample);
-      console.log(`📋 Loaded sample ${type} test:`, sample);
+      console.log(`📋 Loaded sample ${type} test for project:`, projectName, sample);
     }
   };
 

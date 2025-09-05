@@ -407,7 +407,7 @@ function TestManagement() {
             </div>
             
                                        <div className="glass-card p-6 rounded-xl">
-                <AdvancedTestBuilderV2 />
+                <AdvancedTestBuilderV2 projectName={project?.name} />
               </div>
           </div>
         )}
@@ -839,7 +839,7 @@ function TestManagement() {
               </div>
             ) : (
                                              <div className="space-y-6 flex-1 overflow-y-auto">
-                  <AdvancedTestBuilderV2 />
+                  <AdvancedTestBuilderV2 projectName={project?.name} />
                 </div>
             )}
             
