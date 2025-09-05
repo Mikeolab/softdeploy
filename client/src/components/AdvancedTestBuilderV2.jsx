@@ -70,6 +70,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
   const [executionLogs, setExecutionLogs] = useState([]);
   const [notification, setNotification] = useState(null);
   const [quickTestModal, setQuickTestModal] = useState({ isOpen: false, tool: null });
+  const [showExecutionPage, setShowExecutionPage] = useState(false);
 
   // Sample test templates - Professional comprehensive test suites
   const getSampleTests = (projectName = '') => {
@@ -493,6 +494,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
     setIsRunning(true);
     setTestResults(null);
     setExecutionLogs([]);
+    setShowExecutionPage(true); // Show execution page instead of modal
 
     try {
       // Progress callback for real-time updates
@@ -705,6 +707,11 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
         type: 'warning'
       }
     ]));
+  };
+
+  const closeExecutionPage = () => {
+    setShowExecutionPage(false);
+    setIsRunning(false);
   };
 
   // Add step to test suite
@@ -1279,6 +1286,142 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
         );
     }
   };
+
+  // Execution Page Component
+  if (showExecutionPage) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Test Execution: {testSuite.name}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {testSuite.testType} • {testSuite.toolId} • {testSuite.steps.length} steps
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {isRunning && (
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                    <span className="text-sm font-medium">Running...</span>
+                  </div>
+                )}
+                <button
+                  onClick={closeExecutionPage}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Live Execution Logs */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  Live Execution Logs
+                  {isRunning && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      Running...
+                    </span>
+                  )}
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto">
+                  {executionLogs.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No logs yet...</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {executionLogs.map((log, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <span className="text-gray-500 text-xs font-mono mt-1 min-w-[80px]">
+                            {log.timestamp}
+                          </span>
+                          <span className={`text-sm ${
+                            log.type === 'error' ? 'text-red-400' :
+                            log.type === 'success' ? 'text-green-400' :
+                            log.type === 'warning' ? 'text-yellow-400' :
+                            'text-gray-300'
+                          }`}>
+                            {log.message}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Test Results */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Test Results
+                </h2>
+              </div>
+              <div className="p-6">
+                {testResults ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        testResults.success ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      }`}>
+                        {testResults.success ? 'PASSED' : 'FAILED'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Steps:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{testResults.totalSteps || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Passed:</span>
+                      <span className="text-sm text-green-600 dark:text-green-400">{testResults.passedSteps || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Failed:</span>
+                      <span className="text-sm text-red-600 dark:text-red-400">{testResults.failedSteps || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Time:</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{testResults.totalTime || 0}ms</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 text-sm">
+                      {isRunning ? 'Test is running...' : 'No results yet'}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="mt-6 flex justify-center gap-4">
+            {isRunning && (
+              <button
+                onClick={stopExecution}
+                className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                <ExclamationTriangleIcon className="h-5 w-5" />
+                Stop Execution
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
