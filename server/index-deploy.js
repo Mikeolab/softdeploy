@@ -11,7 +11,7 @@ const axios = require('axios');
 const { executeCypressTest, generateCypressScript } = require('./cypressIntegration');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 console.log('🚀 Starting SoftDeploy server (deployment version)...');
 console.log('📦 Port:', PORT);
