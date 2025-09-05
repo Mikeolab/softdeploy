@@ -446,7 +446,9 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
             Create Your First Folder
           </button>
         </div>
-        {/* Saved Tests Section */}
+      )}
+      
+      {/* Saved Tests Section */}
         {(() => {
           const savedTests = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
           if (savedTests.length > 0) {
@@ -510,7 +512,6 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
           }
           return null;
         })()}
-      )}
     </div>
   );
 };
