@@ -111,20 +111,38 @@ async function executeTestSuite(testSuite, executionId) {
   console.log(`🆔 Execution ID: ${executionId}`);
   
   try {
+    // Validate steps exist
+    if (!testSuite.steps || testSuite.steps.length === 0) {
+      throw new Error('No test steps provided');
+    }
+    
     for (let i = 0; i < testSuite.steps.length; i++) {
       const step = testSuite.steps[i];
+      const stepStartTime = Date.now();
       console.log(`🔄 Executing step ${i + 1}/${totalSteps}: ${step.name}`);
       console.log(`📝 Step type: ${step.type}`);
       console.log(`⚙️ Step config:`, JSON.stringify(step.config, null, 2));
       
       let stepResult;
       
-      if (testSuite.testType === 'API') {
-        stepResult = await executeApiStep(step, testSuite);
-      } else if (testSuite.testType === 'Functional') {
-        stepResult = await executeFunctionalStep(step);
-      } else if (testSuite.testType === 'Performance') {
-        stepResult = await executePerformanceStep(step, testSuite);
+      try {
+        if (testSuite.testType === 'API') {
+          stepResult = await executeApiStep(step, testSuite);
+        } else if (testSuite.testType === 'Functional') {
+          stepResult = await executeFunctionalStep(step);
+        } else if (testSuite.testType === 'Performance') {
+          stepResult = await executePerformanceStep(step, testSuite);
+        } else {
+          throw new Error(`Unknown test type: ${testSuite.testType}`);
+        }
+      } catch (stepError) {
+        console.error(`❌ Step ${i + 1} execution error:`, stepError);
+        stepResult = {
+          success: false,
+          duration: Date.now() - stepStartTime,
+          message: `Step execution failed: ${stepError.message}`,
+          error: stepError.message
+        };
       }
       
       // Ensure stepResult has the required properties

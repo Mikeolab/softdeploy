@@ -437,6 +437,14 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     showNotification(`Loaded test suite: ${savedTest.name}`, 'success');
   };
 
+  const deleteSavedTest = (testId, event) => {
+    event.stopPropagation(); // Prevent loading the test when clicking delete
+    const updatedTests = savedTests.filter(test => test.id !== testId);
+    setSavedTests(updatedTests);
+    localStorage.setItem('savedTestSuites', JSON.stringify(updatedTests));
+    showNotification('Test suite deleted successfully', 'success');
+  };
+
   const saveTest = () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId) {
       showNotification('Please fill in all required fields', 'error');
@@ -1194,17 +1202,27 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     <div className="space-y-6">
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-          notification.type === 'success' 
-            ? 'bg-green-500 text-white' 
-            : notification.type === 'error' 
-            ? 'bg-red-500 text-white' 
-            : 'bg-blue-500 text-white'
-        }`}>
+        <div 
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+            notification.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : notification.type === 'error' 
+              ? 'bg-red-500 text-white' 
+              : 'bg-blue-500 text-white'
+          }`}
+          onClick={(e) => e.stopPropagation()} // Prevent clicks from bubbling up
+        >
           <div className="flex items-center gap-2">
             {notification.type === 'success' && <CheckIcon className="h-5 w-5" />}
             {notification.type === 'error' && <ExclamationTriangleIcon className="h-5 w-5" />}
             <span>{notification.message}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-2 hover:bg-black hover:bg-opacity-20 rounded-full p-1 transition-colors"
+              title="Close notification"
+            >
+              <span className="text-lg leading-none">&times;</span>
+            </button>
           </div>
         </div>
       )}
@@ -1474,9 +1492,17 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
             {savedTests.map((savedTest) => (
               <div 
                 key={savedTest.id} 
-                className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700"
+                className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700 relative"
                 onClick={() => loadSavedTest(savedTest)}
               >
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => deleteSavedTest(savedTest.id, e)}
+                  className="absolute top-2 right-2 p-1 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 transition-colors opacity-0 group-hover:opacity-100"
+                  title="Delete test suite"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`p-2 rounded-lg ${
                     savedTest.testType === 'API' ? 'bg-blue-100 dark:bg-blue-900' :
