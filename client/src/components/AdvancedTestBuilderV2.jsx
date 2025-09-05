@@ -38,7 +38,7 @@ import {
 } from '../lib/testConfig';
 import testExecutor from '../lib/testExecutor';
 
-export default function AdvancedTestBuilderV2({ projectName = '' }) {
+export default function AdvancedTestBuilderV2({ projectName = '', initialTestSuite = null, onTestComplete = null }) {
   const [testSuite, setTestSuite] = useState({
     name: '',
     description: '',
@@ -420,6 +420,14 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
     console.log('🧹 Form cleared');
   };
 
+  // Load initial test suite if provided
+  useEffect(() => {
+    if (initialTestSuite) {
+      setTestSuite(initialTestSuite);
+      console.log('📋 Loaded initial test suite:', initialTestSuite);
+    }
+  }, [initialTestSuite]);
+
   // Load saved tests
   useEffect(() => {
     const saved = localStorage.getItem('advancedTestsV2');
@@ -588,6 +596,11 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       window.dispatchEvent(new CustomEvent('testRunCompleted', {
         detail: { result, testSuite, testRun }
       }));
+      
+      // Call onTestComplete callback if provided
+      if (onTestComplete) {
+        onTestComplete(result);
+      }
 
     } catch (error) {
       console.error('❌ Test execution failed:', error);
