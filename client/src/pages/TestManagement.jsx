@@ -54,6 +54,7 @@ const TestManagement = () => {
   const handleBackToFolders = () => {
     console.log('🔙 [DEBUG] Going back to folders view');
     setSelectedFolder(null);
+    setSelectedTestSuite(null);
     setCurrentView('folders');
     navigate('/test-management');
     console.log('✅ [DEBUG] Navigation state updated');
@@ -65,8 +66,10 @@ const TestManagement = () => {
   };
 
   const handleBackToFolder = () => {
+    console.log('🔙 [DEBUG] Going back to folder view');
     setSelectedTestSuite(null);
     setCurrentView('folder');
+    // Keep the folder selected and URL intact
   };
 
   if (!user) {

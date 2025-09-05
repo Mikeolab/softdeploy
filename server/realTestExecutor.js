@@ -374,7 +374,7 @@ class RealTestExecutor {
       const totalTime = Date.now() - startTime;
       const avgResponseTime = requests.length > 0 ? 
         requests.reduce((sum, req) => sum + req.responseTime, 0) / requests.length : 0;
-      const requestsPerSecond = requests.length / (totalTime / 1000);
+      const actualRequestsPerSecond = requests.length / (totalTime / 1000);
 
       const result = {
         stepName: step.name,
@@ -383,7 +383,7 @@ class RealTestExecutor {
         totalRequests: requests.length,
         totalErrors: errors.length,
         averageResponseTime: avgResponseTime,
-        requestsPerSecond: requestsPerSecond,
+        requestsPerSecond: actualRequestsPerSecond,
         totalTime: totalTime,
         timestamp: new Date().toISOString()
       };
