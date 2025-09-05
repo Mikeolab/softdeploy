@@ -80,7 +80,7 @@ app.post('/api/execute-test-suite', async (req, res) => {
     }
 
     // Validate tool ID
-    const validTools = ['axios', 'puppeteer', 'k6', 'cypress', 'playwright'];
+    const validTools = ['inbuilt', 'axios', 'puppeteer', 'k6', 'cypress', 'playwright'];
     if (testSuite.toolId && !validTools.includes(testSuite.toolId)) {
       console.error('❌ [SERVER] Invalid tool ID:', testSuite.toolId);
       return res.status(400).json({
@@ -510,25 +510,41 @@ async function executeFunctionalStep(step, browser) {
         message: `Successfully navigated to ${step.config.url}`
       };
     } else if (step.type === 'interaction') {
-      await page.waitForSelector(step.config.selector, { timeout: 5000 });
+      // Handle multiple selectors (comma-separated)
+      const selectors = step.config.selector.split(',').map(s => s.trim());
+      let foundSelector = null;
+      
+      for (const selector of selectors) {
+        try {
+          await page.waitForSelector(selector, { timeout: 2000 });
+          foundSelector = selector;
+          break;
+        } catch (e) {
+          console.log(`Selector ${selector} not found, trying next...`);
+        }
+      }
+      
+      if (!foundSelector) {
+        throw new Error(`None of the selectors found: ${selectors.join(', ')}`);
+      }
       
       if (step.config.action === 'click') {
-        await page.click(step.config.selector);
+        await page.click(foundSelector);
         result = {
           success: true,
-          message: `Successfully clicked ${step.config.selector}`
+          message: `Successfully clicked ${foundSelector}`
         };
       } else if (step.config.action === 'type') {
-        await page.type(step.config.selector, step.config.value || '');
+        await page.type(foundSelector, step.config.value || '');
         result = {
           success: true,
-          message: `Successfully typed into ${step.config.selector}`
+          message: `Successfully typed into ${foundSelector}`
         };
       } else if (step.config.action === 'select') {
-        await page.select(step.config.selector, step.config.value);
+        await page.select(foundSelector, step.config.value);
         result = {
           success: true,
-          message: `Successfully selected option in ${step.config.selector}`
+          message: `Successfully selected option in ${foundSelector}`
         };
       }
     } else if (step.type === 'assertion') {

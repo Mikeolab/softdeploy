@@ -1,7 +1,7 @@
 // src/pages/Runs.jsx
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import TestRunsService from '../lib/testRunsService';
 
 function Runs() {
   const { user } = useAuth();
@@ -20,34 +20,32 @@ function Runs() {
     try {
       setLoading(true);
       
-      // Fetch test plans as runs since we don't have a separate runs table
-      const { data, error } = await supabase
-        .from('test_plans')
-        .select('id, title, result, owner_name, ran_at, test_type')
-        .eq('user_id', user.id)
-        .order('ran_at', { ascending: false });
+      // Fetch test runs using our new service
+      const result = await TestRunsService.getTestRuns(user?.id || 'anonymous');
+      
+      if (result.success) {
+        // Transform test runs into the expected format
+        const transformedRuns = result.data.map(run => ({
+          id: run.id,
+          name: run.test_suite_name,
+          type: run.test_type || 'automated',
+          status: run.status === 'completed' ? 'passed' : run.status,
+          duration: run.total_time || 0,
+          startedAt: run.created_at,
+          completedAt: run.updated_at,
+          owner: run.user_id,
+          result: run.results ? JSON.stringify(run.results, null, 2) : 'No results available',
+          logs: `Running ${run.test_suite_name}...\nStatus: ${run.status}\nSteps: ${run.passed_steps}/${run.total_steps}\nDuration: ${run.total_time}ms`,
+          passedSteps: run.passed_steps,
+          totalSteps: run.total_steps,
+          toolId: run.tool_id
+        }));
 
-      if (error) {
-        console.error('Error fetching runs:', error);
+        setRuns(transformedRuns);
+      } else {
+        console.error('Error fetching runs:', result.error);
         setRuns([]);
-        return;
       }
-
-      // Transform test plans into run format
-      const transformedRuns = (data || []).map(test => ({
-        id: test.id,
-        name: test.title,
-        type: test.test_type || 'automated',
-        status: test.result?.includes('passed') || test.result?.includes('success') ? 'passed' : 'failed',
-        duration: Math.floor(Math.random() * 300) + 30, // Mock duration
-        startedAt: test.ran_at,
-        completedAt: test.ran_at,
-        owner: test.owner_name,
-        result: test.result,
-        logs: `Running ${test.title}...\n${test.result}\nCompleted in ${Math.floor(Math.random() * 300) + 30}s`
-      }));
-
-      setRuns(transformedRuns);
     } catch (error) {
       console.error('Error fetching runs:', error);
       setRuns([]);
@@ -87,10 +85,11 @@ function Runs() {
     }
   };
 
-  const formatDuration = (seconds) => {
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+  const formatDuration = (ms) => {
+    if (ms < 1000) return `${ms}ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+    const minutes = Math.floor(ms / 60000);
+    const remainingSeconds = Math.floor((ms % 60000) / 1000);
     return `${minutes}m ${remainingSeconds}s`;
   };
 
@@ -115,10 +114,10 @@ function Runs() {
 
   const stats = {
     total: runs.length,
-    passed: runs.filter(r => r.status === 'passed').length,
+    passed: runs.filter(r => r.status === 'passed' || r.status === 'completed').length,
     failed: runs.filter(r => r.status === 'failed').length,
     running: runs.filter(r => r.status === 'running').length,
-    successRate: runs.length > 0 ? Math.round((runs.filter(r => r.status === 'passed').length / runs.length) * 100) : 0
+    successRate: runs.length > 0 ? Math.round((runs.filter(r => r.status === 'passed' || r.status === 'completed').length / runs.length) * 100) : 0
   };
 
   return (
@@ -221,7 +220,7 @@ function Runs() {
                       {run.name}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {run.owner} • {run.type}
+                      {run.owner} • {run.type} • {run.toolId}
                     </p>
                   </div>
                 </div>
@@ -232,6 +231,11 @@ function Runs() {
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDuration(run.duration)}
                   </span>
+                  {run.totalSteps && (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {run.passedSteps}/{run.totalSteps} steps
+                    </span>
+                  )}
                 </div>
               </div>
               

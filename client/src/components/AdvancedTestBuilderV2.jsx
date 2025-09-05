@@ -125,7 +125,7 @@ export default function AdvancedTestBuilderV2() {
           name: "Search for 'test automation'",
           type: "interaction",
           config: {
-            selector: "input[name='q']",
+            selector: "input[name='q'], input[title='Search'], textarea[name='q']",
             action: "type",
             value: "test automation"
           }

@@ -1,4 +1,5 @@
 
+import TestRunsService from './testRunsService';
 
 class TestExecutor {
   constructor() {
@@ -169,6 +170,9 @@ class TestExecutor {
         const result = message.finalResult;
         onProgress(`Test suite completed: ${result.passedSteps}/${result.totalSteps} steps passed in ${result.totalTime}ms`, 
                   result.success ? 'success' : 'error');
+        
+        // Automatically save test run
+        this.saveTestRun(result);
         break;
         
       case 'execution_failed':
@@ -361,6 +365,46 @@ class TestExecutor {
     }
     
     return current;
+  }
+
+  // Save test run to Supabase
+  async saveTestRun(result) {
+    try {
+      if (!this.currentExecution) {
+        console.log('No current execution to save');
+        return;
+      }
+
+      const testRun = {
+        executionId: this.executionId,
+        userId: this.getCurrentUserId(),
+        testSuiteName: this.currentExecution.name,
+        testType: this.currentExecution.testType,
+        toolId: this.currentExecution.toolId,
+        status: result.success ? 'completed' : 'failed',
+        totalSteps: result.totalSteps,
+        passedSteps: result.passedSteps,
+        failedSteps: result.failedSteps,
+        totalTime: result.totalTime,
+        results: result
+      };
+
+      const saveResult = await TestRunsService.saveTestRun(testRun);
+      if (saveResult.success) {
+        console.log('✅ Test run saved successfully');
+      } else {
+        console.error('❌ Failed to save test run:', saveResult.error);
+      }
+    } catch (error) {
+      console.error('❌ Error saving test run:', error);
+    }
+  }
+
+  // Get current user ID (you can implement user authentication here)
+  getCurrentUserId() {
+    // For now, return a default user ID
+    // In a real app, this would come from authentication
+    return 'user_' + Date.now();
   }
 }
 
