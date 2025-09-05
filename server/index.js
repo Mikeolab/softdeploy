@@ -53,7 +53,7 @@ app.post('/api/execute-test-suite', async (req, res) => {
     console.log('📋 Test Suite Details:', {
       name: testSuite.name,
       type: testSuite.testType,
-      tool: testSuite.tool,
+      tool: testSuite.toolId || testSuite.tool,
       steps: testSuite.steps?.length || 0,
       baseUrl: testSuite.baseUrl
     });
@@ -177,7 +177,7 @@ async function executeTestSuite(testSuite, executionId) {
   console.log(`📊 [SERVER] Execution details:`, {
     executionId,
     testType: testSuite.testType,
-    tool: testSuite.tool,
+    tool: testSuite.toolId || testSuite.tool,
     stepsCount: testSuite.steps?.length || 0,
     baseUrl: testSuite.baseUrl
   });
@@ -238,9 +238,9 @@ async function executeTestSuite(testSuite, executionId) {
       let stepResult;
       
       if (testSuite.testType === 'API') {
-        stepResult = await executeApiStep(step);
+        stepResult = await executeApiStep(step, testSuite);
       } else if (testSuite.testType === 'Functional') {
-        if (testSuite.tool === 'Cypress') {
+        if ((testSuite.toolId || testSuite.tool) === 'Cypress') {
           // Execute entire test suite with Cypress
           const cypressResult = await executeCypressTest(testSuite, executionId);
           return cypressResult; // Return early for Cypress
@@ -352,7 +352,7 @@ async function executeTestSuite(testSuite, executionId) {
 }
 
 // Execute API test step with real HTTP requests
-async function executeApiStep(step) {
+async function executeApiStep(step, testSuite) {
   const startTime = Date.now();
   
   try {
@@ -373,9 +373,9 @@ async function executeApiStep(step) {
     // Construct full URL with base URL if needed
     let fullUrl = stepUrl;
     if (!stepUrl.startsWith('http')) {
-      // Assume it's a relative URL, we'll need baseUrl from testSuite
-      // For now, use a default base URL
-      fullUrl = `https://jsonplaceholder.typicode.com${stepUrl}`;
+      // Use the testSuite baseUrl if available, otherwise default
+      const baseUrl = testSuite.baseUrl || 'https://jsonplaceholder.typicode.com';
+      fullUrl = `${baseUrl}${stepUrl}`;
     }
     
     const url = new URL(fullUrl);
