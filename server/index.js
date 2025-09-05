@@ -606,14 +606,17 @@ async function executePerformanceStep(step) {
   const startTime = Date.now();
   
   try {
-    if (step.type === 'loadTest') {
-      const { url, duration, users, rampUpTime } = step.config;
+    if (step.type === 'loadTest' || step.type === 'load') {
+      const { url, duration, users, rampUpTime, vus } = step.config;
       
       // Simulate load test with multiple concurrent requests
       const promises = [];
-      for (let i = 0; i < users; i++) {
-        const delay = (rampUpTime * 1000 * i) / users;
-        promises.push(simulateUser(url, duration, i, delay));
+      const userCount = users || vus || 5; // Use vus if users not provided
+      const testDuration = typeof duration === 'string' ? parseInt(duration.replace('s', '')) : duration || 10;
+      
+      for (let i = 0; i < userCount; i++) {
+        const delay = (rampUpTime * 1000 * i) / userCount;
+        promises.push(simulateUser(url, testDuration, i, delay));
       }
       
       const results = await Promise.all(promises);
@@ -625,8 +628,39 @@ async function executePerformanceStep(step) {
       
       return {
         success: totalErrors === 0,
-        duration,
+        duration: testDuration,
         message: `Load test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms`,
+        metrics: {
+          totalRequests,
+          totalErrors,
+          avgResponseTime,
+          requestsPerSecond: totalRequests / (totalTime / 1000)
+        }
+      };
+    } else if (step.type === 'stressTest' || step.type === 'stress') {
+      const { url, duration, users, rampUpTime, vus } = step.config;
+      
+      // Simulate stress test with higher load
+      const promises = [];
+      const userCount = (users || vus || 5) * 2; // Double the load for stress test
+      const testDuration = typeof duration === 'string' ? parseInt(duration.replace('s', '')) : duration || 10;
+      
+      for (let i = 0; i < userCount; i++) {
+        const delay = (rampUpTime * 1000 * i) / userCount;
+        promises.push(simulateUser(url, testDuration, i, delay));
+      }
+      
+      const results = await Promise.all(promises);
+      const totalRequests = results.reduce((sum, r) => sum + r.requests, 0);
+      const totalErrors = results.reduce((sum, r) => sum + r.errors, 0);
+      const avgResponseTime = results.reduce((sum, r) => sum + r.avgResponseTime, 0) / results.length;
+      
+      const totalTime = Date.now() - startTime;
+      
+      return {
+        success: totalErrors < totalRequests * 0.1, // Allow up to 10% error rate for stress test
+        duration: testDuration,
+        message: `Stress test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms`,
         metrics: {
           totalRequests,
           totalErrors,

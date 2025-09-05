@@ -125,7 +125,7 @@ export default function AdvancedTestBuilderV2() {
           name: "Search for 'test automation'",
           type: "interaction",
           config: {
-            selector: "input[name='q'], input[title='Search'], textarea[name='q']",
+            selector: "input[name='q'], textarea[name='q'], input[title='Search'], input[aria-label*='Search'], .gLFyf",
             action: "type",
             value: "test automation"
           }
@@ -134,7 +134,7 @@ export default function AdvancedTestBuilderV2() {
           name: "Click search button",
           type: "interaction",
           config: {
-            selector: "input[value='Google Search']",
+            selector: "input[value='Google Search'], button[aria-label*='Search'], .gNO89b, .Tg7LZd",
             action: "click"
           }
         },
@@ -142,7 +142,7 @@ export default function AdvancedTestBuilderV2() {
           name: "Verify results page",
           type: "assertion",
           config: {
-            selector: "#search",
+            selector: "#search, #rso, .g, .tF2Cxc",
             assertion: "visible"
           }
         }
@@ -940,84 +940,6 @@ export default function AdvancedTestBuilderV2() {
 
   return (
     <div className="space-y-6">
-      {/* Sample Tests Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <SparklesIcon className="h-5 w-5" />
-          Sample Tests
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Choose a sample test to get started quickly, then customize it to your needs
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('api')}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <ServerIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  API Test
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">E-commerce API endpoints</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Test GET, POST endpoints with validation
-            </p>
-            <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
-              <span>3 steps</span>
-              <span>•</span>
-              <span>Ready to run</span>
-            </div>
-          </div>
-
-          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('functional')}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                  Functional Test
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Google search flow</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Navigate, interact, and assert on web pages
-            </p>
-            <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
-              <span>4 steps</span>
-              <span>•</span>
-              <span>Browser automation</span>
-            </div>
-          </div>
-
-          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('performance')}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                  Performance Test
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">API load testing</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Load and stress test API endpoints
-            </p>
-            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-              <span>2 steps</span>
-              <span>•</span>
-              <span>K6 integration</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Test Suite Configuration */}
       <div className="space-y-4">
@@ -1190,6 +1112,87 @@ export default function AdvancedTestBuilderV2() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Sample Tests Section - Show after tool selection */}
+      {testSuite.toolId && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <SparklesIcon className="h-5 w-5" />
+            Sample Tests
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Choose a sample test to get started quickly, then customize it to your needs
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('api')}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <ServerIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    API Test
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">E-commerce API endpoints</p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Test GET, POST endpoints with validation
+              </p>
+              <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+                <span>3 steps</span>
+                <span>•</span>
+                <span>Ready to run</span>
+              </div>
+            </div>
+
+            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('functional')}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                    Functional Test
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Google search flow</p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Navigate, interact, and assert on web pages
+              </p>
+              <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                <span>4 steps</span>
+                <span>•</span>
+                <span>Browser automation</span>
+              </div>
+            </div>
+
+            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('performance')}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                  <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                    Performance Test
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">API load testing</p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Load and stress test API endpoints
+              </p>
+              <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <span>2 steps</span>
+                <span>•</span>
+                <span>K6 integration</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

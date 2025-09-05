@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@playwright/test": "^1.55.0",
+    "@supabase/supabase-js": "^2.57.0",
     "axios": "^1.11.0",
     "playwright": "^1.55.0",
     "ws": "^8.18.3"
