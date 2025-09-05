@@ -429,6 +429,14 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   }, []);
 
   // Save test to localStorage
+  const loadSavedTest = (savedTest) => {
+    setTestSuite({
+      ...savedTest,
+      steps: savedTest.steps || []
+    });
+    showNotification(`Loaded test suite: ${savedTest.name}`, 'success');
+  };
+
   const saveTest = () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId) {
       showNotification('Please fill in all required fields', 'error');
@@ -1450,6 +1458,77 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
           </div>
         </div>
       </div>
+
+      {/* Saved Tests Section */}
+      {savedTests.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <DocumentTextIcon className="h-5 w-5" />
+            Saved Test Suites ({savedTests.length})
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Your previously saved test suites. Click to load and edit them.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedTests.map((savedTest) => (
+              <div 
+                key={savedTest.id} 
+                className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700"
+                onClick={() => loadSavedTest(savedTest)}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2 rounded-lg ${
+                    savedTest.testType === 'API' ? 'bg-blue-100 dark:bg-blue-900' :
+                    savedTest.testType === 'Functional' ? 'bg-green-100 dark:bg-green-900' :
+                    'bg-purple-100 dark:bg-purple-900'
+                  }`}>
+                    {savedTest.testType === 'API' ? (
+                      <ServerIcon className={`h-6 w-6 ${
+                        savedTest.testType === 'API' ? 'text-blue-600 dark:text-blue-400' :
+                        savedTest.testType === 'Functional' ? 'text-green-600 dark:text-green-400' :
+                        'text-purple-600 dark:text-purple-400'
+                      }`} />
+                    ) : savedTest.testType === 'Functional' ? (
+                      <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                      {savedTest.name}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {savedTest.testType} • {savedTest.steps?.length || 0} steps
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                  {savedTest.description || 'No description available'}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={`px-2 py-1 rounded ${
+                      savedTest.testType === 'API' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' :
+                      savedTest.testType === 'Functional' ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400' :
+                      'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400'
+                    }`}>
+                      {savedTest.testType}
+                    </span>
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
+                      {savedTest.steps?.length || 0} steps
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {new Date(savedTest.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Variables Management */}
       {testSuite.toolId && (
