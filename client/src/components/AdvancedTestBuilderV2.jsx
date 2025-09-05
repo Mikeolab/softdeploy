@@ -499,6 +499,33 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
         
         setExecutionLogs(prev => [...prev, log]);
         
+        // Magical success animation
+        if (type === 'success') {
+          // Add sparkle effect
+          setTimeout(() => {
+            const sparkleContainer = document.getElementById('sparkle-container');
+            if (sparkleContainer) {
+              const sparkle = document.createElement('div');
+              sparkle.className = 'sparkle';
+              sparkle.textContent = '✨';
+              sparkle.style.cssText = `
+                position: absolute;
+                animation: sparkleAnimation 2s ease-out forwards;
+                pointer-events: none;
+                font-size: 20px;
+                z-index: 1000;
+              `;
+              sparkleContainer.appendChild(sparkle);
+              
+              setTimeout(() => {
+                if (sparkle.parentNode) {
+                  sparkle.parentNode.removeChild(sparkle);
+                }
+              }, 2000);
+            }
+          }, 100);
+        }
+        
         // Auto-scroll to bottom
         setTimeout(() => {
           const logsContainer = document.getElementById('execution-logs');
@@ -517,7 +544,9 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       const result = await testExecutor.executeTestSuite(testSuite, onProgress);
       
       console.log('📊 Test execution completed:', result);
-      onProgress(`Test execution completed with ${result.success ? 'SUCCESS' : 'FAILURE'}`, result.success ? 'success' : 'error');
+      // Fix: Check the correct success property from the server response
+      const isSuccess = result.success !== false; // Handle both true and undefined as success
+      onProgress(`Test execution completed with ${isSuccess ? 'SUCCESS' : 'FAILURE'}`, isSuccess ? 'success' : 'error');
       
       setTestResults(result);
       
@@ -527,7 +556,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
         testSuiteName: testSuite.name,
         testType: testSuite.testType,
         toolId: testSuite.toolId,
-        status: result.success ? 'completed' : 'failed',
+        status: isSuccess ? 'completed' : 'failed',
         totalSteps: result.totalSteps || 0,
         passedSteps: result.passedSteps || 0,
         failedSteps: result.failedSteps || 0,
@@ -1200,6 +1229,51 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
 
   return (
     <div className="space-y-6">
+      {/* CSS Animations for Magical Effects */}
+      <style jsx>{`
+        @keyframes sparkleAnimation {
+          0% {
+            opacity: 0;
+            transform: scale(0.5) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2) rotate(180deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8) rotate(360deg);
+          }
+        }
+        
+        @keyframes successPulse {
+          0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+          }
+          70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+          }
+          100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+          }
+        }
+        
+        .success-log {
+          animation: successPulse 0.6s ease-out;
+        }
+        
+        .sparkle {
+          position: absolute;
+          animation: sparkleAnimation 2s ease-out forwards;
+          pointer-events: none;
+          font-size: 20px;
+          z-index: 1000;
+        }
+      `}</style>
+      
       {/* Notification */}
       {notification && (
         <div 
@@ -1809,29 +1883,48 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
             )}
           </h3>
           
-          <div 
-            id="execution-logs"
-            className="max-h-96 overflow-y-auto bg-gray-900 dark:bg-gray-800 rounded-lg p-4 font-mono text-sm"
-          >
+          <div className="relative">
+            {/* Sparkle container for magical animations */}
+            <div id="sparkle-container" className="absolute inset-0 pointer-events-none z-10"></div>
+            
+            <div 
+              id="execution-logs"
+              className="max-h-96 overflow-y-auto bg-gray-900 dark:bg-gray-800 rounded-lg p-4 font-mono text-sm relative"
+            >
             {executionLogs.length === 0 ? (
               <div className="text-gray-400">Waiting for execution to start...</div>
             ) : (
               <div className="space-y-1">
                 {executionLogs.map((log) => (
-                  <div key={log.id} className={`flex items-start gap-2 ${
+                  <div key={log.id} className={`flex items-start gap-2 transition-all duration-300 ${
                     log.type === 'error' ? 'text-red-400' :
-                    log.type === 'success' ? 'text-green-400' :
+                    log.type === 'success' ? 'text-green-400 success-log' :
                     log.type === 'warning' ? 'text-yellow-400' :
                     'text-gray-300'
                   }`}>
                     <span className="text-gray-500 text-xs flex-shrink-0">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </span>
-                    <span className="flex-1">{log.message}</span>
+                    <span className="flex-1 flex items-center gap-2">
+                      {log.type === 'success' && (
+                        <span className="text-lg animate-bounce">✨</span>
+                      )}
+                      {log.type === 'error' && (
+                        <span className="text-lg">❌</span>
+                      )}
+                      {log.type === 'warning' && (
+                        <span className="text-lg">⚠️</span>
+                      )}
+                      {log.type === 'info' && (
+                        <span className="text-lg">📝</span>
+                      )}
+                      {log.message}
+                    </span>
                   </div>
                 ))}
               </div>
             )}
+          </div>
           </div>
         </div>
       )}

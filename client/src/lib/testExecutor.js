@@ -70,6 +70,7 @@ class TestExecutor {
     this.isRunning = true;
     this.variables = {};
     this.executionId = null;
+    this.currentExecution = testSuite; // Set current execution for saving
 
     try {
       // Connect to WebSocket for real-time updates
@@ -115,6 +116,11 @@ class TestExecutor {
         
         // Automatically save test run
         this.saveTestRun(result.finalResult);
+        
+        // Dispatch event to refresh UI
+        window.dispatchEvent(new CustomEvent('testRunCompleted', {
+          detail: { result: result.finalResult }
+        }));
         
         return result.finalResult;
       } else {

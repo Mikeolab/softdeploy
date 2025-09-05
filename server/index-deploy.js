@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3001;
 console.log('🚀 Starting SoftDeploy server (deployment version)...');
 console.log('📦 Port:', PORT);
 console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔧 Fixed stepStartTime scope issue - v2');
 
 app.use(cors());
 app.use(express.json());
