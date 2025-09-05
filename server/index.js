@@ -633,12 +633,15 @@ async function executePerformanceStep(step, testSuite) {
       return {
         success: totalErrors === 0,
         duration: testDuration,
-        message: `Load test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms`,
+        message: `Load test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms, ${(totalRequests / (totalTime / 1000)).toFixed(2)} req/s`,
         metrics: {
           totalRequests,
           totalErrors,
-          avgResponseTime,
-          requestsPerSecond: totalRequests / (totalTime / 1000)
+          avgResponseTime: Math.round(avgResponseTime),
+          requestsPerSecond: Math.round(totalRequests / (totalTime / 1000)),
+          successRate: Math.round(((totalRequests - totalErrors) / totalRequests) * 100),
+          duration: testDuration,
+          users: userCount
         }
       };
     } else if (step.type === 'stressTest' || step.type === 'stress') {
@@ -668,12 +671,16 @@ async function executePerformanceStep(step, testSuite) {
       return {
         success: totalErrors < totalRequests * 0.1, // Allow up to 10% error rate for stress test
         duration: testDuration,
-        message: `Stress test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms`,
+        message: `Stress test completed: ${totalRequests} requests, ${totalErrors} errors, avg ${avgResponseTime.toFixed(2)}ms, ${(totalRequests / (totalTime / 1000)).toFixed(2)} req/s`,
         metrics: {
           totalRequests,
           totalErrors,
-          avgResponseTime,
-          requestsPerSecond: totalRequests / (totalTime / 1000)
+          avgResponseTime: Math.round(avgResponseTime),
+          requestsPerSecond: Math.round(totalRequests / (totalTime / 1000)),
+          successRate: Math.round(((totalRequests - totalErrors) / totalRequests) * 100),
+          duration: testDuration,
+          users: userCount,
+          testType: 'stress'
         }
       };
     }

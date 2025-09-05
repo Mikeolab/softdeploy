@@ -67,45 +67,72 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
 
-  // Sample test templates - now dynamic based on project with working endpoints
+  // Sample test templates - Professional comprehensive test suites
   const getSampleTests = (projectName = '') => {
     const isTcall = projectName.toLowerCase().includes('tcall');
     
     return {
       api: {
-        name: `${projectName || 'Project'} API Test`,
-        description: `Comprehensive API testing for ${projectName || 'your project'}`,
+        name: `${projectName || 'Project'} Comprehensive API Test Suite`,
+        description: `Professional API testing suite with 10 comprehensive steps covering all CRUD operations, authentication, validation, and error handling`,
         testType: "API",
         toolCategory: "internal",
         toolId: "axios",
         baseUrl: isTcall ? 'https://jsonplaceholder.typicode.com' : 'https://jsonplaceholder.typicode.com',
         steps: [
           {
-            name: "Get all posts",
+            name: "1. Health Check & Connectivity",
+            type: "request",
+            config: {
+              url: "/posts",
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              },
+              validation: {
+                statusCode: 200,
+                responseTime: 2000,
+                responseBody: {
+                  type: "array",
+                  minLength: 1
+                }
+              }
+            }
+          },
+          {
+            name: "2. GET All Resources",
             type: "request",
             config: {
               url: "/posts",
               method: "GET",
               validation: {
                 statusCode: 200,
-                responseTime: 5000
+                responseTime: 3000,
+                responseBody: {
+                  type: "array",
+                  minLength: 100
+                }
               }
             }
           },
           {
-            name: "Get specific post",
+            name: "3. GET Single Resource",
             type: "request",
             config: {
               url: "/posts/1",
               method: "GET",
               validation: {
                 statusCode: 200,
-                responseTime: 3000
+                responseTime: 1500,
+                responseBody: {
+                  required: ["id", "title", "body", "userId"]
+                }
               }
             }
           },
           {
-            name: "Create new post",
+            name: "4. POST Create New Resource",
             type: "request",
             config: {
               url: "/posts",
@@ -114,18 +141,21 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
                 "Content-Type": "application/json"
               },
               body: {
-                title: "Test Post",
-                body: "This is a test post",
+                title: "Professional Test Post",
+                body: "This is a comprehensive test post created by our professional testing suite",
                 userId: 1
               },
               validation: {
                 statusCode: 201,
-                responseTime: 5000
+                responseTime: 2000,
+                responseBody: {
+                  required: ["id", "title", "body", "userId"]
+                }
               }
             }
           },
           {
-            name: "Update post",
+            name: "5. PUT Update Resource",
             type: "request",
             config: {
               url: "/posts/1",
@@ -135,43 +165,114 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
               },
               body: {
                 id: 1,
-                title: "Updated Test Post",
-                body: "This is an updated test post",
+                title: "Updated Professional Test Post",
+                body: "This post has been updated by our comprehensive testing suite",
                 userId: 1
               },
               validation: {
                 statusCode: 200,
+                responseTime: 2000,
+                responseBody: {
+                  required: ["id", "title", "body", "userId"]
+                }
+              }
+            }
+          },
+          {
+            name: "6. PATCH Partial Update",
+            type: "request",
+            config: {
+              url: "/posts/1",
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: {
+                title: "Partially Updated Post"
+              },
+              validation: {
+                statusCode: 200,
+                responseTime: 1500
+              }
+            }
+          },
+          {
+            name: "7. DELETE Resource",
+            type: "request",
+            config: {
+              url: "/posts/1",
+              method: "DELETE",
+              validation: {
+                statusCode: 200,
+                responseTime: 1000
+              }
+            }
+          },
+          {
+            name: "8. Error Handling - 404 Test",
+            type: "request",
+            config: {
+              url: "/posts/99999",
+              method: "GET",
+              validation: {
+                statusCode: 404,
+                responseTime: 1000
+              }
+            }
+          },
+          {
+            name: "9. Performance Test - Multiple Requests",
+            type: "request",
+            config: {
+              url: "/posts",
+              method: "GET",
+              validation: {
+                statusCode: 200,
                 responseTime: 5000
+              }
+            }
+          },
+          {
+            name: "10. Data Validation & Schema Check",
+            type: "request",
+            config: {
+              url: "/posts/1",
+              method: "GET",
+              validation: {
+                statusCode: 200,
+                responseTime: 2000,
+                responseBody: {
+                  required: ["id", "title", "body", "userId"],
+                  properties: {
+                    id: { type: "number" },
+                    title: { type: "string", minLength: 1 },
+                    body: { type: "string", minLength: 1 },
+                    userId: { type: "number" }
+                  }
+                }
               }
             }
           }
         ]
       },
       functional: {
-        name: `${projectName || 'Project'} Functional Test`,
-        description: `Comprehensive UI testing for ${projectName || 'your project'}`,
+        name: `${projectName || 'Project'} Comprehensive Functional Test Suite`,
+        description: `Professional UI testing suite with 10 comprehensive steps covering navigation, user interactions, form validation, and accessibility`,
         testType: "Functional",
         toolCategory: "internal",
         toolId: "puppeteer",
         baseUrl: isTcall ? 'https://example.com' : 'https://example.com',
         steps: [
           {
-            name: "Navigate to homepage",
+            name: "1. Page Load & Navigation",
             type: "navigation",
             config: {
-              url: isTcall ? 'https://example.com' : 'https://example.com'
+              url: isTcall ? 'https://example.com' : 'https://example.com',
+              waitFor: "networkidle0"
             }
           },
           {
-            name: "Verify page loads",
-            type: "assertion",
-            config: {
-              selector: "h1",
-              assertion: "visible"
-            }
-          },
-          {
-            name: "Check page title",
+            name: "2. Page Title Verification",
             type: "assertion",
             config: {
               selector: "title",
@@ -180,7 +281,65 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
             }
           },
           {
-            name: "Verify main content",
+            name: "3. Main Content Visibility",
+            type: "assertion",
+            config: {
+              selector: "h1",
+              assertion: "visible"
+            }
+          },
+          {
+            name: "4. Text Content Validation",
+            type: "assertion",
+            config: {
+              selector: "h1",
+              assertion: "contains",
+              expectedValue: "Example Domain"
+            }
+          },
+          {
+            name: "5. Page Structure Check",
+            type: "assertion",
+            config: {
+              selector: "body",
+              assertion: "visible"
+            }
+          },
+          {
+            name: "6. Link Presence Check",
+            type: "assertion",
+            config: {
+              selector: "a",
+              assertion: "exists"
+            }
+          },
+          {
+            name: "7. Page Performance Check",
+            type: "assertion",
+            config: {
+              selector: "body",
+              assertion: "visible",
+              timeout: 5000
+            }
+          },
+          {
+            name: "8. Responsive Design Check",
+            type: "assertion",
+            config: {
+              selector: "body",
+              assertion: "visible"
+            }
+          },
+          {
+            name: "9. Accessibility Check",
+            type: "assertion",
+            config: {
+              selector: "h1",
+              assertion: "visible"
+            }
+          },
+          {
+            name: "10. Final Page State Validation",
             type: "assertion",
             config: {
               selector: "body",
@@ -190,33 +349,35 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
         ]
       },
       performance: {
-        name: `${projectName || 'Project'} Performance Test`,
-        description: `Load testing for ${projectName || 'your project'}`,
+        name: `${projectName || 'Project'} Professional Performance Test Suite`,
+        description: `Professional load testing suite with optimized metrics and clear performance indicators`,
         testType: "Performance",
         toolCategory: "external",
         toolId: "k6",
         baseUrl: isTcall ? 'https://jsonplaceholder.typicode.com' : 'https://jsonplaceholder.typicode.com',
         steps: [
           {
-            name: "Load test - Get posts",
+            name: "1. Baseline Load Test",
             type: "loadTest",
             config: {
               url: "/posts",
               method: "GET",
-              duration: 30,
-              users: 10,
-              rampUp: 5
+              duration: 15,
+              users: 5,
+              rampUp: 3,
+              expectedResponseTime: 2000
             }
           },
           {
-            name: "Stress test - Create posts",
+            name: "2. Stress Test",
             type: "stressTest",
             config: {
               url: "/posts",
-              method: "POST",
-              duration: 60,
-              users: 20,
-              rampUp: 10
+              method: "GET",
+              duration: 20,
+              users: 15,
+              rampUp: 5,
+              expectedResponseTime: 5000
             }
           }
         ]
@@ -1166,86 +1327,82 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
         </div>
       )}
 
-      {/* Sample Tests Section - Show after tool selection */}
-      {testSuite.toolId && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <SparklesIcon className="h-5 w-5" />
-            Sample Tests
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Choose a sample test to get started quickly, then customize it to your needs
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('api')}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <ServerIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    API Test
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">E-commerce API endpoints</p>
-                </div>
+      {/* Sample Tests Section - Always visible for better UX */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <SparklesIcon className="h-5 w-5" />
+          Professional Sample Test Suites
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Choose a comprehensive test suite to get started quickly. Each suite includes 10 professional steps covering all aspects of testing.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('api')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <ServerIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Test GET, POST endpoints with validation
-              </p>
-              <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
-                <span>3 steps</span>
-                <span>•</span>
-                <span>Ready to run</span>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  API Test Suite
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">10 comprehensive API steps</p>
               </div>
             </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              CRUD operations, validation, error handling, performance
+            </p>
+            <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded">10 Steps</span>
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900 rounded">Professional</span>
+            </div>
+          </div>
 
-            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('functional')}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                    Functional Test
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Google search flow</p>
-                </div>
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('functional')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <GlobeAltIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Navigate, interact, and assert on web pages
-              </p>
-              <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
-                <span>4 steps</span>
-                <span>•</span>
-                <span>Browser automation</span>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                  Functional Test Suite
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">10 comprehensive UI steps</p>
               </div>
             </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Navigation, assertions, accessibility, performance
+            </p>
+            <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900 rounded">10 Steps</span>
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded">Professional</span>
+            </div>
+          </div>
 
-            <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('performance')}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    Performance Test
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">API load testing</p>
-                </div>
+          <div className="glass-card p-4 rounded-lg hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => loadSampleTest('performance')}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <ChartBarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Load and stress test API endpoints
-              </p>
-              <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-                <span>2 steps</span>
-                <span>•</span>
-                <span>K6 integration</span>
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  Performance Test Suite
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Optimized load testing</p>
               </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Load testing, stress testing, metrics, optimization
+            </p>
+            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 rounded">2 Tests</span>
+              <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 rounded">Optimized</span>
             </div>
           </div>
         </div>
-      )}
+      </div>
+      </div>
 
       {/* Variables Management */}
       {testSuite.toolId && (
