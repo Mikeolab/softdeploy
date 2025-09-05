@@ -74,6 +74,7 @@ app.post('/api/execute-test-suite', async (req, res) => {
       executionId,
       message: 'Test suite execution completed',
       result: result,
+      finalResult: result,
       timestamp: new Date().toISOString()
     });
     
