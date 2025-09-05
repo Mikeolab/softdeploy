@@ -107,8 +107,20 @@ class TestExecutor {
       this.executionId = result.executionId;
       onProgress(`Test execution started with ID: ${this.executionId}`, 'info');
 
-      // Poll for completion
-      return await this.pollExecutionStatus(onProgress);
+      // Check if this is a deployment server response (synchronous execution)
+      if (result.finalResult && result.finalResult.success !== undefined) {
+        // Deployment server returns result immediately
+        onProgress(`Test suite completed: ${result.finalResult.passedSteps}/${result.finalResult.totalSteps} steps passed in ${result.finalResult.totalTime}ms`, 
+                  result.finalResult.success ? 'success' : 'error');
+        
+        // Automatically save test run
+        this.saveTestRun(result.finalResult);
+        
+        return result.finalResult;
+      } else {
+        // Development server with polling
+        return await this.pollExecutionStatus(onProgress);
+      }
 
     } catch (error) {
       onProgress(`Test suite failed: ${error.message}`, 'error');

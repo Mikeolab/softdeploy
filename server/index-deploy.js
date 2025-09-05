@@ -495,10 +495,19 @@ app.get('/api/execution-status/:executionId', (req, res) => {
   const { executionId } = req.params;
   
   // For deployment version, return a simple status
+  // Note: This endpoint is not used in deployment version since tests are synchronous
   res.json({
     executionId,
     status: 'completed',
-    message: 'Execution completed (deployment version)'
+    message: 'Execution completed (deployment version)',
+    finalResult: {
+      success: true,
+      totalSteps: 0,
+      passedSteps: 0,
+      failedSteps: 0,
+      totalTime: 0,
+      results: []
+    }
   });
 });
 
