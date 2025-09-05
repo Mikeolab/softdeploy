@@ -20,25 +20,79 @@ export default function TestRunsPage() {
 
   useEffect(() => {
     loadTestRuns();
-    loadStats();
+    
+    // Listen for new test runs
+    const handleTestRunCompleted = () => {
+      console.log('🔄 New test run completed, refreshing...');
+      loadTestRuns();
+    };
+    
+    window.addEventListener('testRunCompleted', handleTestRunCompleted);
+    
+    return () => {
+      window.removeEventListener('testRunCompleted', handleTestRunCompleted);
+    };
   }, []);
+
+  useEffect(() => {
+    if (testRuns.length > 0) {
+      loadStats();
+    }
+  }, [testRuns]);
 
   const loadTestRuns = async () => {
     setLoading(true);
-    const result = await TestRunsService.getTestRuns();
-    if (result.success) {
-      setTestRuns(result.data);
+    
+    // Load from Supabase
+    const supabaseResult = await TestRunsService.getTestRuns();
+    let supabaseRuns = [];
+    if (supabaseResult.success) {
+      supabaseRuns = supabaseResult.data;
     } else {
-      console.error('Failed to load test runs:', result.error);
+      console.log('Supabase not available, using localStorage only');
     }
+    
+    // Load from localStorage
+    const localResults = JSON.parse(localStorage.getItem('testResultsV2') || '[]');
+    const localRuns = localResults.map(result => ({
+      id: result.id || `local_${Date.now()}_${Math.random()}`,
+      test_suite_name: result.testSuite || result.name || 'Unnamed Test',
+      test_type: result.testType || 'API',
+      tool_id: result.toolId || 'unknown',
+      status: result.success ? 'completed' : 'failed',
+      total_steps: result.totalSteps || result.summary?.total || 0,
+      passed_steps: result.passedSteps || result.summary?.passed || 0,
+      failed_steps: result.failedSteps || result.summary?.failed || 0,
+      total_time: result.totalTime || result.summary?.duration || 0,
+      created_at: result.executedAt || new Date().toISOString(),
+      updated_at: result.executedAt || new Date().toISOString(),
+      results: result,
+      source: 'localStorage'
+    }));
+    
+    // Combine and sort by date (newest first)
+    const allRuns = [...supabaseRuns, ...localRuns]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    setTestRuns(allRuns);
     setLoading(false);
   };
 
   const loadStats = async () => {
-    const result = await TestRunsService.getTestRunStats();
-    if (result.success) {
-      setStats(result.data);
-    }
+    // Calculate stats from current test runs
+    const totalRuns = testRuns.length;
+    const successfulRuns = testRuns.filter(run => run.status === 'completed').length;
+    const failedRuns = testRuns.filter(run => run.status === 'failed').length;
+    const averageTime = totalRuns > 0 
+      ? testRuns.reduce((sum, run) => sum + (run.total_time || 0), 0) / totalRuns 
+      : 0;
+    
+    setStats({
+      totalRuns,
+      successfulRuns,
+      failedRuns,
+      averageTime
+    });
   };
 
   const formatDuration = (ms) => {
@@ -177,6 +231,11 @@ export default function TestRunsPage() {
                         <h3 className="font-medium text-gray-900 dark:text-white">{run.test_suite_name}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
                           {run.test_type} • {run.tool_id} • {formatDate(run.created_at)}
+                          {run.source === 'localStorage' && (
+                            <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
+                              Local
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>

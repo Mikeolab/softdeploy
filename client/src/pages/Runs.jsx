@@ -16,16 +16,29 @@ function Runs() {
     }
   }, [user?.id, timeRange]);
 
+  useEffect(() => {
+    // Listen for new test runs
+    const handleTestRunCompleted = () => {
+      console.log('🔄 New test run completed, refreshing Runs page...');
+      fetchRuns();
+    };
+    
+    window.addEventListener('testRunCompleted', handleTestRunCompleted);
+    
+    return () => {
+      window.removeEventListener('testRunCompleted', handleTestRunCompleted);
+    };
+  }, []);
+
   const fetchRuns = async () => {
     try {
       setLoading(true);
       
-      // Fetch test runs using our new service
-      const result = await TestRunsService.getTestRuns(user?.id || 'anonymous');
-      
-      if (result.success) {
-        // Transform test runs into the expected format
-        const transformedRuns = result.data.map(run => ({
+      // Fetch test runs from Supabase
+      const supabaseResult = await TestRunsService.getTestRuns(user?.id || 'anonymous');
+      let supabaseRuns = [];
+      if (supabaseResult.success) {
+        supabaseRuns = supabaseResult.data.map(run => ({
           id: run.id,
           name: run.test_suite_name,
           type: run.test_type || 'automated',
@@ -38,14 +51,35 @@ function Runs() {
           logs: `Running ${run.test_suite_name}...\nStatus: ${run.status}\nSteps: ${run.passed_steps}/${run.total_steps}\nDuration: ${run.total_time}ms`,
           passedSteps: run.passed_steps,
           totalSteps: run.total_steps,
-          toolId: run.tool_id
+          toolId: run.tool_id,
+          source: 'supabase'
         }));
-
-        setRuns(transformedRuns);
-      } else {
-        console.error('Error fetching runs:', result.error);
-        setRuns([]);
       }
+      
+      // Fetch test runs from localStorage
+      const localResults = JSON.parse(localStorage.getItem('testResultsV2') || '[]');
+      const localRuns = localResults.map(result => ({
+        id: result.id || `local_${Date.now()}_${Math.random()}`,
+        name: result.testSuite || result.name || 'Unnamed Test',
+        type: result.testType || 'API',
+        status: result.success ? 'passed' : 'failed',
+        duration: result.totalTime || result.summary?.duration || 0,
+        startedAt: result.executedAt || new Date().toISOString(),
+        completedAt: result.executedAt || new Date().toISOString(),
+        owner: 'local',
+        result: JSON.stringify(result, null, 2),
+        logs: `Running ${result.testSuite || result.name}...\nStatus: ${result.success ? 'passed' : 'failed'}\nSteps: ${result.passedSteps || result.summary?.passed || 0}/${result.totalSteps || result.summary?.total || 0}\nDuration: ${result.totalTime || result.summary?.duration || 0}ms`,
+        passedSteps: result.passedSteps || result.summary?.passed || 0,
+        totalSteps: result.totalSteps || result.summary?.total || 0,
+        toolId: result.toolId || 'unknown',
+        source: 'localStorage'
+      }));
+      
+      // Combine and sort by date (newest first)
+      const allRuns = [...supabaseRuns, ...localRuns]
+        .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+      
+      setRuns(allRuns);
     } catch (error) {
       console.error('Error fetching runs:', error);
       setRuns([]);

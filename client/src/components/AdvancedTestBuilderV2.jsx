@@ -304,6 +304,11 @@ export default function AdvancedTestBuilderV2() {
         executedAt: new Date().toISOString()
       });
       localStorage.setItem('testResultsV2', JSON.stringify(savedResults));
+      
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('testRunCompleted', {
+        detail: { result, testSuite }
+      }));
 
     } catch (error) {
       console.error('❌ Test execution failed:', error);
@@ -449,6 +454,11 @@ export default function AdvancedTestBuilderV2() {
         executedAt: new Date().toISOString()
       });
       localStorage.setItem('testResultsV2', JSON.stringify(savedResults));
+      
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('testRunCompleted', {
+        detail: { result, testSuite }
+      }));
 
     } catch (error) {
       console.error('Test execution failed:', error);
