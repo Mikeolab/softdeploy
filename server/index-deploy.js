@@ -145,6 +145,9 @@ async function executeTestSuite(testSuite, executionId) {
         };
       }
       
+      // Calculate step duration
+      const stepDuration = Date.now() - stepStartTime;
+      
       // Ensure stepResult has the required properties
       if (!stepResult) {
         stepResult = {
@@ -170,7 +173,6 @@ async function executeTestSuite(testSuite, executionId) {
         error: stepResult.error || null
       });
       
-      const stepDuration = Date.now() - stepStartTime;
       console.log(`✅ Step ${i + 1} completed in ${stepDuration}ms`);
       console.log(`📊 Step result:`, JSON.stringify(stepResult, null, 2));
       
