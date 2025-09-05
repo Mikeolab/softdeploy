@@ -7,6 +7,10 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
 const WebSocket = require('ws');
+const http = require('http');
+
+// Import real test executor
+const RealTestExecutor = require('./realTestExecutor');
 
 // Import Cypress integration functions directly
 const { executeCypressTest, generateCypressScript } = require('./cypressIntegration');
@@ -17,32 +21,100 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// WebSocket server for real-time test execution updates
-const wss = new WebSocket.Server({ noServer: true });
+// Create HTTP server
+const server = http.createServer(app);
 
-// Store active browser instances
-const activeBrowsers = new Map();
+// WebSocket server for real-time test execution updates
+const wss = new WebSocket.Server({ server });
+
+// Store active test executors
+const activeExecutors = new Map();
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // WebSocket connection handler
-wss.on('connection', (ws) => {
-  console.log('WebSocket client connected');
+wss.on('connection', (ws, req) => {
+  console.log('🔌 WebSocket client connected');
   
-  ws.on('close', () => {
-    console.log('WebSocket client disconnected');
-  });
-});
-
-// Broadcast message to all connected clients
-function broadcast(message) {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
+  // Generate unique connection ID
+  const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Create test executor for this connection
+  const executor = new RealTestExecutor(ws);
+  activeExecutors.set(connectionId, executor);
+  
+  // Send connection confirmation
+  ws.send(JSON.stringify({
+    type: 'connection_established',
+    connectionId,
+    timestamp: new Date().toISOString(),
+    message: 'Connected to test execution server'
+  }));
+  
+  ws.on('message', async (message) => {
+    try {
+      const data = JSON.parse(message);
+      
+      switch (data.type) {
+        case 'execute_test_suite':
+          console.log('🚀 [WEBSOCKET] Received test suite execution request');
+          const executor = activeExecutors.get(connectionId);
+          if (executor) {
+            try {
+              const result = await executor.executeTestSuite(data.testSuite);
+              ws.send(JSON.stringify({
+                type: 'execution_complete',
+                result,
+                timestamp: new Date().toISOString()
+              }));
+            } catch (error) {
+              ws.send(JSON.stringify({
+                type: 'execution_error',
+                error: error.message,
+                timestamp: new Date().toISOString()
+              }));
+            }
+          }
+          break;
+          
+        case 'stop_execution':
+          console.log('⏹️ [WEBSOCKET] Received stop execution request');
+          const executorToStop = activeExecutors.get(connectionId);
+          if (executorToStop) {
+            executorToStop.isRunning = false;
+            ws.send(JSON.stringify({
+              type: 'execution_stopped',
+              timestamp: new Date().toISOString(),
+              message: 'Test execution stopped'
+            }));
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('❌ [WEBSOCKET] Error processing message:', error);
+      ws.send(JSON.stringify({
+        type: 'error',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }));
     }
   });
-}
+  
+  ws.on('close', () => {
+    console.log('🔌 WebSocket client disconnected');
+    const executor = activeExecutors.get(connectionId);
+    if (executor) {
+      executor.isRunning = false;
+      activeExecutors.delete(connectionId);
+    }
+  });
+  
+  ws.on('error', (error) => {
+    console.error('❌ [WEBSOCKET] Connection error:', error);
+    activeExecutors.delete(connectionId);
+  });
+});
 
 // API endpoint to execute a complete test suite
 app.post('/api/execute-test-suite', async (req, res) => {

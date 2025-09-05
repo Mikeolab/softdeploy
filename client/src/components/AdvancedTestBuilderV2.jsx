@@ -37,6 +37,7 @@ import {
   generateK6Script
 } from '../lib/testConfig';
 import testExecutor from '../lib/testExecutor';
+import websocketTestExecutor from '../lib/websocketTestExecutor';
 
 export default function AdvancedTestBuilderV2({ projectName = '', initialTestSuite = null, onTestComplete = null }) {
   const [testSuite, setTestSuite] = useState({
@@ -653,7 +654,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
 
     // Stop test execution
   const stopExecution = () => {
-    testExecutor.stopExecution();
+    websocketTestExecutor.stopExecution();
     setIsRunning(false);
     // Log stop event
     setExecutionLogs(prev => ([
@@ -1838,7 +1839,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
             
             {isRunning && (
               <button
-                onClick={() => testExecutor.stopExecution()}
+                onClick={stopExecution}
                 className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
                 <ExclamationTriangleIcon className="h-4 w-4" />
