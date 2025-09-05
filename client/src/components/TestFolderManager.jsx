@@ -457,7 +457,7 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {savedTests.map((test, index) => (
-                    <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+                    <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-medium text-gray-900 dark:text-white text-sm">
                           {test.testSuiteName || `Test Run ${index + 1}`}
@@ -477,6 +477,30 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
                       </div>
                       <div className="mt-2 text-xs text-gray-400">
                         {test.timestamp ? new Date(test.timestamp).toLocaleString() : 'Unknown date'}
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => {
+                            // Navigate to test execution with this test data
+                            console.log('🚀 [DEBUG] Running saved test:', test.testSuiteName);
+                            // You can implement navigation to test execution here
+                          }}
+                          className="flex-1 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                        >
+                          Run Again
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Delete this test run
+                            const updatedTests = savedTests.filter((_, i) => i !== index);
+                            localStorage.setItem('testRunsV2', JSON.stringify(updatedTests));
+                            // Refresh the component
+                            window.location.reload();
+                          }}
+                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   ))}

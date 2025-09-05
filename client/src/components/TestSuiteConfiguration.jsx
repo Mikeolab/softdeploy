@@ -18,6 +18,16 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   const [testSuites, setTestSuites] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editingSuite, setEditingSuite] = useState(null);
+  const [newSuite, setNewSuite] = useState({
+    name: '',
+    description: '',
+    testType: 'API',
+    toolId: 'axios',
+    baseUrl: '',
+    userStories: [],
+    steps: []
+  });
 
   useEffect(() => {
     console.log('🔍 [DEBUG] TestSuiteConfiguration loading for folder:', folder?.name);
@@ -53,6 +63,59 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     if (onRunTest) {
       onRunTest(suite);
     }
+  };
+
+  const handleEditSuite = (suite) => {
+    console.log('✏️ [DEBUG] Editing test suite:', suite.name);
+    setEditingSuite(suite);
+    setNewSuite({
+      name: suite.name,
+      description: suite.description,
+      testType: suite.testType,
+      toolId: suite.toolId,
+      baseUrl: suite.baseUrl,
+      userStories: suite.userStories || [],
+      steps: suite.steps || []
+    });
+    setShowCreateForm(true);
+  };
+
+  const saveTestSuite = () => {
+    if (!newSuite.name.trim()) {
+      alert('Please enter a test suite name');
+      return;
+    }
+
+    const suite = {
+      ...newSuite,
+      id: editingSuite ? editingSuite.id : `suite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      folderId: folder.id,
+      createdAt: editingSuite ? editingSuite.createdAt : new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      status: 'active'
+    };
+
+    let updatedSuites;
+    if (editingSuite) {
+      updatedSuites = testSuites.map(s => s.id === editingSuite.id ? suite : s);
+    } else {
+      updatedSuites = [...testSuites, suite];
+    }
+
+    setTestSuites(updatedSuites);
+    localStorage.setItem(`testSuites_${folder.id}`, JSON.stringify(updatedSuites));
+    
+    setShowCreateForm(false);
+    setEditingSuite(null);
+    setNewSuite({
+      name: '',
+      description: '',
+      testType: 'API',
+      toolId: 'axios',
+      baseUrl: '',
+      userStories: [],
+      steps: []
+    });
   };
 
   if (!folder) {
@@ -195,6 +258,7 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                         Run Test
                       </button>
                       <button
+                        onClick={() => handleEditSuite(suite)}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
                         <PencilIcon className="w-4 h-4 mr-1" />
@@ -207,6 +271,116 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
             )}
           </div>
         </div>
+
+        {/* Create/Edit Form */}
+        {showCreateForm && (
+          <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                {editingSuite ? 'Edit Test Suite' : 'Create New Test Suite'}
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Test Suite Name *
+                </label>
+                <input
+                  type="text"
+                  value={newSuite.name}
+                  onChange={(e) => setNewSuite({...newSuite, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="e.g., User Authentication API Tests"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newSuite.description}
+                  onChange={(e) => setNewSuite({...newSuite, description: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Describe what this test suite validates..."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Test Type
+                  </label>
+                  <select
+                    value={newSuite.testType}
+                    onChange={(e) => setNewSuite({...newSuite, testType: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="API">API Testing</option>
+                    <option value="Functional">Functional Testing</option>
+                    <option value="Performance">Performance Testing</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tool
+                  </label>
+                  <select
+                    value={newSuite.toolId}
+                    onChange={(e) => setNewSuite({...newSuite, toolId: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="axios">Axios (API)</option>
+                    <option value="puppeteer">Puppeteer (Functional)</option>
+                    <option value="k6">k6 (Performance)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Base URL
+                </label>
+                <input
+                  type="url"
+                  value={newSuite.baseUrl}
+                  onChange={(e) => setNewSuite({...newSuite, baseUrl: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="https://api.example.com"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setEditingSuite(null);
+                    setNewSuite({
+                      name: '',
+                      description: '',
+                      testType: 'API',
+                      toolId: 'axios',
+                      baseUrl: '',
+                      userStories: [],
+                      steps: []
+                    });
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveTestSuite}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  {editingSuite ? 'Update Test Suite' : 'Create Test Suite'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
