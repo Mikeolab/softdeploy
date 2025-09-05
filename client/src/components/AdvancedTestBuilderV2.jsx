@@ -545,7 +545,7 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       
       console.log('📊 Test execution completed:', result);
       // Fix: Check the correct success property from the server response
-      const isSuccess = result.success !== false; // Handle both true and undefined as success
+      const isSuccess = (result.success === true) || (result.finalResult && result.finalResult.success === true);
       onProgress(`Test execution completed with ${isSuccess ? 'SUCCESS' : 'FAILURE'}`, isSuccess ? 'success' : 'error');
       
       setTestResults(result);

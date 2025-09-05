@@ -97,7 +97,7 @@ app.post('/api/execute-test-suite', async (req, res) => {
   }
 });
 
-// Execute test suite
+// Execute test suite with step-by-step logging
 async function executeTestSuite(testSuite, executionId) {
   const startTime = Date.now();
   let totalSteps = testSuite.steps?.length || 0;
@@ -117,9 +117,11 @@ async function executeTestSuite(testSuite, executionId) {
       throw new Error('No test steps provided');
     }
     
+    // Execute steps one by one with detailed logging
     for (let i = 0; i < testSuite.steps.length; i++) {
       const step = testSuite.steps[i];
       const stepStartTime = Date.now();
+      
       console.log(`🔄 Executing step ${i + 1}/${totalSteps}: ${step.name}`);
       console.log(`📝 Step type: ${step.type}`);
       console.log(`⚙️ Step config:`, JSON.stringify(step.config, null, 2));
@@ -146,7 +148,6 @@ async function executeTestSuite(testSuite, executionId) {
         };
       }
       
-      // Calculate step duration
       const stepDuration = Date.now() - stepStartTime;
       
       // Ensure stepResult has the required properties
@@ -158,35 +159,29 @@ async function executeTestSuite(testSuite, executionId) {
         };
       }
       
-      if (!stepResult.duration) {
-        stepResult.duration = 0;
-      }
-      
-      if (!stepResult.message) {
-        stepResult.message = stepResult.success ? 'Step completed successfully' : 'Step failed';
-      }
-      
-      results.push({
+      // Add step result to results array
+      const finalStepResult = {
         stepName: step.name,
         success: stepResult.success,
-        duration: stepResult.duration,
-        message: stepResult.message,
+        duration: stepDuration,
+        message: stepResult.message || (stepResult.success ? 'Step completed successfully' : 'Step failed'),
         error: stepResult.error || null
-      });
+      };
       
-      console.log(`✅ Step ${i + 1} completed in ${stepDuration}ms`);
-      console.log(`📊 Step result:`, JSON.stringify(stepResult, null, 2));
+      results.push(finalStepResult);
       
       if (stepResult.success) {
         passedSteps++;
-        console.log(`✅ Step ${i + 1} PASSED: ${step.name} - ${stepResult.message}`);
+        console.log(`✅ Step ${i + 1} PASSED: ${step.name} - ${finalStepResult.message}`);
       } else {
         failedSteps++;
-        console.log(`❌ Step ${i + 1} FAILED: ${step.name} - ${stepResult.message}`);
+        console.log(`❌ Step ${i + 1} FAILED: ${step.name} - ${finalStepResult.message}`);
         if (stepResult.error) {
-          console.log(`🔍 Step ${i + 1} ERROR DETAILS:`, stepResult.error);
+          console.log(`🔍 Step ${i + 1} ERROR DETAILS: ${stepResult.error}`);
         }
       }
+      
+      console.log(`📊 Step result:`, JSON.stringify(finalStepResult, null, 2));
     }
     
     const totalTime = Date.now() - startTime;
