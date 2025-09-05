@@ -398,17 +398,37 @@ class TestExecutor {
         passedSteps: result.passedSteps,
         failedSteps: result.failedSteps,
         totalTime: result.totalTime,
-        results: result
+        results: result,
+        timestamp: new Date().toISOString()
       };
 
-      const saveResult = await TestRunsService.saveTestRun(testRun);
-      if (saveResult.success) {
-        console.log('✅ Test run saved successfully');
-      } else {
-        console.error('❌ Failed to save test run:', saveResult.error);
+      // Try Supabase first, fallback to localStorage
+      try {
+        const saveResult = await TestRunsService.saveTestRun(testRun);
+        if (saveResult.success) {
+          console.log('✅ Test run saved to Supabase successfully');
+        } else {
+          console.log('⚠️ Supabase save failed, using localStorage:', saveResult.error);
+          this.saveTestRunToLocalStorage(testRun);
+        }
+      } catch (supabaseError) {
+        console.log('⚠️ Supabase not available, using localStorage:', supabaseError.message);
+        this.saveTestRunToLocalStorage(testRun);
       }
     } catch (error) {
       console.error('❌ Error saving test run:', error);
+    }
+  }
+
+  // Fallback save to localStorage
+  saveTestRunToLocalStorage(testRun) {
+    try {
+      const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      savedRuns.push(testRun);
+      localStorage.setItem('testRunsV2', JSON.stringify(savedRuns));
+      console.log('✅ Test run saved to localStorage successfully');
+    } catch (error) {
+      console.error('❌ Failed to save to localStorage:', error);
     }
   }
 
