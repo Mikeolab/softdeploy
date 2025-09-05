@@ -9,4 +9,7 @@ services:
         value: production
       - key: PORT
         value: 3001
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=4096"
     autoDeploy: true
+    healthCheckPath: /api/health
