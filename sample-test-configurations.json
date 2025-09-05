@@ -1,0 +1,384 @@
+{
+  "apiTests": {
+    "tcallAuth": {
+      "name": "Tcall.ai User Authentication API Tests",
+      "description": "Comprehensive API testing for Tcall.ai user authentication endpoints",
+      "testType": "API",
+      "toolId": "axios",
+      "baseUrl": "https://api.tcall.ai",
+      "userStories": [
+        {
+          "title": "As a user, I want to authenticate with my credentials",
+          "priority": "High",
+          "description": "User should be able to login with valid email and password",
+          "acceptanceCriteria": [
+            "Login endpoint returns 200 status",
+            "Response includes access token",
+            "Response time under 2 seconds"
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "name": "Login User",
+          "type": "api",
+          "description": "Send POST request to login endpoint with user credentials",
+          "config": {
+            "method": "POST",
+            "url": "/auth/login",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "email": "test@example.com",
+              "password": "testpassword123"
+            },
+            "validation": {
+              "statusCode": 200,
+              "responseTime": 2000
+            }
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "type": "api",
+          "description": "Retrieve user profile information",
+          "config": {
+            "method": "GET",
+            "url": "/user/profile",
+            "headers": {
+              "Authorization": "Bearer {{access_token}}"
+            },
+            "validation": {
+              "statusCode": 200,
+              "responseTime": 1000
+            }
+          }
+        }
+      ]
+    },
+    "jsonPlaceholder": {
+      "name": "JSONPlaceholder Posts API Tests",
+      "description": "Testing CRUD operations on posts endpoint",
+      "testType": "API",
+      "toolId": "axios",
+      "baseUrl": "https://jsonplaceholder.typicode.com",
+      "steps": [
+        {
+          "name": "Get All Posts",
+          "type": "api",
+          "description": "Retrieve all posts from the API",
+          "config": {
+            "method": "GET",
+            "url": "/posts",
+            "validation": {
+              "statusCode": 200,
+              "responseTime": 1000
+            }
+          }
+        },
+        {
+          "name": "Get Single Post",
+          "type": "api",
+          "description": "Retrieve a specific post by ID",
+          "config": {
+            "method": "GET",
+            "url": "/posts/1",
+            "validation": {
+              "statusCode": 200,
+              "responseTime": 500
+            }
+          }
+        },
+        {
+          "name": "Create New Post",
+          "type": "api",
+          "description": "Create a new post",
+          "config": {
+            "method": "POST",
+            "url": "/posts",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "title": "Test Post",
+              "body": "This is a test post",
+              "userId": 1
+            },
+            "validation": {
+              "statusCode": 201,
+              "responseTime": 1000
+            }
+          }
+        }
+      ]
+    }
+  },
+  "functionalTests": {
+    "googleSearch": {
+      "name": "Google Search Functional Tests",
+      "description": "Testing Google search functionality",
+      "testType": "Functional",
+      "toolId": "puppeteer",
+      "baseUrl": "https://www.google.com",
+      "steps": [
+        {
+          "name": "Navigate to Google",
+          "type": "navigation",
+          "description": "Open Google homepage",
+          "config": {
+            "url": "https://www.google.com"
+          }
+        },
+        {
+          "name": "Accept Cookies",
+          "type": "interaction",
+          "description": "Accept cookies if popup appears",
+          "config": {
+            "selector": "button[id*='accept'], button[id*='agree'], #L2AGLb",
+            "action": "click"
+          }
+        },
+        {
+          "name": "Enter Search Query",
+          "type": "interaction",
+          "description": "Type search query in search box",
+          "config": {
+            "selector": "input[name='q'], textarea[name='q'], #search",
+            "action": "type",
+            "value": "SoftDeploy testing platform"
+          }
+        },
+        {
+          "name": "Submit Search",
+          "type": "interaction",
+          "description": "Press Enter or click search button",
+          "config": {
+            "selector": "input[name='btnK'], button[type='submit']",
+            "action": "click"
+          }
+        },
+        {
+          "name": "Verify Search Results",
+          "type": "assertion",
+          "description": "Verify search results are displayed",
+          "config": {
+            "selector": "#search, .g, .rc, h3",
+            "assertion": "visible"
+          }
+        }
+      ]
+    },
+    "ecommerce": {
+      "name": "E-commerce Website Functional Tests",
+      "description": "End-to-end testing of e-commerce website functionality",
+      "testType": "Functional",
+      "toolId": "puppeteer",
+      "baseUrl": "https://demo.opencart.com",
+      "steps": [
+        {
+          "name": "Navigate to Homepage",
+          "type": "navigation",
+          "description": "Open the e-commerce website homepage",
+          "config": {
+            "url": "https://demo.opencart.com"
+          }
+        },
+        {
+          "name": "Click on Products Menu",
+          "type": "interaction",
+          "description": "Click on the products menu to view catalog",
+          "config": {
+            "selector": "a[href*='product'], .nav-link, #menu",
+            "action": "click"
+          }
+        },
+        {
+          "name": "Verify Product Page Loads",
+          "type": "assertion",
+          "description": "Verify that product page loads successfully",
+          "config": {
+            "selector": ".product-thumb, .product-info, h1",
+            "assertion": "visible"
+          }
+        },
+        {
+          "name": "Add Product to Cart",
+          "type": "interaction",
+          "description": "Click add to cart button",
+          "config": {
+            "selector": "button[onclick*='cart'], .btn-cart, #button-cart",
+            "action": "click"
+          }
+        },
+        {
+          "name": "Verify Cart Success Message",
+          "type": "assertion",
+          "description": "Verify success message appears after adding to cart",
+          "config": {
+            "selector": ".alert-success, .success, .notification",
+            "assertion": "visible"
+          }
+        }
+      ]
+    }
+  },
+  "performanceTests": {
+    "loadTest": {
+      "name": "API Load Testing with K6",
+      "description": "Load testing API endpoints to measure performance under stress",
+      "testType": "Performance",
+      "toolId": "k6",
+      "baseUrl": "https://api.tcall.ai",
+      "steps": [
+        {
+          "name": "Load Test Login Endpoint",
+          "type": "loadTest",
+          "description": "Test login endpoint under load",
+          "config": {
+            "url": "/auth/login",
+            "method": "POST",
+            "duration": "30s",
+            "users": 50,
+            "rampUpTime": 10,
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "email": "test@example.com",
+              "password": "testpassword123"
+            },
+            "thresholds": {
+              "responseTime": 2000,
+              "errorRate": 0.01
+            }
+          }
+        }
+      ]
+    },
+    "stressTest": {
+      "name": "Website Stress Testing",
+      "description": "Stress testing website to find breaking point",
+      "testType": "Performance",
+      "toolId": "inbuilt",
+      "baseUrl": "https://jsonplaceholder.typicode.com",
+      "steps": [
+        {
+          "name": "Stress Test Posts Endpoint",
+          "type": "stressTest",
+          "description": "Apply extreme load to posts endpoint",
+          "config": {
+            "url": "/posts",
+            "method": "GET",
+            "duration": "120s",
+            "users": 200,
+            "rampUpTime": 30,
+            "thresholds": {
+              "responseTime": 5000,
+              "errorRate": 0.05
+            }
+          }
+        }
+      ]
+    }
+  },
+  "cypressTests": {
+    "ecommerceCypress": {
+      "name": "E-commerce Cypress E2E Tests",
+      "description": "End-to-end testing with Cypress for e-commerce flow",
+      "testType": "Functional",
+      "toolId": "cypress",
+      "baseUrl": "https://demo.opencart.com",
+      "steps": [
+        {
+          "name": "Browse Products",
+          "type": "cypress",
+          "description": "Navigate and browse product catalog",
+          "config": {
+            "commands": [
+              "cy.visit('/')",
+              "cy.get('.product-thumb').first().click()",
+              "cy.get('h1').should('be.visible')",
+              "cy.get('#button-cart').click()",
+              "cy.get('.alert-success').should('contain', 'Success')"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "quickTemplates": {
+    "apiTemplate": {
+      "name": "{{Test Name}}",
+      "description": "{{Test Description}}",
+      "testType": "API",
+      "toolId": "axios",
+      "baseUrl": "{{Your API Base URL}}",
+      "steps": [
+        {
+          "name": "{{Step Name}}",
+          "type": "api",
+          "description": "{{Step Description}}",
+          "config": {
+            "method": "{{GET|POST|PUT|DELETE}}",
+            "url": "{{Endpoint Path}}",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "{{Request Body}}",
+            "validation": {
+              "statusCode": "{{Expected Status Code}}",
+              "responseTime": "{{Max Response Time}}"
+            }
+          }
+        }
+      ]
+    },
+    "functionalTemplate": {
+      "name": "{{Test Name}}",
+      "description": "{{Test Description}}",
+      "testType": "Functional",
+      "toolId": "puppeteer",
+      "baseUrl": "{{Website URL}}",
+      "steps": [
+        {
+          "name": "{{Step Name}}",
+          "type": "{{navigation|interaction|assertion}}",
+          "description": "{{Step Description}}",
+          "config": {
+            "url": "{{URL for navigation}}",
+            "selector": "{{CSS Selector}}",
+            "action": "{{click|type|hover}}",
+            "value": "{{Input Value}}",
+            "assertion": "{{visible|contains|equals}}"
+          }
+        }
+      ]
+    },
+    "performanceTemplate": {
+      "name": "{{Test Name}}",
+      "description": "{{Test Description}}",
+      "testType": "Performance",
+      "toolId": "{{k6|inbuilt}}",
+      "baseUrl": "{{API Base URL}}",
+      "steps": [
+        {
+          "name": "{{Step Name}}",
+          "type": "{{loadTest|stressTest|spikeTest}}",
+          "description": "{{Step Description}}",
+          "config": {
+            "url": "{{Endpoint}}",
+            "method": "{{HTTP Method}}",
+            "duration": "{{Test Duration}}",
+            "users": "{{Number of Users}}",
+            "rampUpTime": "{{Ramp Up Time}}",
+            "thresholds": {
+              "responseTime": "{{Max Response Time}}",
+              "errorRate": "{{Max Error Rate}}"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
