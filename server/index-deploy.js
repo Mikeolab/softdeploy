@@ -69,13 +69,20 @@ app.post('/api/execute-test-suite', async (req, res) => {
     // Execute test suite
     const result = await executeTestSuite(testSuite, executionId);
     
+    // Return result in the format expected by frontend
     res.json({
-      success: true,
+      success: result.success,
       executionId,
       message: 'Test suite execution completed',
       result: result,
       finalResult: result,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      // Include all result properties at root level for frontend compatibility
+      totalSteps: result.totalSteps,
+      passedSteps: result.passedSteps,
+      failedSteps: result.failedSteps,
+      totalTime: result.totalTime,
+      results: result.results
     });
     
   } catch (error) {
