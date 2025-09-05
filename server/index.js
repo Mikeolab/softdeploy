@@ -248,7 +248,7 @@ async function executeTestSuite(testSuite, executionId) {
           stepResult = await executeFunctionalStep(step, browser);
         }
       } else if (testSuite.testType === 'Performance') {
-        stepResult = await executePerformanceStep(step);
+        stepResult = await executePerformanceStep(step, testSuite);
       }
       
       // Ensure stepResult has the required properties
@@ -602,7 +602,7 @@ async function executeFunctionalStep(step, browser) {
 }
 
 // Execute performance test step
-async function executePerformanceStep(step) {
+async function executePerformanceStep(step, testSuite) {
   const startTime = Date.now();
   
   try {
@@ -614,9 +614,13 @@ async function executePerformanceStep(step) {
       const userCount = users || vus || 5; // Use vus if users not provided
       const testDuration = typeof duration === 'string' ? parseInt(duration.replace('s', '')) : duration || 10;
       
+      // Construct full URL
+      const baseUrl = testSuite.baseUrl || 'https://jsonplaceholder.typicode.com';
+      const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+      
       for (let i = 0; i < userCount; i++) {
         const delay = (rampUpTime * 1000 * i) / userCount;
-        promises.push(simulateUser(url, testDuration, i, delay));
+        promises.push(simulateUser(fullUrl, testDuration, i, delay));
       }
       
       const results = await Promise.all(promises);
@@ -645,9 +649,13 @@ async function executePerformanceStep(step) {
       const userCount = (users || vus || 5) * 2; // Double the load for stress test
       const testDuration = typeof duration === 'string' ? parseInt(duration.replace('s', '')) : duration || 10;
       
+      // Construct full URL
+      const baseUrl = testSuite.baseUrl || 'https://jsonplaceholder.typicode.com';
+      const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+      
       for (let i = 0; i < userCount; i++) {
         const delay = (rampUpTime * 1000 * i) / userCount;
-        promises.push(simulateUser(url, testDuration, i, delay));
+        promises.push(simulateUser(fullUrl, testDuration, i, delay));
       }
       
       const results = await Promise.all(promises);
