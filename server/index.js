@@ -53,7 +53,7 @@ app.post('/api/execute-test-suite', async (req, res) => {
     console.log('📋 Test Suite Details:', {
       name: testSuite.name,
       type: testSuite.testType,
-      tool: testSuite.toolId || testSuite.tool,
+      tool: testSuite.toolId,
       steps: testSuite.steps?.length || 0,
       baseUrl: testSuite.baseUrl
     });
@@ -177,7 +177,7 @@ async function executeTestSuite(testSuite, executionId) {
   console.log(`📊 [SERVER] Execution details:`, {
     executionId,
     testType: testSuite.testType,
-    tool: testSuite.toolId || testSuite.tool,
+    tool: testSuite.toolId,
     stepsCount: testSuite.steps?.length || 0,
     baseUrl: testSuite.baseUrl
   });
@@ -607,7 +607,7 @@ async function executePerformanceStep(step, testSuite) {
   
   try {
     if (step.type === 'loadTest' || step.type === 'load') {
-      const { url, duration, users, rampUpTime, vus } = step.config;
+      const { url, duration, users, rampUp, vus } = step.config;
       
       // Simulate load test with multiple concurrent requests
       const promises = [];
@@ -619,7 +619,7 @@ async function executePerformanceStep(step, testSuite) {
       const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
       
       for (let i = 0; i < userCount; i++) {
-        const delay = (rampUpTime * 1000 * i) / userCount;
+        const delay = (rampUp || 0) * 1000 * i / userCount;
         promises.push(simulateUser(fullUrl, testDuration, i, delay));
       }
       
@@ -642,7 +642,7 @@ async function executePerformanceStep(step, testSuite) {
         }
       };
     } else if (step.type === 'stressTest' || step.type === 'stress') {
-      const { url, duration, users, rampUpTime, vus } = step.config;
+      const { url, duration, users, rampUp, vus } = step.config;
       
       // Simulate stress test with higher load
       const promises = [];
@@ -654,7 +654,7 @@ async function executePerformanceStep(step, testSuite) {
       const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
       
       for (let i = 0; i < userCount; i++) {
-        const delay = (rampUpTime * 1000 * i) / userCount;
+        const delay = (rampUp || 0) * 1000 * i / userCount;
         promises.push(simulateUser(fullUrl, testDuration, i, delay));
       }
       

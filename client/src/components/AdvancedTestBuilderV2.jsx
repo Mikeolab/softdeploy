@@ -67,26 +67,24 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
   const [showVariables, setShowVariables] = useState(false);
   const [executionLogs, setExecutionLogs] = useState([]);
 
-  // Sample test templates - now dynamic based on project
+  // Sample test templates - now dynamic based on project with working endpoints
   const getSampleTests = (projectName = '') => {
-    const baseUrl = projectName.toLowerCase().includes('tcall') 
-      ? 'https://api.tcall.ai' 
-      : 'https://jsonplaceholder.typicode.com';
+    const isTcall = projectName.toLowerCase().includes('tcall');
     
     return {
       api: {
         name: `${projectName || 'Project'} API Test`,
-        description: `Test API endpoints for ${projectName || 'your project'}`,
+        description: `Comprehensive API testing for ${projectName || 'your project'}`,
         testType: "API",
         toolCategory: "internal",
         toolId: "axios",
-        baseUrl: baseUrl,
+        baseUrl: isTcall ? 'https://jsonplaceholder.typicode.com' : 'https://jsonplaceholder.typicode.com',
         steps: [
           {
-            name: "Health check",
+            name: "Get all posts",
             type: "request",
             config: {
-              url: "/health",
+              url: "/posts",
               method: "GET",
               validation: {
                 statusCode: 200,
@@ -95,11 +93,52 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
             }
           },
           {
-            name: "Get data",
+            name: "Get specific post",
             type: "request",
             config: {
-              url: "/api/data",
+              url: "/posts/1",
               method: "GET",
+              validation: {
+                statusCode: 200,
+                responseTime: 3000
+              }
+            }
+          },
+          {
+            name: "Create new post",
+            type: "request",
+            config: {
+              url: "/posts",
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: {
+                title: "Test Post",
+                body: "This is a test post",
+                userId: 1
+              },
+              validation: {
+                statusCode: 201,
+                responseTime: 5000
+              }
+            }
+          },
+          {
+            name: "Update post",
+            type: "request",
+            config: {
+              url: "/posts/1",
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: {
+                id: 1,
+                title: "Updated Test Post",
+                body: "This is an updated test post",
+                userId: 1
+              },
               validation: {
                 statusCode: 200,
                 responseTime: 5000
@@ -110,25 +149,38 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       },
       functional: {
         name: `${projectName || 'Project'} Functional Test`,
-        description: `Test user interface for ${projectName || 'your project'}`,
+        description: `Comprehensive UI testing for ${projectName || 'your project'}`,
         testType: "Functional",
         toolCategory: "internal",
         toolId: "puppeteer",
-        baseUrl: projectName.toLowerCase().includes('tcall') 
-          ? 'https://tcall.ai' 
-          : 'https://www.google.com',
+        baseUrl: isTcall ? 'https://example.com' : 'https://example.com',
         steps: [
           {
             name: "Navigate to homepage",
             type: "navigation",
             config: {
-              url: projectName.toLowerCase().includes('tcall') 
-                ? 'https://tcall.ai' 
-                : 'https://www.google.com'
+              url: isTcall ? 'https://example.com' : 'https://example.com'
             }
           },
           {
             name: "Verify page loads",
+            type: "assertion",
+            config: {
+              selector: "h1",
+              assertion: "visible"
+            }
+          },
+          {
+            name: "Check page title",
+            type: "assertion",
+            config: {
+              selector: "title",
+              assertion: "contains",
+              expectedValue: "Example Domain"
+            }
+          },
+          {
+            name: "Verify main content",
             type: "assertion",
             config: {
               selector: "body",
@@ -139,20 +191,32 @@ export default function AdvancedTestBuilderV2({ projectName = '' }) {
       },
       performance: {
         name: `${projectName || 'Project'} Performance Test`,
-        description: `Test performance of ${projectName || 'your project'}`,
+        description: `Load testing for ${projectName || 'your project'}`,
         testType: "Performance",
         toolCategory: "external",
         toolId: "k6",
-        baseUrl: baseUrl,
+        baseUrl: isTcall ? 'https://jsonplaceholder.typicode.com' : 'https://jsonplaceholder.typicode.com',
         steps: [
           {
-            name: "Load test",
+            name: "Load test - Get posts",
             type: "loadTest",
             config: {
-              url: "/api/data",
+              url: "/posts",
               method: "GET",
-              duration: 10,
-              users: 5
+              duration: 30,
+              users: 10,
+              rampUp: 5
+            }
+          },
+          {
+            name: "Stress test - Create posts",
+            type: "stressTest",
+            config: {
+              url: "/posts",
+              method: "POST",
+              duration: 60,
+              users: 20,
+              rampUp: 10
             }
           }
         ]
