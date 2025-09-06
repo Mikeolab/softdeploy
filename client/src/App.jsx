@@ -58,7 +58,8 @@ function App() {
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/projects" element={<ProjectsPage />} />
                   <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                  <Route path="/test-management/:projectId" element={<TestManagementPage />} />
+                  <Route path="/test-management" element={<TestManagementPage />} />
+                  <Route path="/test-management/:folderId" element={<TestManagementPage />} />
                   <Route path="/jobs" element={<JobsPage />} />
                   <Route path="/deploy" element={<DeployPage />} />
                   <Route path="/runs" element={<RunsPage />} />

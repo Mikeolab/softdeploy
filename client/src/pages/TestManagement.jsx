@@ -318,6 +318,7 @@ const TestManagement = () => {
               <TestFolderManager 
                 onFolderSelect={handleFolderSelect}
                 onCreateFolder={() => {}}
+                onTestSuiteSelect={handleTestSuiteSelect}
               />
             )}
             

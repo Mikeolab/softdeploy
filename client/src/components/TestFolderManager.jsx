@@ -10,7 +10,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
-const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
+const TestFolderManager = ({ onFolderSelect, onCreateFolder, onTestSuiteSelect }) => {
   const [folders, setFolders] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -409,6 +409,62 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
                     Created {new Date(folder.createdAt).toLocaleDateString()}
                   </span>
                 </div>
+                
+                {/* Test Suites Preview */}
+                {folder.testSuites && folder.testSuites.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    {folder.testSuites.slice(0, 2).map((suite) => (
+                      <div
+                        key={suite.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onTestSuiteSelect) {
+                            onTestSuiteSelect(suite);
+                          }
+                        }}
+                        className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-gray-700 dark:text-gray-300">
+                            {suite.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onTestSuiteSelect) {
+                                onTestSuiteSelect(suite);
+                              }
+                            }}
+                            className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            title="Edit"
+                          >
+                            <PencilIcon className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onTestSuiteSelect) {
+                                onTestSuiteSelect(suite);
+                              }
+                            }}
+                            className="p-1 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                            title="Run"
+                          >
+                            <PlayIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {folder.testSuites.length > 2 && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        +{folder.testSuites.length - 2} more suites
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             

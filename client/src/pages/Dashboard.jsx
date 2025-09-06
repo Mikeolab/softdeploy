@@ -24,6 +24,7 @@ function Dashboard() {
   // ===== Data state =====
   const [projects, setProjects] = useState([]);
   const [testPlans, setTestPlans] = useState([]);
+  const [recentTestRuns, setRecentTestRuns] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +60,12 @@ function Dashboard() {
 
       if (testError) throw testError;
 
+      // Load recent test runs from localStorage
+      const savedTestRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      const recentRuns = savedTestRuns
+        .sort((a, b) => new Date(b.executedAt || b.timestamp) - new Date(a.executedAt || a.timestamp))
+        .slice(0, 5);
+
       // Calculate recent activity
       const activity = [
         ...(projectsData || []).map(project => ({
@@ -72,11 +79,18 @@ function Dashboard() {
           title: `Completed test management "${test.title}"`,
           time: test.ran_at,
           icon: '🧪'
+        })),
+        ...recentRuns.map(run => ({
+          type: 'test_run',
+          title: `Executed test "${run.testSuite?.name || 'Unknown'}"`,
+          time: run.executedAt || run.timestamp,
+          icon: run.success ? '✅' : '❌'
         }))
       ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
       setProjects(projectsData || []);
       setTestPlans(testData || []);
+      setRecentTestRuns(recentRuns);
       setRecentActivity(activity);
     } catch (err) {
       console.error('fetchDashboardData:', err.message);
@@ -96,20 +110,22 @@ function Dashboard() {
       color: 'from-blue-500 to-cyan-500'
     },
     { 
-      label: 'Total Test Plans', 
-      value: testPlans.length.toString(), 
-      change: '+0', 
-      trend: 'neutral',
-      link: '/projects',
+      label: 'Recent Test Runs', 
+      value: recentTestRuns.length.toString(), 
+      change: recentTestRuns.length > 0 ? `+${recentTestRuns.length}` : '0', 
+      trend: recentTestRuns.length > 0 ? 'up' : 'neutral',
+      link: '/test-management',
       icon: '🧪',
       color: 'from-green-500 to-emerald-500'
     },
     { 
       label: 'Success Rate', 
-      value: testPlans.length > 0 ? '85%' : '-', 
+      value: recentTestRuns.length > 0 ? 
+        `${Math.round((recentTestRuns.filter(run => run.success).length / recentTestRuns.length) * 100)}%` : 
+        '-', 
       change: '+5%', 
       trend: 'up',
-      link: '/projects',
+      link: '/test-management',
       icon: '📊',
       color: 'from-purple-500 to-pink-500'
     },
@@ -221,6 +237,71 @@ function Dashboard() {
               </p>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* Recent Test Runs */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Recent Test Runs
+          </h2>
+          <Link to="/test-management" className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors">
+            View all →
+          </Link>
+        </div>
+        
+        <div className="glass-card p-6 rounded-xl">
+          {loading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-8 h-8 shimmer rounded-full"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 shimmer rounded w-3/4"></div>
+                    <div className="h-3 shimmer rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : recentTestRuns.length > 0 ? (
+            <div className="space-y-4">
+              {recentTestRuns.map((run, i) => (
+                <div key={run.id || i} className="flex items-center gap-4 animate-slide-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    run.success ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-700 dark:to-green-600' : 
+                    'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-700 dark:to-red-600'
+                  }`}>
+                    <span className="text-sm">{run.success ? '✅' : '❌'}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {run.testSuite?.name || 'Unknown Test'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed • {run.executedAt ? new Date(run.executedAt).toLocaleDateString() : 'Unknown date'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-4">🧪</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No test runs yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Create and run your first test to see results here
+              </p>
+              <Link 
+                to="/test-management"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-semibold"
+              >
+                Start Testing
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
