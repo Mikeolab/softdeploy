@@ -477,7 +477,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
     showNotification('Test suite saved successfully!', 'success');
   };
 
-  // Execute test suite
+  // Execute test suite - Simple HTTP-based approach
   const executeTestSuite = async () => {
     if (!testSuite.name || !testSuite.testType || !testSuite.toolId || testSuite.steps.length === 0) {
       showNotification('Please fill in all required fields and add at least one step', 'error');
@@ -495,7 +495,19 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
     setIsRunning(true);
     setTestResults(null);
     setExecutionLogs([]);
-    setShowExecutionPage(true); // Show execution page instead of modal
+    setShowExecutionPage(true);
+
+    // Simple logging function
+    const addLog = (message, type = 'info') => {
+      const log = {
+        id: Date.now() + Math.random(),
+        timestamp: new Date().toISOString(),
+        message,
+        type
+      };
+      setExecutionLogs(prev => [...prev, log]);
+      console.log(`${type === 'error' ? '❌' : type === 'success' ? '✅' : '📝'} ${message}`);
+    };
 
     try {
       // Progress callback for real-time updates
