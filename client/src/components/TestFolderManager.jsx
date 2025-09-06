@@ -447,71 +447,71 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
           </button>
         </div>
       )}
-      
+
       {/* Saved Tests Section */}
-        {(() => {
-          const savedTests = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
-          if (savedTests.length > 0) {
-            return (
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Saved Test Runs ({savedTests.length})
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {savedTests.map((test, index) => (
-                    <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-medium text-gray-900 dark:text-white text-sm">
-                          {test.testSuiteName || `Test Run ${index + 1}`}
-                        </h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          test.success ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                        }`}>
-                          {test.success ? 'PASSED' : 'FAILED'}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        {test.testType || 'Unknown'} • {test.totalSteps || 0} steps
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>{test.passedSteps || 0}/{test.totalSteps || 0} passed</span>
-                        <span>{test.totalTime ? `${test.totalTime}ms` : 'Unknown time'}</span>
-                      </div>
-                      <div className="mt-2 text-xs text-gray-400">
-                        {test.timestamp ? new Date(test.timestamp).toLocaleString() : 'Unknown date'}
-                      </div>
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          onClick={() => {
-                            // Navigate to test execution with this test data
-                            console.log('🚀 [DEBUG] Running saved test:', test.testSuiteName);
-                            // You can implement navigation to test execution here
-                          }}
-                          className="flex-1 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
-                        >
-                          Run Again
-                        </button>
-                        <button
-                          onClick={() => {
-                            // Delete this test run
-                            const updatedTests = savedTests.filter((_, i) => i !== index);
-                            localStorage.setItem('testRunsV2', JSON.stringify(updatedTests));
-                            // Refresh the component
-                            window.location.reload();
-                          }}
-                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
+      {(() => {
+        const savedTests = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+        if (savedTests.length > 0) {
+          return (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Saved Test Runs ({savedTests.length})
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {savedTests.map((test, index) => (
+                  <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-medium text-gray-900 dark:text-white text-sm">
+                        {test.testSuiteName || `Test Run ${index + 1}`}
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        test.success ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      }`}>
+                        {test.success ? 'PASSED' : 'FAILED'}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      {test.testType || 'Unknown'} • {test.totalSteps || 0} steps
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>{test.passedSteps || 0}/{test.totalSteps || 0} passed</span>
+                      <span>{test.totalTime ? `${test.totalTime}ms` : 'Unknown time'}</span>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      {test.timestamp ? new Date(test.timestamp).toLocaleString() : 'Unknown date'}
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => {
+                          // Navigate to test execution with this test data
+                          console.log('🚀 [DEBUG] Running saved test:', test.testSuiteName);
+                          // You can implement navigation to test execution here
+                        }}
+                        className="flex-1 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                      >
+                        Run Again
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Delete this test run
+                          const updatedTests = savedTests.filter((_, i) => i !== index);
+                          localStorage.setItem('testRunsV2', JSON.stringify(updatedTests));
+                          // Refresh the component
+                          window.location.reload();
+                        }}
+                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            );
-          }
-          return null;
-        })()}
+            </div>
+          );
+        }
+        return null;
+      })()}
     </div>
   );
 };
