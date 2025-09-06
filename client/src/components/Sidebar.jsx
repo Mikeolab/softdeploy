@@ -63,6 +63,8 @@ function Sidebar() {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Projects', href: '/projects', icon: FolderIcon },
+    { name: 'Test Management', href: '/test-management', icon: PlayIcon },
+    { name: 'Deploy', href: '/deploy', icon: RocketLaunchIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
   ];

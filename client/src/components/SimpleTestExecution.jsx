@@ -45,9 +45,53 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
 
       const result = await response.json();
       
+      // Enhanced console output with detailed step information
       addLog('✅ Test execution completed!', 'success');
       addLog(`📊 Results: ${result.passedSteps || 0}/${result.totalSteps || 0} passed`, 'info');
       addLog(`⏱️ Total time: ${result.totalTime || 0}ms`, 'info');
+      
+      // Show detailed step results
+      if (result.steps && result.steps.length > 0) {
+        addLog('📋 Detailed Step Results:', 'info');
+        result.steps.forEach((step, index) => {
+          const stepNumber = index + 1;
+          const status = step.success ? '✅' : '❌';
+          const duration = step.duration ? `${step.duration}ms` : 'N/A';
+          
+          addLog(`  ${status} Step ${stepNumber}: ${step.name || 'Unknown'}`, step.success ? 'success' : 'error');
+          addLog(`     Type: ${step.type || 'Unknown'} | Duration: ${duration}`, 'info');
+          
+          // Show specific details based on step type
+          if (step.type === 'api' && step.config) {
+            const method = step.config.method || 'GET';
+            const url = step.config.url || 'Unknown URL';
+            const statusCode = step.config.expectedStatus || 'Unknown';
+            addLog(`     Endpoint: ${method} ${url} | Expected Status: ${statusCode}`, 'info');
+            if (step.response) {
+              addLog(`     Response Status: ${step.response.status || 'N/A'}`, 'info');
+            }
+          } else if (step.type === 'interaction' && step.config) {
+            const action = step.config.action || 'Unknown';
+            const selector = step.config.selector || 'Unknown';
+            addLog(`     Action: ${action} | Selector: ${selector}`, 'info');
+          } else if (step.type === 'assertion' && step.config) {
+            const assertion = step.config.assertion || 'Unknown';
+            const selector = step.config.selector || 'Unknown';
+            addLog(`     Assertion: ${assertion} | Selector: ${selector}`, 'info');
+          } else if (step.type === 'loadTest' && step.config) {
+            const duration = step.config.duration || 'Unknown';
+            const users = step.config.users || 'Unknown';
+            addLog(`     Duration: ${duration} | Users: ${users}`, 'info');
+          }
+          
+          if (step.message) {
+            addLog(`     Message: ${step.message}`, 'info');
+          }
+          if (step.error) {
+            addLog(`     Error: ${step.error}`, 'error');
+          }
+        });
+      }
 
       setResults(result);
 
