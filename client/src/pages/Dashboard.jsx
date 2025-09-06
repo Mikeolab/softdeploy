@@ -3,6 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { 
+  FolderIcon, 
+  ChartBarIcon, 
+  ClockIcon, 
+  CheckCircleIcon, 
+  XCircleIcon,
+  PlusIcon,
+  ArrowRightIcon,
+  PlayIcon,
+  CogIcon
+} from '@heroicons/react/24/outline';
 
 function Dashboard() {
   const { user } = useAuth();
@@ -120,17 +131,17 @@ function Dashboard() {
       change: '+0', 
       trend: 'neutral',
       link: '/projects',
-      icon: '📁',
-      color: 'from-blue-500 to-cyan-500'
+      icon: FolderIcon,
+      priority: 'high' // Top-left priority
     },
     { 
-      label: 'Recent Test Runs', 
+      label: 'Test Runs', 
       value: recentTestRuns.length.toString(), 
       change: recentTestRuns.length > 0 ? `+${recentTestRuns.length}` : '0', 
       trend: recentTestRuns.length > 0 ? 'up' : 'neutral',
       link: '/test-management',
-      icon: '🧪',
-      color: 'from-green-500 to-emerald-500'
+      icon: PlayIcon,
+      priority: 'high' // Top-left priority
     },
     { 
       label: 'Success Rate', 
@@ -140,8 +151,8 @@ function Dashboard() {
       change: '+5%', 
       trend: 'up',
       link: '/test-management',
-      icon: '📊',
-      color: 'from-purple-500 to-pink-500'
+      icon: ChartBarIcon,
+      priority: 'medium'
     },
     { 
       label: 'Avg Deploy Time', 
@@ -149,8 +160,8 @@ function Dashboard() {
       change: '-0.5m', 
       trend: 'down',
       link: '/projects',
-      icon: '⚡',
-      color: 'from-orange-500 to-red-500'
+      icon: ClockIcon,
+      priority: 'low'
     }
   ];
 
@@ -158,228 +169,245 @@ function Dashboard() {
     {
       title: 'Create New Project',
       description: 'Start a new project with AI-powered workflows',
-      icon: '🚀',
+      icon: PlusIcon,
       link: '/projects',
-      action: 'Create',
-      color: 'from-cyan-500 to-blue-500'
+      action: 'Create'
     },
     {
       title: 'View Projects',
       description: 'Manage your existing projects and deployments',
-      icon: '📁',
+      icon: FolderIcon,
       link: '/projects',
-      action: 'View',
-      color: 'from-green-500 to-emerald-500'
+      action: 'View'
     },
     {
       title: 'Test Management',
       description: 'Create and manage test plans for your projects',
-      icon: '🧪',
-      link: '/projects',
-      action: 'Manage',
-      color: 'from-purple-500 to-pink-500'
+      icon: CogIcon,
+      link: '/test-management',
+      action: 'Manage'
     }
   ];
 
   return (
-    <div className="min-h-screen p-6 space-y-8 animate-fade-in">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome back, {firstName}! 👋
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Your AI-powered development workspace overview
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header - Clean and minimal */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            Welcome back, {firstName}
+          </h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Your development workspace overview
+          </p>
+        </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <Link 
-            key={i} 
-            to={stat.link}
-            className="group glass-card hover-lift p-6 rounded-xl cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
-                <span className="text-2xl">{stat.icon}</span>
-              </div>
-              <span className={`text-sm font-medium ${
-                stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
-                stat.trend === 'down' ? 'text-red-600 dark:text-red-400' :
-                'text-gray-500 dark:text-gray-400'
-              }`}>
-                {stat.change}
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {stat.value}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              {stat.label}
-            </p>
-          </Link>
-        ))}
-      </div>
+        {/* Key Metrics - Top-left priority layout */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, i) => {
+              const IconComponent = stat.icon;
+              return (
+                <Link 
+                  key={i} 
+                  to={stat.link}
+                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {stat.value}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {stat.label}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
+                      stat.trend === 'down' ? 'text-red-600 dark:text-red-400' :
+                      'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {stat.change}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* Quick Actions */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickActions.map((action, i) => (
-            <Link
-              key={i}
-              to={action.link}
-              className="group glass-card hover-lift p-6 rounded-xl cursor-pointer"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg bg-gradient-to-r ${action.color}`}>
-                  <span className="text-2xl">{action.icon}</span>
-                </div>
-                <span className="text-sm text-cyan-600 dark:text-cyan-400 group-hover:text-cyan-500 transition-colors">
-                  {action.action} →
-                </span>
-              </div>
-              <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
-                {action.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">
-                {action.description}
-              </p>
+        {/* Quick Actions - Clean and functional */}
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {quickActions.map((action, i) => {
+              const IconComponent = action.icon;
+              return (
+                <Link
+                  key={i}
+                  to={action.link}
+                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 dark:text-white text-sm">
+                          {action.title}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {action.description}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRightIcon className="h-4 w-4 text-gray-400" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent Test Runs - Clean list design */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+              Recent Test Runs
+            </h2>
+            <Link to="/test-management" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+              View all
             </Link>
-          ))}
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            {loading ? (
+              <div className="p-6">
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : recentTestRuns.length > 0 ? (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {recentTestRuns.map((run, i) => (
+                  <div key={run.id || i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        run.success ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
+                      }`}>
+                        {run.success ? (
+                          <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <XCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {run.testSuite?.name || 'Unknown Test'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed • {run.executedAt ? new Date(run.executedAt).toLocaleDateString() : 'Unknown date'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <PlayIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  No test runs yet
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Create and run your first test to see results here
+                </p>
+                <Link 
+                  to="/test-management"
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Start Testing
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Recent Test Runs */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Recent Test Runs
-          </h2>
-          <Link to="/test-management" className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors">
-            View all →
-          </Link>
-        </div>
-        
-        <div className="glass-card p-6 rounded-xl">
-          {loading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-8 h-8 shimmer rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 shimmer rounded w-3/4"></div>
-                    <div className="h-3 shimmer rounded w-1/2"></div>
-                  </div>
+        {/* Recent Activity - Clean timeline design */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+              Recent Activity
+            </h2>
+            <Link to="/projects" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+              View all
+            </Link>
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            {loading ? (
+              <div className="p-6">
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : recentTestRuns.length > 0 ? (
-            <div className="space-y-4">
-              {recentTestRuns.map((run, i) => (
-                <div key={run.id || i} className="flex items-center gap-4 animate-slide-in" style={{ animationDelay: `${i * 0.1}s` }}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    run.success ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-700 dark:to-green-600' : 
-                    'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-700 dark:to-red-600'
-                  }`}>
-                    <span className="text-sm">{run.success ? '✅' : '❌'}</span>
+              </div>
+            ) : recentActivity.length > 0 ? (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {recentActivity.map((activity, i) => (
+                  <div key={i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <span className="text-sm">{activity.icon}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {activity.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(activity.time).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {run.testSuite?.name || 'Unknown Test'}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed • {run.executedAt ? new Date(run.executedAt).toLocaleDateString() : 'Unknown date'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-4">🧪</div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                No test runs yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Create and run your first test to see results here
-              </p>
-              <Link 
-                to="/test-management"
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 font-semibold"
-              >
-                Start Testing
-              </Link>
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 text-center">
+                <div className="text-2xl mb-4">🎉</div>
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Welcome to SoftDeploy!
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Your activity will appear here as you start using the platform
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Recent Activity
-          </h2>
-          <Link to="/projects" className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors">
-            View all →
-          </Link>
-        </div>
-        
-        <div className="glass-card p-6 rounded-xl">
-          {loading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-8 h-8 shimmer rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 shimmer rounded w-3/4"></div>
-                    <div className="h-3 shimmer rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : recentActivity.length > 0 ? (
-            <div className="space-y-4">
-              {recentActivity.map((activity, i) => (
-                <div key={i} className="flex items-center gap-4 animate-slide-in" style={{ animationDelay: `${i * 0.1}s` }}>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
-                    <span className="text-sm">{activity.icon}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {activity.title}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(activity.time).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-4">🎉</div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Welcome to SoftDeploy!
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Start by creating your first project to see activity here
-              </p>
-              <Link 
-                to="/projects"
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-              >
-                Create Your First Project
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

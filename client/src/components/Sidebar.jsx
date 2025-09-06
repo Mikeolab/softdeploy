@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import { 
   HomeIcon, 
   FolderIcon, 
@@ -11,7 +12,13 @@ import {
   SunIcon,
   MoonIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  PlayIcon,
+  RocketLaunchIcon,
+  PlusIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 function Sidebar() {
@@ -22,6 +29,36 @@ function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isNear, setIsNear] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({});
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  // Fetch projects on component mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('projects')
+            .select('id, name, description')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+          
+          if (error) throw error;
+          setProjects(data || []);
+          
+          // Set first project as selected by default
+          if (data && data.length > 0) {
+            setSelectedProject(data[0]);
+          }
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+        }
+      }
+    };
+
+    fetchProjects();
+  }, [user?.id]);
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -29,6 +66,13 @@ function Sidebar() {
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
   ];
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const isActive = (href) => {
     if (href === '/dashboard') {
@@ -132,8 +176,115 @@ function Sidebar() {
            </div>
 
                      {/* Navigation */}
-           <nav className="flex-1 px-4 py-6 space-y-2">
-             {navigation.map((item) => (
+           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+             {/* Main Navigation */}
+             {navigation.slice(0, 2).map((item) => (
+               <Link
+                 key={item.name}
+                 to={item.href}
+                 className={`
+                   flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+                   ${isActive(item.href)
+                     ? 'bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30'
+                     : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                   }
+                   ${isCollapsed ? 'justify-center' : ''}
+                 `}
+                 title={isCollapsed ? item.name : ''}
+               >
+                 <item.icon className="h-5 w-5 flex-shrink-0" />
+                 {!isCollapsed && (
+                   <span className="font-medium">{item.name}</span>
+                 )}
+               </Link>
+             ))}
+
+             {/* Project-based Navigation */}
+             {!isCollapsed && projects.length > 0 && (
+               <div className="mt-6">
+                 <div className="px-3 py-2">
+                   <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                     Projects
+                   </h3>
+                 </div>
+                 
+                 {projects.map((project) => (
+                   <div key={project.id} className="mb-2">
+                     {/* Project Header */}
+                     <button
+                       onClick={() => toggleSection(project.id)}
+                       className={`
+                         w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200
+                         ${expandedSections[project.id] 
+                           ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' 
+                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                         }
+                       `}
+                     >
+                       <div className="flex items-center gap-3">
+                         <FolderIcon className="h-4 w-4 flex-shrink-0" />
+                         <span className="font-medium text-sm truncate">{project.name}</span>
+                       </div>
+                       {expandedSections[project.id] ? (
+                         <ChevronDownIcon className="h-4 w-4 flex-shrink-0" />
+                       ) : (
+                         <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
+                       )}
+                     </button>
+
+                     {/* Project Sub-navigation */}
+                     {expandedSections[project.id] && (
+                       <div className="ml-6 mt-1 space-y-1">
+                         <Link
+                           to={`/projects/${project.id}`}
+                           className={`
+                             flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm
+                             ${isActive(`/projects/${project.id}`)
+                               ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                             }
+                           `}
+                         >
+                           <DocumentTextIcon className="h-4 w-4 flex-shrink-0" />
+                           <span>Overview</span>
+                         </Link>
+                         
+                         <Link
+                           to={`/test-management?project=${project.id}`}
+                           className={`
+                             flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm
+                             ${isActive('/test-management')
+                               ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border border-green-500/30'
+                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                             }
+                           `}
+                         >
+                           <PlayIcon className="h-4 w-4 flex-shrink-0" />
+                           <span>Test Management</span>
+                         </Link>
+                         
+                         <Link
+                           to={`/deploy?project=${project.id}`}
+                           className={`
+                             flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm
+                             ${isActive('/deploy')
+                               ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
+                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                             }
+                           `}
+                         >
+                           <RocketLaunchIcon className="h-4 w-4 flex-shrink-0" />
+                           <span>Deployments</span>
+                         </Link>
+                       </div>
+                     )}
+                   </div>
+                 ))}
+               </div>
+             )}
+
+             {/* Global Navigation */}
+             {navigation.slice(2).map((item) => (
                <Link
                  key={item.name}
                  to={item.href}

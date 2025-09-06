@@ -1,6 +1,6 @@
 // src/pages/TestManagement.jsx
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import TestFolderManager from '../components/TestFolderManager';
@@ -18,18 +18,46 @@ import {
   DocumentTextIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ChartBarIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
 const TestManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { folderId } = useParams();
+  const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState('folders'); // 'folders', 'folder', 'test'
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [selectedTestSuite, setSelectedTestSuite] = useState(null);
   const [savedTestRuns, setSavedTestRuns] = useState([]);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
+  const [currentProject, setCurrentProject] = useState(null);
+
+  // Fetch current project
+  useEffect(() => {
+    const fetchCurrentProject = async () => {
+      const projectId = searchParams.get('project');
+      if (projectId && user?.id) {
+        try {
+          const { data, error } = await supabase
+            .from('projects')
+            .select('id, name, description')
+            .eq('id', projectId)
+            .eq('user_id', user.id)
+            .single();
+          
+          if (error) throw error;
+          setCurrentProject(data);
+        } catch (error) {
+          console.error('Error fetching project:', error);
+        }
+      }
+    };
+
+    fetchCurrentProject();
+  }, [searchParams, user?.id]);
 
   useEffect(() => {
     if (!user) {
@@ -44,7 +72,8 @@ const TestManagement = () => {
     console.log('🔍 [DEBUG] TestManagement useEffect:', {
       folderId,
       currentView,
-      selectedFolder: selectedFolder?.name
+      selectedFolder: selectedFolder?.name,
+      currentProject: currentProject?.name
     });
     
     // Handle URL-based navigation
@@ -61,7 +90,7 @@ const TestManagement = () => {
         navigate('/test-management');
       }
     }
-  }, [user, navigate, folderId, selectedFolder]);
+  }, [user, navigate, folderId, selectedFolder, currentProject]);
 
   // Listen for test run completion events
   useEffect(() => {
@@ -154,21 +183,21 @@ const TestManagement = () => {
       name: 'Basic API Test Template',
       description: 'Template for basic API testing with GET/POST requests',
       type: 'API',
-      icon: '🌐'
+      icon: ChartBarIcon
     },
     {
       id: 'template_functional_basic',
       name: 'Basic Functional Test Template',
       description: 'Template for basic UI testing with navigation and interactions',
       type: 'Functional',
-      icon: '🖱️'
+      icon: PlayIcon
     },
     {
       id: 'template_performance_basic',
       name: 'Basic Performance Test Template',
       description: 'Template for basic load testing with concurrent requests',
       type: 'Performance',
-      icon: '⚡'
+      icon: ClockIcon
     }
   ];
 
@@ -179,15 +208,28 @@ const TestManagement = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header - Clean and minimal with project context */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Test Management
-              </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">
-                Manage your test folders, suites, and execution results
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  Test Management
+                </h1>
+                {currentProject && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full">
+                    <FolderIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      {currentProject.name}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {currentProject 
+                  ? `Manage test folders, suites, and execution results for ${currentProject.name}`
+                  : 'Manage your test folders, suites, and execution results'
+                }
               </p>
             </div>
             
@@ -236,27 +278,27 @@ const TestManagement = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Saved Test Runs */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-sm font-medium text-gray-900 dark:text-white">
                   Recent Test Runs
                 </h2>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 {savedTestRuns.length === 0 ? (
-                  <div className="text-center py-8">
-                    <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No test runs yet. Create and run your first test!
+                  <div className="text-center py-6">
+                    <ClockIcon className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      No test runs yet
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {savedTestRuns.slice(0, 10).map((run) => (
-                      <div key={run.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div className="space-y-3">
+                    {savedTestRuns.slice(0, 8).map((run) => (
+                      <div key={run.id} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {run.testSuite?.name || 'Unknown Test'}
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -264,29 +306,29 @@ const TestManagement = () => {
                             </p>
                             <div className="flex items-center mt-2">
                               {run.success ? (
-                                <CheckCircleIcon className="h-4 w-4 text-green-500 mr-1" />
+                                <CheckCircleIcon className="h-3 w-3 text-green-500 mr-1" />
                               ) : (
-                                <XCircleIcon className="h-4 w-4 text-red-500 mr-1" />
+                                <XCircleIcon className="h-3 w-3 text-red-500 mr-1" />
                               )}
                               <span className={`text-xs ${run.success ? 'text-green-600' : 'text-red-600'}`}>
                                 {run.passedSteps || 0}/{run.totalSteps || 0} passed
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1 ml-2">
                             <button
                               onClick={() => handleEditTestRun(run)}
                               className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
                               title="Edit"
                             >
-                              <PencilIcon className="h-4 w-4" />
+                              <PencilIcon className="h-3 w-3" />
                             </button>
                             <button
                               onClick={() => handleDeleteTestRun(run.id)}
                               className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                               title="Delete"
                             >
-                              <TrashIcon className="h-4 w-4" />
+                              <TrashIcon className="h-3 w-3" />
                             </button>
                           </div>
                         </div>
@@ -298,29 +340,30 @@ const TestManagement = () => {
             </div>
 
             {/* Template Test Plans */}
-            <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+            <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-sm font-medium text-gray-900 dark:text-white">
                   Template Test Plans
                 </h2>
               </div>
-              <div className="p-6">
+              <div className="p-4">
                 <div className="space-y-3">
-                  {templateTestPlans.map((template) => (
-                    <div key={template.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                      <div className="flex items-center">
-                        <span className="text-lg mr-3">{template.icon}</span>
-                        <div className="flex-1">
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                            {template.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {template.description}
-                          </p>
+                  {templateTestPlans.map((template) => {
+                    const IconComponent = template.icon;
+                    return (
+                      <div key={template.id} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                        <div className="flex items-center">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg mr-3">
+                            <IconComponent className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{template.name}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{template.description}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
