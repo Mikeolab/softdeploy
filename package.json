@@ -7,7 +7,7 @@
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "build": "npm install && cd server && npm install --production && cd ../client && npm install && cd ../client && npm run build",
-    "start": "cd server && node index-real.js",
+    "start": "node server.js",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "devDependencies": {

@@ -493,11 +493,24 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder }) => {
                       </button>
                       <button
                         onClick={() => {
+                          // Edit this test run - open in test builder
+                          console.log('✏️ [DEBUG] Editing saved test:', test.testSuiteName);
+                          // Navigate to test builder with this test data
+                          window.location.href = '/test-builder';
+                        }}
+                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
                           // Delete this test run
-                          const updatedTests = savedTests.filter((_, i) => i !== index);
-                          localStorage.setItem('testRunsV2', JSON.stringify(updatedTests));
-                          // Refresh the component
-                          window.location.reload();
+                          if (confirm('Are you sure you want to delete this test run?')) {
+                            const updatedTests = savedTests.filter((_, i) => i !== index);
+                            localStorage.setItem('testRunsV2', JSON.stringify(updatedTests));
+                            // Refresh the component
+                            window.location.reload();
+                          }
                         }}
                         className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
                       >

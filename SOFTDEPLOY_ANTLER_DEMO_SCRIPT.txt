@@ -1,4 +1,4 @@
-# SoftDeploy - Antler Demo Script
+# SoftDeploy -  Demo Script
 
 ## 🎯 Demo Flow (15 minutes)
 
