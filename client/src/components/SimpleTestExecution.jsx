@@ -117,6 +117,12 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
                 </div>
               )}
               <button
+                onClick={() => window.history.back()}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                ← Back
+              </button>
+              <button
                 onClick={executeTest}
                 disabled={isRunning}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"

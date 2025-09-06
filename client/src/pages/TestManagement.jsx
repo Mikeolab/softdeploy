@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 import TestFolderManager from '../components/TestFolderManager';
 import TestSuiteConfiguration from '../components/TestSuiteConfiguration';
 import AdvancedTestBuilderV2 from '../components/AdvancedTestBuilderV2';
+import SimpleTestExecution from '../components/SimpleTestExecution';
 
 const TestManagement = () => {
   const { user } = useAuth();
@@ -140,14 +141,12 @@ const TestManagement = () => {
               </div>
             </div>
             
-            {/* Test Execution Component */}
-            <AdvancedTestBuilderV2 
-              initialTestSuite={selectedTestSuite}
-              onTestComplete={() => {
-                // Optionally navigate back to folder after test completion
-                setTimeout(() => {
-                  handleBackToFolder();
-                }, 5000);
+            {/* Stable Test Execution Component */}
+            <SimpleTestExecution 
+              testSuite={selectedTestSuite}
+              onComplete={(result) => {
+                console.log('🎯 Test completed:', result);
+                // Keep the page open - user can navigate back manually
               }}
             />
           </div>
