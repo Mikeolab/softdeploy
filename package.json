@@ -25,6 +25,10 @@
     "@supabase/supabase-js": "^2.57.0",
     "axios": "^1.11.0",
     "playwright": "^1.55.0",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "puppeteer": "^24.18.0",
+    "cypress": "^13.6.0"
   }
 }
