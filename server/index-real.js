@@ -556,6 +556,15 @@ app.post('/api/execute-test-suite', async (req, res) => {
 // Serve static files from the React app (AFTER API routes)
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
+// SPA catch-all route - MUST be after API routes and static files
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
 // Handle WebSocket upgrade with proper error handling
 server.on('upgrade', (request, socket, head) => {
   try {
