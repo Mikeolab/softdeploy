@@ -346,6 +346,7 @@ const TestManagement = () => {
                 <TestSuiteConfiguration 
                   folder={selectedFolder}
                   onTestSuiteSelect={handleTestSuiteSelect}
+                  onRunTest={handleTestSuiteSelect}
                 />
               </div>
             )}

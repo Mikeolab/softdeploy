@@ -541,7 +541,9 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder, onTestSuiteSelect }
                         onClick={() => {
                           // Navigate to test execution with this test data
                           console.log('🚀 [DEBUG] Running saved test:', test.testSuiteName);
-                          // You can implement navigation to test execution here
+                          if (onTestSuiteSelect && test.testSuite) {
+                            onTestSuiteSelect(test.testSuite);
+                          }
                         }}
                         className="flex-1 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                       >
