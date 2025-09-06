@@ -45,16 +45,31 @@ function ProjectDetail() {
       const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
       // Sort by executedAt date, most recent first
       const sortedRuns = savedRuns.sort((a, b) => {
-        const dateA = new Date(a.executedAt || 0);
-        const dateB = new Date(b.executedAt || 0);
+        const dateA = new Date(a.executedAt || a.timestamp || 0);
+        const dateB = new Date(b.executedAt || b.timestamp || 0);
         return dateB - dateA;
       });
       setRecentRuns(sortedRuns);
+      console.log('📊 [PROJECT_DETAIL] Loaded recent runs:', sortedRuns.length);
     } catch (error) {
       console.error('Error loading recent runs:', error);
       setRecentRuns([]);
     }
   };
+
+  // Listen for test run completion events to sync with dashboard
+  useEffect(() => {
+    const handleTestRunCompleted = () => {
+      console.log('🔄 [PROJECT_DETAIL] Test run completed, refreshing data...');
+      loadRecentRuns();
+    };
+
+    window.addEventListener('testRunCompleted', handleTestRunCompleted);
+    
+    return () => {
+      window.removeEventListener('testRunCompleted', handleTestRunCompleted);
+    };
+  }, []);
 
   const handleEditName = () => {
     setIsEditingName(true);
@@ -225,17 +240,17 @@ function ProjectDetail() {
                 >
                   Cancel
                 </button>
-              </div>
+          </div>
             ) : (
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{project.name}</h1>
-                <button
+            <button
                   onClick={handleEditName}
                   className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title="Edit project name"
-                >
+            >
                   ✏️
-                </button>
+            </button>
               </div>
             )}
           </div>
@@ -315,10 +330,15 @@ function ProjectDetail() {
                     <div key={run.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-white">{run.testSuite?.name || 'Unknown Test'}</p>
-                          <p className="text-gray-600 dark:text-gray-300 text-sm">{run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">
+                            {run.testSuite?.name || run.testSuiteName || 'Unknown Test'}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            {run.testSuite?.testType || run.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed
+                          </p>
                           <p className="text-gray-500 dark:text-gray-400 text-xs">
-                            {run.executedAt ? new Date(run.executedAt).toLocaleString() : 'Unknown date'}
+                            {run.executedAt ? new Date(run.executedAt).toLocaleString() : 
+                             run.timestamp ? new Date(run.timestamp).toLocaleString() : 'Unknown date'}
                           </p>
                         </div>
                         <div className="flex items-center ml-2">
@@ -329,7 +349,7 @@ function ProjectDetail() {
                           )}
                         </div>
                       </div>
-                    </div>
+                      </div>
                     ))}
                     {recentRuns.length === 0 && (
                     <p className="text-gray-500 dark:text-gray-400 text-sm">No test runs yet.</p>
@@ -364,12 +384,12 @@ function ProjectDetail() {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Test Management</h2>
                 <div className="relative">
-                  <button
+                <button
                     onClick={() => navigate(`/test-management?project=${projectId}`)}
                     className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-                  >
+                >
                     + Create
-                  </button>
+                </button>
                 </div>
               </div>
               
@@ -384,15 +404,20 @@ function ProjectDetail() {
                     View all →
                   </button>
                 </div>
-                <div className="space-y-3">
+              <div className="space-y-3">
                   {recentRuns.slice(0, 5).map((run) => (
                     <div key={run.id} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-white">{run.testSuite?.name || 'Unknown Test'}</p>
-                          <p className="text-gray-600 dark:text-gray-300 text-sm">{run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">
+                            {run.testSuite?.name || run.testSuiteName || 'Unknown Test'}
+                          </p>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">
+                            {run.testSuite?.testType || run.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed
+                          </p>
                           <p className="text-gray-500 dark:text-gray-400 text-xs">
-                            {run.executedAt ? new Date(run.executedAt).toLocaleString() : 'Unknown date'}
+                            {run.executedAt ? new Date(run.executedAt).toLocaleString() : 
+                             run.timestamp ? new Date(run.timestamp).toLocaleString() : 'Unknown date'}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2 ml-4">
@@ -416,14 +441,14 @@ function ProjectDetail() {
                       <div className="text-4xl mb-4">🧪</div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No test runs yet</h3>
                       <p className="text-gray-600 dark:text-gray-300 mb-4">Create and run your first test to see results here</p>
-                      <button
+                    <button
                         onClick={() => navigate(`/test-management?project=${projectId}`)}
                         className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
-                      >
+                    >
                         Start Testing
-                      </button>
-                    </div>
-                  )}
+                    </button>
+                  </div>
+                )}
                 </div>
               </div>
 
@@ -484,7 +509,7 @@ function ProjectDetail() {
             <div className="glass-card p-6 rounded-xl">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Project Information</h3>
                 <div className="space-y-4">
-                  <div>
+                                     <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Name</label>
                     {isEditingName ? (
                       <div className="flex items-center gap-2">
@@ -515,11 +540,11 @@ function ProjectDetail() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <input
-                          value={project.name}
+                     <input
+                       value={project.name}
                           className="flex-1 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                          readOnly
-                        />
+                       readOnly
+                     />
                         <button
                           onClick={handleEditName}
                           className="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -528,7 +553,7 @@ function ProjectDetail() {
                         </button>
                       </div>
                     )}
-                  </div>
+                   </div>
                    <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project ID</label>
                      <input

@@ -136,11 +136,11 @@ function Sidebar() {
 
       {/* Sidebar */}
       <div 
-        className={`
-          fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out
-          ${isCollapsed ? 'w-16' : 'w-64'} 
-          ${!isCollapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
+                 className={`
+                   fixed top-0 left-0 h-full z-50 transition-all duration-200 ease-out
+                   ${isCollapsed ? 'w-16' : 'w-64'}
+                   ${!isCollapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                 `}
         onMouseEnter={() => {
           setIsHovered(true);
           setIsCollapsed(false);
@@ -196,7 +196,7 @@ function Sidebar() {
                >
                  <item.icon className="h-5 w-5 flex-shrink-0" />
                  {!isCollapsed && (
-                   <span className="font-medium">{item.name}</span>
+                   <span className="font-medium text-sm">{item.name}</span>
                  )}
                </Link>
              ))}
@@ -302,7 +302,7 @@ function Sidebar() {
                >
                  <item.icon className="h-5 w-5 flex-shrink-0" />
                  {!isCollapsed && (
-                   <span className="font-medium">{item.name}</span>
+                   <span className="font-medium text-sm">{item.name}</span>
                  )}
                </Link>
              ))}

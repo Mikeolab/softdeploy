@@ -88,7 +88,7 @@ function Dashboard() {
       // Load recent test runs from localStorage
       const savedTestRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
       const recentRuns = savedTestRuns
-        .sort((a, b) => new Date(b.executedAt || b.timestamp) - new Date(a.executedAt || a.timestamp))
+        .sort((a, b) => new Date(b.executedAt || b.timestamp || 0) - new Date(a.executedAt || a.timestamp || 0))
         .slice(0, 5);
 
       // Calculate recent activity
@@ -196,11 +196,11 @@ function Dashboard() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Welcome back, {firstName}
-          </h1>
+        </h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Your development workspace overview
-          </p>
-        </div>
+        </p>
+      </div>
 
         {/* Key Metrics - Top-left priority layout */}
         <div className="mb-8">
@@ -208,9 +208,9 @@ function Dashboard() {
             {stats.map((stat, i) => {
               const IconComponent = stat.icon;
               return (
-                <Link 
-                  key={i} 
-                  to={stat.link}
+          <Link 
+            key={i} 
+            to={stat.link}
                   className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
@@ -226,47 +226,47 @@ function Dashboard() {
                           {stat.label}
                         </p>
                       </div>
-                    </div>
+              </div>
                     <span className={`text-xs font-medium ${
-                      stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
-                      stat.trend === 'down' ? 'text-red-600 dark:text-red-400' :
-                      'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      {stat.change}
-                    </span>
-                  </div>
-                </Link>
+                stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
+                stat.trend === 'down' ? 'text-red-600 dark:text-red-400' :
+                'text-gray-500 dark:text-gray-400'
+              }`}>
+                {stat.change}
+              </span>
+            </div>
+          </Link>
               );
             })}
           </div>
-        </div>
+      </div>
 
         {/* Quick Actions - Clean and functional */}
         <div className="mb-8">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Quick Actions
-          </h2>
+          Quick Actions
+        </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, i) => {
               const IconComponent = action.icon;
               return (
-                <Link
-                  key={i}
-                  to={action.link}
+            <Link
+              key={i}
+              to={action.link}
                   className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                         <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                      </div>
+                </div>
                       <div>
                         <h3 className="font-medium text-gray-900 dark:text-white text-sm">
-                          {action.title}
-                        </h3>
+                {action.title}
+              </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {action.description}
-                        </p>
+                {action.description}
+              </p>
                       </div>
                     </div>
                     <ArrowRightIcon className="h-4 w-4 text-gray-400" />
@@ -317,14 +317,14 @@ function Dashboard() {
                           <XCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {run.testSuite?.name || 'Unknown Test'}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {run.testSuite?.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed • {run.executedAt ? new Date(run.executedAt).toLocaleDateString() : 'Unknown date'}
-                        </p>
-                      </div>
+                           <div className="flex-1 min-w-0">
+                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                               {run.testSuite?.name || run.testSuiteName || 'Unknown Test'}
+                             </p>
+                             <p className="text-xs text-gray-500 dark:text-gray-400">
+                               {run.testSuite?.testType || run.testType || 'Unknown'} • {run.passedSteps || 0}/{run.totalSteps || 0} passed • {run.executedAt ? new Date(run.executedAt).toLocaleDateString() : run.timestamp ? new Date(run.timestamp).toLocaleDateString() : 'Unknown date'}
+                             </p>
+                           </div>
                     </div>
                   </div>
                 ))}
@@ -346,66 +346,66 @@ function Dashboard() {
                 </Link>
               </div>
             )}
-          </div>
         </div>
+      </div>
 
         {/* Recent Activity - Clean timeline design */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-              Recent Activity
-            </h2>
+            Recent Activity
+          </h2>
             <Link to="/projects" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
               View all
-            </Link>
-          </div>
-          
+          </Link>
+        </div>
+        
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            {loading ? (
+          {loading ? (
               <div className="p-6">
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
-                      <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-2">
                         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
                         <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
-                      </div>
-                    </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            ) : recentActivity.length > 0 ? (
+              ))}
+                </div>
+            </div>
+          ) : recentActivity.length > 0 ? (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {recentActivity.map((activity, i) => (
+              {recentActivity.map((activity, i) => (
                   <div key={i} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                        <span className="text-sm">{activity.icon}</span>
-                      </div>
+                    <span className="text-sm">{activity.icon}</span>
+                  </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {activity.title}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(activity.time).toLocaleString()}
-                        </p>
+                      {activity.title}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(activity.time).toLocaleString()}
+                    </p>
                       </div>
-                    </div>
                   </div>
-                ))}
-              </div>
-            ) : (
+                </div>
+              ))}
+            </div>
+          ) : (
               <div className="p-6 text-center">
                 <div className="text-2xl mb-4">🎉</div>
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Welcome to SoftDeploy!
-                </h3>
+                Welcome to SoftDeploy!
+              </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Your activity will appear here as you start using the platform
                 </p>
-              </div>
-            )}
+            </div>
+          )}
           </div>
         </div>
       </div>

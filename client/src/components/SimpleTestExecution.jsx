@@ -99,6 +99,12 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
       const testRun = {
         id: Date.now(),
         testSuiteName: testSuite.name,
+        testSuite: {
+          name: testSuite.name,
+          testType: testSuite.testType,
+          toolId: testSuite.toolId,
+          baseUrl: testSuite.baseUrl
+        },
         testType: testSuite.testType,
         toolId: testSuite.toolId,
         baseUrl: testSuite.baseUrl,
@@ -107,6 +113,7 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
         passedSteps: result.passedSteps || 0,
         failedSteps: result.failedSteps || 0,
         totalTime: result.totalTime || 0,
+        executedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
         results: result
       };
