@@ -27,9 +27,6 @@ const wss = new WebSocket.Server({ server });
 // Store active test executors
 const activeExecutors = new Map();
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {
   console.log('🔌 WebSocket client connected');
@@ -546,6 +543,9 @@ app.post('/api/execute-test-suite', async (req, res) => {
     });
   }
 });
+
+// Serve static files from the React app (AFTER API routes)
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Handle WebSocket upgrade
 server.on('upgrade', (request, socket, head) => {
