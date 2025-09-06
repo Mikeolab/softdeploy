@@ -419,6 +419,17 @@ async function executePlaywrightQuickTest(script) {
   }
 }
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: '1.0.0',
+    message: 'SoftDeploy Test Execution Server is running'
+  });
+});
+
 // API endpoint to execute a complete test suite (WebSocket-based)
 app.post('/api/execute-test-suite', async (req, res) => {
   try {
