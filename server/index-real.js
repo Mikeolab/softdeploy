@@ -34,6 +34,15 @@ wss.on('connection', (ws, req) => {
   // Generate unique connection ID
   const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
+  // Check if connection already exists and close it
+  if (activeExecutors.has(connectionId)) {
+    console.log('⚠️ [WEBSOCKET] Duplicate connection detected, closing previous');
+    const existingExecutor = activeExecutors.get(connectionId);
+    if (existingExecutor && existingExecutor.ws) {
+      existingExecutor.ws.close();
+    }
+  }
+  
   // Create test executor for this connection
   const executor = new RealTestExecutor(ws);
   activeExecutors.set(connectionId, executor);
@@ -547,11 +556,22 @@ app.post('/api/execute-test-suite', async (req, res) => {
 // Serve static files from the React app (AFTER API routes)
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// Handle WebSocket upgrade
+// Handle WebSocket upgrade with proper error handling
 server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
+  try {
+    // Check if socket is already handled
+    if (socket.destroyed) {
+      console.log('⚠️ [WEBSOCKET] Socket already destroyed, skipping upgrade');
+      return;
+    }
+    
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } catch (error) {
+    console.error('❌ [WEBSOCKET] Upgrade error:', error.message);
+    socket.destroy();
+  }
 });
 
 // Start server

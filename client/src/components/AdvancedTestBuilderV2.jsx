@@ -71,6 +71,7 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
   const [notification, setNotification] = useState(null);
   const [quickTestModal, setQuickTestModal] = useState({ isOpen: false, tool: null });
   const [showExecutionPage, setShowExecutionPage] = useState(false);
+  const [keepConsoleOpen, setKeepConsoleOpen] = useState(false);
 
   // Sample test templates - Professional comprehensive test suites
   const getSampleTests = (projectName = '') => {
@@ -710,6 +711,16 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
   };
 
   const closeExecutionPage = () => {
+    if (isRunning) {
+      if (!confirm('Test is still running. Are you sure you want to close the execution console?')) {
+        return;
+      }
+    }
+    if (keepConsoleOpen) {
+      if (!confirm('Console is set to stay open. Are you sure you want to close it?')) {
+        return;
+      }
+    }
     setShowExecutionPage(false);
     setIsRunning(false);
   };
@@ -1310,6 +1321,21 @@ export default function AdvancedTestBuilderV2({ projectName = '', initialTestSui
                     <span className="text-sm font-medium">Running...</span>
                   </div>
                 )}
+                
+                {/* Keep Console Open Toggle */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="keepConsoleOpen"
+                    checked={keepConsoleOpen}
+                    onChange={(e) => setKeepConsoleOpen(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="keepConsoleOpen" className="text-sm text-gray-700 dark:text-gray-300">
+                    Keep Console Open
+                  </label>
+                </div>
+                
                 <button
                   onClick={closeExecutionPage}
                   className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
