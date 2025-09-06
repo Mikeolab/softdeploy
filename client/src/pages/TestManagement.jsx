@@ -109,8 +109,17 @@ const TestManagement = () => {
   const loadSavedTestRuns = () => {
     try {
       const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
-      setSavedTestRuns(savedRuns);
-      console.log('📊 [DEBUG] Loaded saved test runs:', savedRuns.length);
+      
+      // Filter runs by current project if project is specified
+      let filteredRuns = savedRuns;
+      if (currentProject?.id) {
+        filteredRuns = savedRuns.filter(run => run.projectId === currentProject.id);
+        console.log('📊 [DEBUG] Filtered runs for project:', currentProject.name, filteredRuns.length);
+      } else {
+        console.log('📊 [DEBUG] No project filter, showing all runs:', savedRuns.length);
+      }
+      
+      setSavedTestRuns(filteredRuns);
     } catch (error) {
       console.error('❌ [ERROR] Failed to load saved test runs:', error);
       setSavedTestRuns([]);
@@ -404,6 +413,7 @@ const TestManagement = () => {
                   folder={selectedFolder}
                   onTestSuiteSelect={handleTestSuiteSelect}
                   onRunTest={handleTestSuiteSelect}
+                  onBack={handleBackToFolders}
                 />
               </div>
             )}

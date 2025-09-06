@@ -26,6 +26,9 @@ function ProjectDetail() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [projectMembers, setProjectMembers] = useState([]);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
 
   // redirect if no user
   useEffect(() => {
@@ -43,14 +46,18 @@ function ProjectDetail() {
   const loadRecentRuns = () => {
     try {
       const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      
+      // Filter runs by current project
+      const projectRuns = savedRuns.filter(run => run.projectId === projectId);
+      
       // Sort by executedAt date, most recent first
-      const sortedRuns = savedRuns.sort((a, b) => {
+      const sortedRuns = projectRuns.sort((a, b) => {
         const dateA = new Date(a.executedAt || a.timestamp || 0);
         const dateB = new Date(b.executedAt || b.timestamp || 0);
         return dateB - dateA;
       });
       setRecentRuns(sortedRuns);
-      console.log('📊 [PROJECT_DETAIL] Loaded recent runs:', sortedRuns.length);
+      console.log('📊 [PROJECT_DETAIL] Loaded project runs:', sortedRuns.length, 'for project:', projectId);
     } catch (error) {
       console.error('Error loading recent runs:', error);
       setRecentRuns([]);
@@ -108,6 +115,57 @@ function ProjectDetail() {
     }
   };
 
+  const handleInviteMember = async () => {
+    if (!inviteEmail.trim()) return;
+
+    try {
+      setSaving(true);
+      // For now, we'll store invitations in localStorage
+      // In a real app, this would be stored in Supabase
+      const invitation = {
+        id: Date.now(),
+        projectId: project.id,
+        email: inviteEmail.trim(),
+        invitedBy: user.email,
+        invitedAt: new Date().toISOString(),
+        status: 'pending'
+      };
+
+      const existingInvitations = JSON.parse(localStorage.getItem('projectInvitations') || '[]');
+      existingInvitations.push(invitation);
+      localStorage.setItem('projectInvitations', JSON.stringify(existingInvitations));
+
+      setInviteEmail('');
+      setShowInviteForm(false);
+      alert(`Invitation sent to ${inviteEmail}!`);
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      alert('Failed to send invitation. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const loadProjectMembers = () => {
+    try {
+      // Load project members from localStorage
+      // In a real app, this would come from Supabase
+      const members = [
+        {
+          id: user.id,
+          email: user.email,
+          name: displayName,
+          role: 'owner',
+          joinedAt: new Date().toISOString()
+        }
+      ];
+      setProjectMembers(members);
+    } catch (error) {
+      console.error('Error loading project members:', error);
+      setProjectMembers([]);
+    }
+  };
+
   // ===== Queries =====
   const fetchProjectData = async () => {
     try {
@@ -150,6 +208,9 @@ function ProjectDetail() {
       
       // Load recent runs from localStorage
       loadRecentRuns();
+      
+      // Load project members
+      loadProjectMembers();
     } catch (err) {
       console.error('fetchProjectData:', err.message);
       // Don't automatically redirect on errors, let the user see the error
@@ -562,6 +623,78 @@ function ProjectDetail() {
                        readOnly
                      />
                    </div>
+                </div>
+              </div>
+
+              {/* Project Members */}
+              <div className="glass-card p-6 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Project Members</h3>
+                  <button
+                    onClick={() => setShowInviteForm(!showInviteForm)}
+                    className="px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    + Invite Member
+                  </button>
+                </div>
+
+                {/* Invite Form */}
+                {showInviteForm && (
+                  <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="Enter email address"
+                        className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded focus:border-blue-500 focus:outline-none dark:bg-gray-800 dark:text-white"
+                      />
+                      <button
+                        onClick={handleInviteMember}
+                        disabled={!inviteEmail.trim() || saving}
+                        className="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+                      >
+                        {saving ? 'Sending...' : 'Send'}
+                      </button>
+                      <button
+                        onClick={() => setShowInviteForm(false)}
+                        className="px-3 py-2 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Members List */}
+                <div className="space-y-2">
+                  {projectMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                          {member.name?.charAt(0) || member.email?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{member.name || member.email}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{member.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          member.role === 'owner' 
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        }`}>
+                          {member.role}
+                        </span>
+                        {member.role !== 'owner' && (
+                          <button className="text-red-500 hover:text-red-700 text-sm">
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

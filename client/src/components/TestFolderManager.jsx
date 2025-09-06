@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   FolderIcon, 
   PlusIcon, 
@@ -15,25 +16,17 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder, onTestSuiteSelect }
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderDescription, setNewFolderDescription] = useState('');
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Load folders from localStorage
-    let savedFolders = JSON.parse(localStorage.getItem('testFolders') || '[]');
+    const projectId = searchParams.get('project');
+    const storageKey = projectId ? `testFolders_${projectId}` : 'testFolders';
     
-    // Debug: Force create sample folders if none exist
-    if (savedFolders.length === 0) {
-      console.log('🔧 [DEBUG] No folders found, creating sample data...');
-      savedFolders = createSampleFolders();
-      
-      // Save sample folders to localStorage
-      localStorage.setItem('testFolders', JSON.stringify(savedFolders));
-      console.log('✅ [DEBUG] Sample folders created and saved:', savedFolders.length);
-    } else {
-      console.log('📁 [DEBUG] Found existing folders:', savedFolders.length);
-    }
-    
+    // Load folders from localStorage (project-specific)
+    const savedFolders = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('📁 [DEBUG] Loaded folders for project:', projectId, savedFolders.length);
     setFolders(savedFolders);
-  }, []);
+  }, [searchParams]);
 
   // Function to create sample folders
   const createSampleFolders = () => {
@@ -246,18 +239,22 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder, onTestSuiteSelect }
   const createFolder = () => {
     if (!newFolderName.trim()) return;
 
+    const projectId = searchParams.get('project');
+    const storageKey = projectId ? `testFolders_${projectId}` : 'testFolders';
+
     const newFolder = {
       id: `folder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: newFolderName.trim(),
       description: newFolderDescription.trim(),
       createdAt: new Date().toISOString(),
       testSuites: [],
-      status: 'active'
+      status: 'active',
+      projectId: projectId // Add project association
     };
 
     const updatedFolders = [...folders, newFolder];
     setFolders(updatedFolders);
-    localStorage.setItem('testFolders', JSON.stringify(updatedFolders));
+    localStorage.setItem(storageKey, JSON.stringify(updatedFolders));
 
     setNewFolderName('');
     setNewFolderDescription('');
@@ -296,18 +293,6 @@ const TestFolderManager = ({ onFolderSelect, onCreateFolder, onTestSuiteSelect }
         </button>
         
         {/* Debug Button */}
-        <button
-          onClick={() => {
-            console.log('🔧 [DEBUG] Force refreshing sample data...');
-            const sampleFolders = createSampleFolders();
-            localStorage.setItem('testFolders', JSON.stringify(sampleFolders));
-            setFolders(sampleFolders);
-            console.log('✅ [DEBUG] Sample data refreshed:', sampleFolders.length);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          🔧 Debug: Refresh Sample Data
-        </button>
       </div>
 
       {/* Create Folder Form */}

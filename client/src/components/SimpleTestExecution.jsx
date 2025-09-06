@@ -1,10 +1,12 @@
 // Simple HTTP-based test execution without WebSocket complexity
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 const SimpleTestExecution = ({ testSuite, onComplete }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState([]);
   const [results, setResults] = useState(null);
+  const [searchParams] = useSearchParams();
 
   const addLog = (message, type = 'info') => {
     const log = {
@@ -96,8 +98,10 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
       setResults(result);
 
       // Save to localStorage
+      const projectId = searchParams.get('project');
       const testRun = {
         id: Date.now(),
+        projectId: projectId, // Add project isolation
         testSuiteName: testSuite.name,
         testSuite: {
           name: testSuite.name,
