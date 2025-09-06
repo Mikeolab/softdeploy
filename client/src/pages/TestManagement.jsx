@@ -63,6 +63,20 @@ const TestManagement = () => {
     }
   }, [user, navigate, folderId, selectedFolder]);
 
+  // Listen for test run completion events
+  useEffect(() => {
+    const handleTestRunCompleted = () => {
+      console.log('🔄 [TEST_MANAGEMENT] Test run completed, refreshing data...');
+      loadSavedTestRuns();
+    };
+
+    window.addEventListener('testRunCompleted', handleTestRunCompleted);
+    
+    return () => {
+      window.removeEventListener('testRunCompleted', handleTestRunCompleted);
+    };
+  }, []);
+
   const loadSavedTestRuns = () => {
     try {
       const savedRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');

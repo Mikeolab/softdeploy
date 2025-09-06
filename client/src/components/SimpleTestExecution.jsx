@@ -81,6 +81,14 @@ const SimpleTestExecution = ({ testSuite, onComplete }) => {
         onComplete(result);
       }
 
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('testRunCompleted', { 
+        detail: { 
+          testRun,
+          result 
+        } 
+      }));
+
     } catch (error) {
       console.error('❌ Test execution failed:', error);
       addLog(`❌ Execution failed: ${error.message}`, 'error');

@@ -35,6 +35,20 @@ function Dashboard() {
     }
   }, [user?.id]);
 
+  // Listen for test run completion events
+  useEffect(() => {
+    const handleTestRunCompleted = () => {
+      console.log('🔄 [DASHBOARD] Test run completed, refreshing data...');
+      fetchDashboardData();
+    };
+
+    window.addEventListener('testRunCompleted', handleTestRunCompleted);
+    
+    return () => {
+      window.removeEventListener('testRunCompleted', handleTestRunCompleted);
+    };
+  }, [user?.id]);
+
   // ===== Queries =====
   const fetchDashboardData = async () => {
     try {

@@ -352,6 +352,384 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                 />
               </div>
 
+              {/* Steps Management */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Test Steps ({newSuite.steps.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newStep = {
+                        id: Date.now(),
+                        name: `Step ${newSuite.steps.length + 1}`,
+                        type: 'api',
+                        description: '',
+                        config: {}
+                      };
+                      setNewSuite({
+                        ...newSuite,
+                        steps: [...newSuite.steps, newStep]
+                      });
+                    }}
+                    className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                  >
+                    <PlusIcon className="w-3 h-3 mr-1" />
+                    Add Step
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {newSuite.steps.map((step, index) => (
+                    <div key={step.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Step {index + 1}: {step.name}
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedSteps = newSuite.steps.filter(s => s.id !== step.id);
+                            setNewSuite({ ...newSuite, steps: updatedSteps });
+                          }}
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                            Step Name
+                          </label>
+                          <input
+                            type="text"
+                            value={step.name}
+                            onChange={(e) => {
+                              const updatedSteps = newSuite.steps.map(s => 
+                                s.id === step.id ? { ...s, name: e.target.value } : s
+                              );
+                              setNewSuite({ ...newSuite, steps: updatedSteps });
+                            }}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                            Step Type
+                          </label>
+                          <select
+                            value={step.type}
+                            onChange={(e) => {
+                              const updatedSteps = newSuite.steps.map(s => 
+                                s.id === step.id ? { ...s, type: e.target.value, config: {} } : s
+                              );
+                              setNewSuite({ ...newSuite, steps: updatedSteps });
+                            }}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          >
+                            <option value="api">API Request</option>
+                            <option value="interaction">UI Interaction</option>
+                            <option value="assertion">Assertion</option>
+                            <option value="navigation">Navigation</option>
+                            <option value="loadTest">Load Test</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          Description
+                        </label>
+                        <input
+                          type="text"
+                          value={step.description}
+                          onChange={(e) => {
+                            const updatedSteps = newSuite.steps.map(s => 
+                              s.id === step.id ? { ...s, description: e.target.value } : s
+                            );
+                            setNewSuite({ ...newSuite, steps: updatedSteps });
+                          }}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Describe what this step does..."
+                        />
+                      </div>
+
+                      {/* Step Configuration based on type */}
+                      {step.type === 'api' && (
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Method
+                            </label>
+                            <select
+                              value={step.config.method || 'GET'}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, method: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                              <option value="GET">GET</option>
+                              <option value="POST">POST</option>
+                              <option value="PUT">PUT</option>
+                              <option value="DELETE">DELETE</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              URL Path
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.url || ''}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, url: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="/api/users"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Expected Status
+                            </label>
+                            <input
+                              type="number"
+                              value={step.config.expectedStatus || 200}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, expectedStatus: parseInt(e.target.value) } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {step.type === 'interaction' && (
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Selector
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.selector || ''}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, selector: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="button[type='submit']"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Action
+                            </label>
+                            <select
+                              value={step.config.action || 'click'}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, action: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                              <option value="click">Click</option>
+                              <option value="type">Type</option>
+                              <option value="hover">Hover</option>
+                              <option value="select">Select</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Value
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.value || ''}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, value: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="Text to type or select"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {step.type === 'assertion' && (
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Selector
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.selector || ''}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, selector: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="h1, .error-message, etc."
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Assertion
+                            </label>
+                            <select
+                              value={step.config.assertion || 'visible'}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, assertion: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                              <option value="visible">Visible</option>
+                              <option value="exists">Exists</option>
+                              <option value="contains">Contains Text</option>
+                              <option value="equals">Equals Text</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+
+                      {step.type === 'loadTest' && (
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Duration
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.duration || '10s'}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, duration: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="10s"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Users
+                            </label>
+                            <input
+                              type="number"
+                              value={step.config.users || 5}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, users: parseInt(e.target.value) } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              Ramp Up
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.rampUpTime || '2s'}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, rampUpTime: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="2s"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                              URL Path
+                            </label>
+                            <input
+                              type="text"
+                              value={step.config.url || ''}
+                              onChange={(e) => {
+                                const updatedSteps = newSuite.steps.map(s => 
+                                  s.id === step.id ? { 
+                                    ...s, 
+                                    config: { ...s.config, url: e.target.value } 
+                                  } : s
+                                );
+                                setNewSuite({ ...newSuite, steps: updatedSteps });
+                              }}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="/api/posts"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => {
