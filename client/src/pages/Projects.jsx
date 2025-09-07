@@ -39,11 +39,23 @@ function Projects() {
       setLoading(true);
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name')
+        .select('id, name, environment')
         .eq('user_id', user.id)
         .order('id', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('fetchProjects error:', error);
+        
+        // Handle case where projects table doesn't exist
+        if (error.code === '42P01' || error.message.includes('relation "projects" does not exist')) {
+          console.warn('Projects table not found, returning empty array');
+          setProjects([]);
+          return;
+        }
+        
+        throw error;
+      }
+      
       setProjects(data || []);
     } catch (err) {
       console.error('fetchProjects:', err.message);
@@ -60,7 +72,8 @@ function Projects() {
     try {
       const newProject = {
         user_id: user.id,
-        name: newProjectName.trim()
+        name: newProjectName.trim(),
+        environment: 'production'
       };
 
       const { data, error } = await supabase
@@ -68,7 +81,17 @@ function Projects() {
         .insert([newProject])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Project creation error:', error);
+        
+        // Handle case where projects table doesn't exist
+        if (error.code === '42P01' || error.message.includes('relation "projects" does not exist')) {
+          alert('Projects table not found. Please run the database setup script in Supabase first.');
+          return;
+        }
+        
+        throw error;
+      }
       
       // Add to projects list
       if (data && data[0]) {

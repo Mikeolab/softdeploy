@@ -40,35 +40,43 @@ export const ProjectProvider = ({ children }) => {
         throw new Error('User not authenticated');
       }
 
-      // Load project details - temporarily disable environment filtering
+      // Load project details with proper error handling
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
-        .select('id, name, user_id')
+        .select('id, name, user_id, environment')
         .eq('id', id)
         .single();
 
       if (projectError) {
         console.error('Project fetch error:', projectError);
-        // If project not found or table doesn't exist, create a mock project
-        if (projectError.code === 'PGRST116' || projectError.code === '42P01') {
+        
+        // Handle different error cases
+        if (projectError.code === 'PGRST116' || projectError.code === '42P01' || projectError.message.includes('relation "projects" does not exist')) {
+          // Projects table doesn't exist - create a mock project
+          console.warn('Projects table not found, using mock project');
           setProject({
             id: id,
             name: `Project ${id}`,
             user_id: user.id,
+            environment: 'production',
             created_at: new Date().toISOString()
           });
           setUserRole('owner');
           setLoading(false);
           return;
+        } else if (projectError.code === 'PGRST116') {
+          // Project not found
+          throw new Error('Project not found');
+        } else {
+          throw projectError;
         }
-        throw projectError;
       }
 
       if (!projectData) {
         throw new Error('Project not found');
       }
 
-      // Try to load user's role in project, but don't fail if table doesn't exist
+      // Try to load user's role in project
       try {
         const { data: membership, error: membershipError } = await supabase
           .from('project_memberships')
@@ -77,11 +85,16 @@ export const ProjectProvider = ({ children }) => {
           .eq('user_id', user.id)
           .single();
 
-        if (membershipError || !membership) {
-          // If no membership found, assume owner if user created the project
+        if (membershipError) {
+          console.warn('Could not load project membership:', membershipError);
+          // If membership table doesn't exist or no membership found, 
+          // assume owner if user created the project
           setUserRole(projectData.user_id === user.id ? 'owner' : 'viewer');
-        } else {
+        } else if (membership) {
           setUserRole(membership.role);
+        } else {
+          // No membership found, check if user is the project owner
+          setUserRole(projectData.user_id === user.id ? 'owner' : 'viewer');
         }
       } catch (membershipErr) {
         console.warn('Could not load project membership:', membershipErr);
