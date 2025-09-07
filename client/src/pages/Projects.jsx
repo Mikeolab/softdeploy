@@ -39,16 +39,24 @@ function Projects() {
       setLoading(true);
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name, environment')
+        .select('id, name, environment, created_at')
         .eq('user_id', user.id)
-        .order('id', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('fetchProjects error:', error);
         
-        // Handle case where projects table doesn't exist
+        // Handle different error cases
         if (error.code === '42P01' || error.message.includes('relation "projects" does not exist')) {
           console.warn('Projects table not found, returning empty array');
+          setProjects([]);
+          return;
+        } else if (error.code === 'PGRST301' || error.message.includes('JWT')) {
+          console.warn('Authentication error, redirecting to login');
+          navigate('/login');
+          return;
+        } else if (error.code === '400' || error.message.includes('Bad Request')) {
+          console.warn('Bad request error, likely RLS policy issue');
           setProjects([]);
           return;
         }
