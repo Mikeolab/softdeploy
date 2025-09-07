@@ -15,6 +15,9 @@ const RealTestExecutor = require('./realTestExecutor');
 // Import Cypress integration functions directly
 const { executeCypressTest, generateCypressScript } = require('./cypressIntegration');
 
+// Import sample data routes
+const sampleDataRoutes = require('./routes/sampleData');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -32,6 +35,9 @@ const activeExecutors = new Map();
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Sample data API routes
+app.use('/api/sample-data', sampleDataRoutes);
 
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {

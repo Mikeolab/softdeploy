@@ -1,66 +1,303 @@
 {
+  "users": [
+    {
+      "email": "new@example.com",
+      "name": "New User",
+      "role": "developer",
+      "id": "users-1757288877792-5vwleg2aq",
+      "created_at": "2025-09-07T23:47:57.792Z",
+      "updated_at": "2025-09-07T23:47:57.792Z"
+    }
+  ],
   "projects": [
     {
-      "id": "sample-project-1",
-      "name": "E-commerce Platform",
-      "description": "Full-stack e-commerce application",
-      "user_id": "sample-user-1",
-      "environment": "production",
-      "created_at": "2025-09-07T23:18:34.669Z",
-      "updated_at": "2025-09-07T23:18:34.674Z"
-    },
-    {
-      "id": "sample-project-2",
-      "name": "API Gateway",
-      "description": "Microservices API gateway",
-      "user_id": "sample-user-1",
-      "environment": "staging",
-      "created_at": "2025-09-07T23:18:34.674Z",
-      "updated_at": "2025-09-07T23:18:34.674Z"
+      "name": "New Project",
+      "description": "New Project Description",
+      "environment": "development",
+      "id": "projects-1757288877824-2r9hkleco",
+      "created_at": "2025-09-07T23:47:57.824Z",
+      "updated_at": "2025-09-07T23:47:57.824Z"
     }
   ],
   "testSuites": [
     {
       "id": "suite-1",
-      "project_id": "sample-project-1",
       "name": "Payment Processing Tests",
-      "description": "Test payment flows and transactions",
-      "test_count": 5,
-      "created_at": "2025-09-07T23:18:34.674Z"
+      "description": "Test suite for payment gateway integration",
+      "project_id": "proj-1",
+      "test_type": "API",
+      "tool_id": "postman",
+      "base_url": "https://api.ecommerce.com",
+      "steps": [
+        {
+          "id": "step-1",
+          "name": "Validate Payment Request",
+          "method": "POST",
+          "url": "/payments/validate",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "amount": 100,
+            "currency": "USD"
+          },
+          "expected_status": 200
+        },
+        {
+          "id": "step-2",
+          "name": "Process Payment",
+          "method": "POST",
+          "url": "/payments/process",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "amount": 100,
+            "currency": "USD",
+            "token": "test_token"
+          },
+          "expected_status": 201
+        }
+      ],
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-20T14:30:00Z"
     },
     {
       "id": "suite-2",
-      "project_id": "sample-project-2",
-      "name": "API Endpoint Tests",
-      "description": "Test REST API functionality",
-      "test_count": 8,
-      "created_at": "2025-09-07T23:18:34.674Z"
+      "name": "API Endpoints Tests",
+      "description": "Test suite for core API functionality",
+      "project_id": "proj-2",
+      "test_type": "API",
+      "tool_id": "rest",
+      "base_url": "https://api.testlab.com",
+      "steps": [
+        {
+          "id": "step-3",
+          "name": "Health Check",
+          "method": "GET",
+          "url": "/health",
+          "expected_status": 200
+        },
+        {
+          "id": "step-4",
+          "name": "Authentication Test",
+          "method": "POST",
+          "url": "/auth/login",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "username": "test",
+            "password": "test"
+          },
+          "expected_status": 200
+        }
+      ],
+      "created_at": "2024-01-16T09:45:00Z",
+      "updated_at": "2024-01-20T16:45:00Z"
+    },
+    {
+      "id": "suite-3",
+      "name": "Core Features Tests",
+      "description": "Test suite for basic application features",
+      "project_id": "proj-3",
+      "test_type": "UI",
+      "tool_id": "playwright",
+      "base_url": "https://app.newproject.com",
+      "steps": [
+        {
+          "id": "step-5",
+          "name": "Login Flow",
+          "method": "GET",
+          "url": "/login",
+          "expected_status": 200
+        },
+        {
+          "id": "step-6",
+          "name": "Dashboard Access",
+          "method": "GET",
+          "url": "/dashboard",
+          "expected_status": 200
+        }
+      ],
+      "created_at": "2024-01-17T11:50:00Z",
+      "updated_at": "2024-01-19T13:15:00Z"
     }
   ],
   "testRuns": [
     {
       "id": "run-1",
-      "project_id": "sample-project-1",
-      "suite_id": "suite-1",
+      "test_suite_id": "suite-1",
+      "project_id": "proj-1",
+      "user_id": "user-1",
       "status": "completed",
-      "success": true,
-      "total_steps": 5,
-      "passed_steps": 5,
+      "total_steps": 2,
+      "passed_steps": 2,
       "failed_steps": 0,
-      "total_time": 2500,
-      "executed_at": "2025-09-07T23:18:34.674Z"
+      "total_time": 1250,
+      "created_at": "2024-01-20T10:00:00Z",
+      "executed_at": "2024-01-20T10:00:00Z",
+      "results": {
+        "success": true,
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "duration": 1250
+        }
+      }
     },
     {
       "id": "run-2",
-      "project_id": "sample-project-2",
-      "suite_id": "suite-2",
+      "test_suite_id": "suite-2",
+      "project_id": "proj-2",
+      "user_id": "user-2",
       "status": "completed",
-      "success": false,
-      "total_steps": 8,
-      "passed_steps": 6,
-      "failed_steps": 2,
-      "total_time": 4200,
-      "executed_at": "2025-09-07T23:18:34.674Z"
+      "total_steps": 2,
+      "passed_steps": 1,
+      "failed_steps": 1,
+      "total_time": 2100,
+      "created_at": "2024-01-20T11:30:00Z",
+      "executed_at": "2024-01-20T11:30:00Z",
+      "results": {
+        "success": false,
+        "summary": {
+          "total": 2,
+          "passed": 1,
+          "failed": 1,
+          "duration": 2100
+        }
+      }
+    },
+    {
+      "id": "run-3",
+      "test_suite_id": "suite-3",
+      "project_id": "proj-3",
+      "user_id": "user-3",
+      "status": "completed",
+      "total_steps": 2,
+      "passed_steps": 2,
+      "failed_steps": 0,
+      "total_time": 1800,
+      "created_at": "2024-01-20T13:15:00Z",
+      "executed_at": "2024-01-20T13:15:00Z",
+      "results": {
+        "success": true,
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "duration": 1800
+        }
+      }
     }
-  ]
+  ],
+  "localStorage": {
+    "testRunsV2": [
+      {
+        "id": "run-1",
+        "projectId": "proj-1",
+        "testSuite": {
+          "name": "Payment Processing Tests",
+          "description": "Test suite for payment gateway integration"
+        },
+        "success": true,
+        "totalSteps": 2,
+        "passedSteps": 2,
+        "failedSteps": 0,
+        "totalTime": 1250,
+        "executedAt": "2024-01-20T10:00:00Z",
+        "timestamp": 1705744800000,
+        "user_id": "user-1"
+      },
+      {
+        "id": "run-2",
+        "projectId": "proj-2",
+        "testSuite": {
+          "name": "API Endpoints Tests",
+          "description": "Test suite for core API functionality"
+        },
+        "success": false,
+        "totalSteps": 2,
+        "passedSteps": 1,
+        "failedSteps": 1,
+        "totalTime": 2100,
+        "executedAt": "2024-01-20T11:30:00Z",
+        "timestamp": 1705750200000,
+        "user_id": "user-2"
+      },
+      {
+        "id": "run-3",
+        "projectId": "proj-3",
+        "testSuite": {
+          "name": "Core Features Tests",
+          "description": "Test suite for basic application features"
+        },
+        "success": true,
+        "totalSteps": 2,
+        "passedSteps": 2,
+        "failedSteps": 0,
+        "totalTime": 1800,
+        "executedAt": "2024-01-20T13:15:00Z",
+        "timestamp": 1705756500000,
+        "user_id": "user-3"
+      }
+    ],
+    "testResultsV2": [
+      {
+        "id": "run-1",
+        "testSuite": "Payment Processing Tests",
+        "testType": "API",
+        "toolId": "postman",
+        "success": true,
+        "totalSteps": 2,
+        "passedSteps": 2,
+        "failedSteps": 0,
+        "totalTime": 1250,
+        "executedAt": "2024-01-20T10:00:00Z",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "duration": 1250
+        }
+      },
+      {
+        "id": "run-2",
+        "testSuite": "API Endpoints Tests",
+        "testType": "API",
+        "toolId": "rest",
+        "success": false,
+        "totalSteps": 2,
+        "passedSteps": 1,
+        "failedSteps": 1,
+        "totalTime": 2100,
+        "executedAt": "2024-01-20T11:30:00Z",
+        "summary": {
+          "total": 2,
+          "passed": 1,
+          "failed": 1,
+          "duration": 2100
+        }
+      },
+      {
+        "id": "run-3",
+        "testSuite": "Core Features Tests",
+        "testType": "UI",
+        "toolId": "playwright",
+        "success": true,
+        "totalSteps": 2,
+        "passedSteps": 2,
+        "failedSteps": 0,
+        "totalTime": 1800,
+        "executedAt": "2024-01-20T13:15:00Z",
+        "summary": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "duration": 1800
+        }
+      }
+    ]
+  }
 }

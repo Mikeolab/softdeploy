@@ -22,6 +22,7 @@ import PricingPage from './pages/PricingPage.jsx';
 import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
 import SettingsPage from './pages/Settings.jsx';
+import SampleDataEditor from './pages/SampleDataEditor.jsx';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -94,6 +95,7 @@ function App() {
                   
                   <Route path="/jobs" element={<JobsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/sample-data" element={<SampleDataEditor />} />
                   <Route path="/" element={<DashboardPage />} />
                 </Routes>
               </main>
