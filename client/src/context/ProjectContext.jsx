@@ -40,13 +40,33 @@ export const ProjectProvider = ({ children }) => {
         throw new Error('User not authenticated');
       }
 
-      // Load project details - simplified query to avoid schema issues
-      const { data: projectData, error: projectError } = await supabase
+      // Load project details - try environment-specific first, then fallback
+      let projectData = null;
+      let projectError = null;
+
+      // First try environment-specific project
+      const { data: envData, error: envError } = await supabase
         .from('projects')
         .select('id, name, user_id, environment')
         .eq('id', id)
-        .eq('environment', ENVIRONMENT) // Filter by environment
+        .eq('environment', ENVIRONMENT)
         .single();
+
+      if (envError || !envData) {
+        // Fallback: try to get project without environment filter
+        console.warn('Environment-specific project not found, trying fallback');
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('projects')
+          .select('id, name, user_id, environment')
+          .eq('id', id)
+          .single();
+
+        projectData = fallbackData;
+        projectError = fallbackError;
+      } else {
+        projectData = envData;
+        projectError = null;
+      }
 
       if (projectError) {
         console.error('Project fetch error:', projectError);

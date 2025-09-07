@@ -171,28 +171,42 @@ function ProjectDetail() {
     try {
       setLoading(true);
       
-      // Fetch project details - handle case where table doesn't exist
+      // Fetch project details - try environment-specific first, then fallback
       let projectData = null;
       try {
-        const { data, error: projectError } = await supabase
+        // First try environment-specific project
+        const { data: envData, error: envError } = await supabase
           .from('projects')
           .select('id, name, environment')
           .eq('id', projectId)
           .eq('user_id', user.id)
-          .eq('environment', ENVIRONMENT) // Filter by environment
+          .eq('environment', ENVIRONMENT)
           .single();
 
-        if (projectError) {
-          console.warn('Project not found or table not available:', projectError);
-          // Create a mock project for testing
-          projectData = {
-            id: projectId,
-            name: `Project ${projectId}`,
-            user_id: user.id,
-            environment: ENVIRONMENT
-          };
+        if (envError || !envData) {
+          // Fallback: try without environment filter
+          console.warn('Environment-specific project not found, trying fallback');
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('projects')
+            .select('id, name, environment')
+            .eq('id', projectId)
+            .eq('user_id', user.id)
+            .single();
+
+          if (fallbackError) {
+            console.warn('Project not found or table not available:', fallbackError);
+            // Create a mock project for testing
+            projectData = {
+              id: projectId,
+              name: `Project ${projectId}`,
+              user_id: user.id,
+              environment: ENVIRONMENT
+            };
+          } else {
+            projectData = fallbackData;
+          }
         } else {
-          projectData = data;
+          projectData = envData;
         }
       } catch (err) {
         console.warn('Could not fetch project:', err);

@@ -68,19 +68,33 @@ function Dashboard() {
       // Fetch projects count - handle case where table doesn't exist
       let projectsData = [];
       try {
-        const { data, error: projectsError } = await supabase
+        // First try to get environment-specific projects
+        const { data: envData, error: envError } = await supabase
           .from('projects')
           .select('id, name, environment')
           .eq('user_id', user.id)
-          .eq('environment', ENVIRONMENT) // Filter by environment
+          .eq('environment', ENVIRONMENT)
           .order('id', { ascending: false })
           .limit(5);
 
-        if (projectsError) {
-          console.warn('Projects table not available:', projectsError);
-          projectsData = [];
+        if (envError || !envData || envData.length === 0) {
+          // If no environment-specific projects, try to get all projects (fallback)
+          console.warn('No environment-specific projects found, falling back to all projects');
+          const { data: allData, error: allError } = await supabase
+            .from('projects')
+            .select('id, name, environment')
+            .eq('user_id', user.id)
+            .order('id', { ascending: false })
+            .limit(5);
+
+          if (allError) {
+            console.warn('Projects table not available:', allError);
+            projectsData = [];
+          } else {
+            projectsData = allData || [];
+          }
         } else {
-          projectsData = data || [];
+          projectsData = envData;
         }
       } catch (err) {
         console.warn('Could not fetch projects:', err);
