@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeftIcon,
   PlayIcon,
@@ -11,14 +12,18 @@ import {
   XMarkIcon,
   ClockIcon,
   UserGroupIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
+import AIAssistant from './AIAssistant';
 
 const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   const [testSuites, setTestSuites] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editingSuite, setEditingSuite] = useState(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [searchParams] = useSearchParams();
   const [newSuite, setNewSuite] = useState({
     name: '',
     description: '',
@@ -63,6 +68,43 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     if (onRunTest) {
       onRunTest(suite);
     }
+  };
+
+  const handleAITestGenerated = (aiTest) => {
+    console.log('🤖 [AI] Test generated:', aiTest.name);
+    
+    // Convert AI-generated test to our format
+    const newTestSuite = {
+      id: `suite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: aiTest.name,
+      description: aiTest.description,
+      testType: aiTest.testType,
+      toolId: aiTest.toolId || 'axios',
+      baseUrl: aiTest.baseUrl || '',
+      steps: aiTest.steps || [],
+      createdAt: new Date().toISOString(),
+      status: 'active'
+    };
+
+    // Add to test suites
+    const updatedSuites = [...testSuites, newTestSuite];
+    setTestSuites(updatedSuites);
+
+    // Save to localStorage
+    const projectId = searchParams.get('project');
+    const storageKey = projectId ? `testSuites_${projectId}` : 'testSuites';
+    localStorage.setItem(storageKey, JSON.stringify(updatedSuites));
+
+    console.log('✅ [AI] Test suite added:', newTestSuite.name);
+  };
+
+  const getProjectContext = () => {
+    const projectId = searchParams.get('project');
+    return {
+      id: projectId,
+      name: folder?.name || 'Test Project',
+      description: folder?.description || 'Test management project'
+    };
   };
 
   const handleEditSuite = (suite) => {

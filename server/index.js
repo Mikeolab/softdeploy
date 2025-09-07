@@ -831,7 +831,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-const server = app.listen(PORT, () => {
+// Start the HTTP server
+server.listen(PORT, () => {
   console.log(`🚀 Real test execution server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🧪 Test execution: http://localhost:${PORT}/api/execute-test-suite`);

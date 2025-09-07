@@ -1,0 +1,18 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    },
+    "emmet.includeLanguages": {
+      "javascript": "javascriptreact"
+    },
+    "tailwindCSS.includeLanguages": {
+      "javascript": "javascript",
+      "html": "HTML"
+    },
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "editor.quickSuggestions": {
+      "strings": true
+    }
+  }

@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { ProjectProvider } from './context/ProjectContext.jsx';
 
 // Pages
 import Home from './pages/Home.jsx';
@@ -57,12 +58,41 @@ function App() {
                 <Routes>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/projects" element={<ProjectsPage />} />
-                  <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                  <Route path="/test-management" element={<TestManagementPage />} />
-                  <Route path="/test-management/:folderId" element={<TestManagementPage />} />
+                  
+                  {/* Project-scoped routes */}
+                  <Route path="/projects/:projectId" element={
+                    <ProjectProvider>
+                      <ProjectDetailPage />
+                    </ProjectProvider>
+                  } />
+                  <Route path="/projects/:projectId/test-management" element={
+                    <ProjectProvider>
+                      <TestManagementPage />
+                    </ProjectProvider>
+                  } />
+                  <Route path="/projects/:projectId/test-management/:folderId" element={
+                    <ProjectProvider>
+                      <TestManagementPage />
+                    </ProjectProvider>
+                  } />
+                  <Route path="/projects/:projectId/deploy" element={
+                    <ProjectProvider>
+                      <DeployPage />
+                    </ProjectProvider>
+                  } />
+                  <Route path="/projects/:projectId/runs" element={
+                    <ProjectProvider>
+                      <RunsPage />
+                    </ProjectProvider>
+                  } />
+                  
+                  {/* Legacy routes - redirect to projects */}
+                  <Route path="/test-management" element={<ProjectsPage />} />
+                  <Route path="/test-management/:folderId" element={<ProjectsPage />} />
+                  <Route path="/deploy" element={<ProjectsPage />} />
+                  <Route path="/runs" element={<ProjectsPage />} />
+                  
                   <Route path="/jobs" element={<JobsPage />} />
-                  <Route path="/deploy" element={<DeployPage />} />
-                  <Route path="/runs" element={<RunsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/" element={<DashboardPage />} />
                 </Routes>

@@ -1,7 +1,8 @@
 // src/components/Sidebar.jsx
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useProject } from '../context/ProjectContext';
+import { useNavigate, Link, useLocation, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { 
@@ -26,6 +27,7 @@ function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { projectId } = useParams();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isNear, setIsNear] = useState(false);
@@ -60,14 +62,35 @@ function Sidebar() {
     fetchProjects();
   }, [user?.id]);
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Projects', href: '/projects', icon: FolderIcon },
-    { name: 'Test Management', href: '/test-management', icon: PlayIcon },
-    { name: 'Deploy', href: '/deploy', icon: RocketLaunchIcon },
-    { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
-  ];
+  // Navigation items - project-aware
+  const getNavigationItems = () => {
+    const baseItems = [
+      { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+      { name: 'Projects', href: '/projects', icon: FolderIcon },
+    ];
+
+    // Add project-scoped items if we're in a project
+    if (projectId) {
+      baseItems.push(
+        { name: 'Overview', href: `/projects/${projectId}`, icon: HomeIcon },
+        { name: 'Test Management', href: `/projects/${projectId}/test-management`, icon: PlayIcon },
+        { name: 'Deploy', href: `/projects/${projectId}/deploy`, icon: RocketLaunchIcon },
+        { name: 'Runs', href: `/projects/${projectId}/runs`, icon: ChartBarIcon }
+      );
+    } else {
+      // Legacy routes for when no project is selected
+      baseItems.push(
+        { name: 'Test Management', href: '/test-management', icon: PlayIcon },
+        { name: 'Deploy', href: '/deploy', icon: RocketLaunchIcon },
+        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon }
+      );
+    }
+
+    baseItems.push({ name: 'Settings', href: '/settings', icon: Cog6ToothIcon });
+    return baseItems;
+  };
+
+  const navigation = getNavigationItems();
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({

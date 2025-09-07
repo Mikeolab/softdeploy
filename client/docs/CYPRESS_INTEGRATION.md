@@ -4,7 +4,6 @@
 This guide explains how to integrate Cypress testing with SoftDeploy without leaving the application. The system generates Cypress scripts that can be executed directly from within SoftDeploy.
 
 ## How It Works
-
 ### 1. **Script Generation**
 When you select Cypress as your testing tool, SoftDeploy automatically generates Cypress-compatible test scripts based on your test steps.
 

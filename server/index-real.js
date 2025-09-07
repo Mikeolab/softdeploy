@@ -9,11 +9,25 @@ const axios = require('axios');
 const WebSocket = require('ws');
 const http = require('http');
 
-// Import real test executor
+// Import real test executor and AI service
 const RealTestExecutor = require('./realTestExecutor');
+const AIService = require('./aiService');
+
+// Import project isolation middleware
+const {
+  loadProject,
+  assertMembership,
+  validateResourceProject,
+  enforceProjectId,
+  validateWebSocketProject,
+  logProjectOperation
+} = require('./middleware/projectIsolation');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize AI service
+const aiService = new AIService();
 
 app.use(cors());
 app.use(express.json());
@@ -22,17 +36,37 @@ app.use(express.json());
 const server = http.createServer(app);
 
 // WebSocket server for real-time test execution updates
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ 
+  server,
+  path: '/ws',
+  verifyClient: async (info) => {
+    console.log('🔌 [WS] New WebSocket connection attempt');
+    
+    // Validate project access
+    const isValid = await validateWebSocketProject(null, info.req);
+    if (!isValid) {
+      console.log('❌ [WS] WebSocket connection rejected: Invalid project access');
+      return false;
+    }
+    
+    return true;
+  }
+});
 
 // Store active test executors
 const activeExecutors = new Map();
 
 // WebSocket connection handler
-wss.on('connection', (ws, req) => {
-  console.log('🔌 WebSocket client connected');
-  
-  // Generate unique connection ID
+wss.on('connection', async (ws, req) => {
   const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Validate project access for the connection
+  const isValid = await validateWebSocketProject(ws, req);
+  if (!isValid) {
+    return; // Connection already closed by middleware
+  }
+  
+  console.log(`🔌 [WS] Client connected: ${connectionId} (Project: ${ws.projectId}, User: ${ws.userId})`);
   
   // Check if connection already exists and close it
   if (activeExecutors.has(connectionId)) {
@@ -47,10 +81,18 @@ wss.on('connection', (ws, req) => {
   const executor = new RealTestExecutor(ws);
   activeExecutors.set(connectionId, executor);
   
+  // Log project-scoped connection
+  logProjectOperation('WebSocket Connected', ws.projectId, ws.userId, {
+    connectionId,
+    userRole: ws.userRole
+  });
+  
   // Send connection confirmation
   ws.send(JSON.stringify({
     type: 'connection_established',
     connectionId,
+    projectId: ws.projectId,
+    userRole: ws.userRole,
     timestamp: new Date().toISOString(),
     message: 'Connected to test execution server'
   }));
@@ -105,18 +147,177 @@ wss.on('connection', (ws, req) => {
   });
   
   ws.on('close', () => {
-    console.log('🔌 WebSocket client disconnected');
+    console.log(`🔌 [WS] Client disconnected: ${connectionId} (Project: ${ws.projectId})`);
+    
+    // Log project-scoped disconnection
+    logProjectOperation('WebSocket Disconnected', ws.projectId, ws.userId, {
+      connectionId
+    });
+    
     const executor = activeExecutors.get(connectionId);
     if (executor) {
       executor.isRunning = false;
-      activeExecutors.delete(connectionId);
     }
+    activeExecutors.delete(connectionId);
   });
   
   ws.on('error', (error) => {
-    console.error('❌ [WEBSOCKET] Connection error:', error);
+    console.error(`❌ [WS] WebSocket error for ${connectionId} (Project: ${ws.projectId}):`, error);
     activeExecutors.delete(connectionId);
   });
+});
+
+// ===== AI ENDPOINTS =====
+
+// Health check for AI service
+app.get('/api/ai/health', (req, res) => {
+  try {
+    const stats = aiService.getUsageStats();
+    res.json({
+      success: true,
+      available: stats.available,
+      stats: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Get AI usage statistics
+app.get('/api/ai/usage', (req, res) => {
+  try {
+    const stats = aiService.getUsageStats();
+    res.json({
+      success: true,
+      usage: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Generate test script using AI
+app.post('/api/ai/generate-test', async (req, res) => {
+  try {
+    const { prompt, testType = 'API', projectContext = {} } = req.body;
+    
+    console.log('🤖 [AI] Received test generation request');
+    console.log('📋 AI Request Details:', {
+      testType,
+      projectName: projectContext.name,
+      promptLength: prompt?.length || 0
+    });
+    
+    // Validate input
+    if (!prompt || !prompt.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Prompt is required for AI generation',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Check if AI service is available
+    if (!aiService.isAvailable()) {
+      return res.status(503).json({
+        success: false,
+        message: 'AI service not available. Please set GEMINI_API_KEY environment variable.',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Generate test script
+    const result = await aiService.generateTestScript(prompt, testType, projectContext);
+    
+    if (result.success) {
+      console.log('✅ [AI] Test script generated successfully');
+      res.json(result);
+    } else {
+      console.error('❌ [AI] Test generation failed:', result.error);
+      
+      // Check if it's a rate limit error
+      if (result.error.includes('limit reached') || result.error.includes('Rate limit exceeded')) {
+        res.status(429).json({
+          success: false,
+          error: result.error,
+          message: result.error,
+          timestamp: new Date().toISOString(),
+          usageStats: aiService.getUsageStats()
+        });
+      } else {
+        res.status(500).json(result);
+      }
+    }
+  } catch (error) {
+    console.error('❌ [AI] Test generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Generate test suggestions for a project
+app.post('/api/ai/suggest-tests', async (req, res) => {
+  try {
+    const { projectContext } = req.body;
+    
+    console.log('🤖 [AI] Received test suggestions request');
+    console.log('📋 Project Context:', {
+      name: projectContext.name,
+      description: projectContext.description
+    });
+    
+    // Check if AI service is available
+    if (!aiService.isAvailable()) {
+      return res.status(503).json({
+        success: false,
+        message: 'AI service not available. Please set GEMINI_API_KEY environment variable.',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Generate suggestions
+    const result = await aiService.generateTestSuggestions(projectContext);
+    
+    if (result.success) {
+      console.log('✅ [AI] Test suggestions generated successfully');
+      res.json(result);
+    } else {
+      console.error('❌ [AI] Suggestions generation failed:', result.error);
+      
+      // Check if it's a rate limit error
+      if (result.error.includes('limit reached') || result.error.includes('Rate limit exceeded')) {
+        res.status(429).json({
+          success: false,
+          error: result.error,
+          message: result.error,
+          timestamp: new Date().toISOString(),
+          usageStats: aiService.getUsageStats()
+        });
+      } else {
+        res.status(500).json(result);
+      }
+    }
+  } catch (error) {
+    console.error('❌ [AI] Suggestions generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API endpoint for Quick Test execution
@@ -437,17 +638,32 @@ app.get('/api/health', (req, res) => {
 });
 
 // API endpoint to execute a complete test suite (WebSocket-based)
-app.post('/api/execute-test-suite', async (req, res) => {
+app.post('/api/projects/:projectId/execute-test-suite', 
+  loadProject, 
+  assertMembership('editor'), 
+  enforceProjectId,
+  async (req, res) => {
   try {
     const { testSuite } = req.body;
+    const projectId = req.project.id;
+    const userId = req.user.id;
     
-    console.log('🚀 [SERVER] Received test suite execution request');
+    console.log(`🚀 [SERVER] Received test suite execution request for project ${projectId}`);
     console.log('📋 Test Suite Details:', {
       name: testSuite.name,
       type: testSuite.testType,
       tool: testSuite.toolId,
       steps: testSuite.steps?.length || 0,
-      baseUrl: testSuite.baseUrl
+      baseUrl: testSuite.baseUrl,
+      projectId: projectId,
+      userId: userId
+    });
+    
+    // Log project-scoped operation
+    logProjectOperation('Test Suite Execution Started', projectId, userId, {
+      testSuiteName: testSuite.name,
+      testType: testSuite.testType,
+      toolId: testSuite.toolId
     });
     
     // Enhanced validation
@@ -496,6 +712,10 @@ app.post('/api/execute-test-suite', async (req, res) => {
       }
     }
 
+    // Ensure project_id is set in test suite
+    testSuite.project_id = projectId;
+    testSuite.user_id = userId;
+
     // Validate steps
     if (!testSuite.steps || !Array.isArray(testSuite.steps) || testSuite.steps.length === 0) {
       console.error('❌ [SERVER] Invalid or empty steps array');
@@ -518,7 +738,17 @@ app.post('/api/execute-test-suite', async (req, res) => {
         totalSteps: result.totalSteps,
         passedSteps: result.passedSteps,
         failedSteps: result.failedSteps,
-        totalTime: result.totalTime
+        totalTime: result.totalTime,
+        projectId: projectId
+      });
+
+      // Log project-scoped completion
+      logProjectOperation('Test Suite Execution Completed', projectId, userId, {
+        testSuiteName: testSuite.name,
+        success: result.success,
+        totalSteps: result.totalSteps,
+        passedSteps: result.passedSteps,
+        failedSteps: result.failedSteps
       });
 
       return res.json({
@@ -529,11 +759,19 @@ app.post('/api/execute-test-suite', async (req, res) => {
         totalTime: result.totalTime,
         results: result.results,
         timestamp: result.timestamp,
+        projectId: projectId,
         message: `Test suite completed: ${result.passedSteps}/${result.totalSteps} steps passed`
       });
 
     } catch (executionError) {
       console.error('❌ [SERVER] Test execution failed:', executionError.message);
+      
+      // Log project-scoped failure
+      logProjectOperation('Test Suite Execution Failed', projectId, userId, {
+        testSuiteName: testSuite.name,
+        error: executionError.message
+      });
+      
       return res.status(500).json({
         success: false,
         message: `Test execution failed: ${executionError.message}`,
@@ -552,6 +790,195 @@ app.post('/api/execute-test-suite', async (req, res) => {
     });
   }
 });
+
+// ===== PROJECT-SCOPED API ROUTES =====
+
+// Get test runs for a project
+app.get('/api/projects/:projectId/test-runs', 
+  loadProject, 
+  assertMembership('viewer'),
+  async (req, res) => {
+    try {
+      const projectId = req.project.id;
+      const userId = req.user.id;
+      
+      console.log(`📊 [API] Fetching test runs for project ${projectId}`);
+      
+      // Log project-scoped operation
+      logProjectOperation('Test Runs Fetched', projectId, userId, {});
+      
+      // In a real implementation, this would query the database
+      // For now, return mock data
+      const testRuns = [
+        {
+          id: 'run_1',
+          project_id: projectId,
+          user_id: userId,
+          test_suite_name: 'API Test Suite',
+          test_type: 'API',
+          tool_id: 'axios',
+          status: 'completed',
+          total_steps: 3,
+          passed_steps: 3,
+          failed_steps: 0,
+          total_time: 1250,
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      res.json({
+        success: true,
+        testRuns: testRuns,
+        projectId: projectId,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [API] Error fetching test runs:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch test runs',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+// Get test plans for a project
+app.get('/api/projects/:projectId/test-plans', 
+  loadProject, 
+  assertMembership('viewer'),
+  async (req, res) => {
+    try {
+      const projectId = req.project.id;
+      const userId = req.user.id;
+      
+      console.log(`📋 [API] Fetching test plans for project ${projectId}`);
+      
+      // Log project-scoped operation
+      logProjectOperation('Test Plans Fetched', projectId, userId, {});
+      
+      // In a real implementation, this would query the database
+      const testPlans = [
+        {
+          id: 'plan_1',
+          project_id: projectId,
+          user_id: userId,
+          title: 'API Test Plan',
+          description: 'Comprehensive API testing plan',
+          status: 'active',
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      res.json({
+        success: true,
+        testPlans: testPlans,
+        projectId: projectId,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [API] Error fetching test plans:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch test plans',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+// Create test plan for a project
+app.post('/api/projects/:projectId/test-plans', 
+  loadProject, 
+  assertMembership('editor'), 
+  enforceProjectId,
+  async (req, res) => {
+    try {
+      const projectId = req.project.id;
+      const userId = req.user.id;
+      const { title, description, testSuites } = req.body;
+      
+      console.log(`➕ [API] Creating test plan for project ${projectId}`);
+      
+      // Log project-scoped operation
+      logProjectOperation('Test Plan Created', projectId, userId, {
+        title: title,
+        description: description
+      });
+      
+      // In a real implementation, this would save to database
+      const newTestPlan = {
+        id: `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        project_id: projectId,
+        user_id: userId,
+        title: title,
+        description: description,
+        test_suites: testSuites || [],
+        status: 'active',
+        created_at: new Date().toISOString()
+      };
+      
+      res.status(201).json({
+        success: true,
+        testPlan: newTestPlan,
+        projectId: projectId,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [API] Error creating test plan:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create test plan',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
+
+// Get project members
+app.get('/api/projects/:projectId/members', 
+  loadProject, 
+  assertMembership('viewer'),
+  async (req, res) => {
+    try {
+      const projectId = req.project.id;
+      const userId = req.user.id;
+      
+      console.log(`👥 [API] Fetching members for project ${projectId}`);
+      
+      // Log project-scoped operation
+      logProjectOperation('Project Members Fetched', projectId, userId, {});
+      
+      // In a real implementation, this would query the project_memberships table
+      const members = [
+        {
+          id: userId,
+          email: req.user.email,
+          role: req.userRole,
+          joined_at: new Date().toISOString()
+        }
+      ];
+      
+      res.json({
+        success: true,
+        members: members,
+        projectId: projectId,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [API] Error fetching project members:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch project members',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+);
 
 // Serve static files from the React app (AFTER API routes)
 app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -587,7 +1014,7 @@ server.on('upgrade', (request, socket, head) => {
 server.listen(PORT, () => {
   console.log('🚀 Real test execution server running on port', PORT);
   console.log('📊 Health check: http://localhost:' + PORT + '/api/health');
-  console.log('🧪 Test execution: http://localhost:' + PORT + '/api/execute-test-suite');
+  console.log('🧪 Test execution: http://localhost:' + PORT + '/api/projects/:projectId/execute-test-suite');
   console.log('🔌 WebSocket server ready for real-time updates');
 });
 
