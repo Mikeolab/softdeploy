@@ -8,10 +8,30 @@
     "dev:client": "cd client && npm run dev",
     "build": "npm install && cd server && npm install --production && cd ../client && npm install && cd ../client && npm run build",
     "start": "cd server && node index-real.js",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "test:unit": "npm run test:unit:client && npm run test:unit:server",
+    "test:unit:client": "cd client && npm run test:unit",
+    "test:unit:server": "cd server && npm run test:unit",
+    "test:api": "cd server && npm run test:api",
+    "test:e2e": "cd client && npm run test:e2e",
+    "test": "npm run test:unit && npm run test:api && npm run test:e2e",
+    "lint": "npm run lint:client && npm run lint:server",
+    "lint:client": "cd client && npm run lint",
+    "lint:server": "cd server && npm run lint",
+    "typecheck": "npm run typecheck:client && npm run typecheck:server",
+    "typecheck:client": "cd client && npm run typecheck",
+    "typecheck:server": "cd server && npm run typecheck",
+    "seed:sample": "cd server && npm run seed:sample"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "vitest": "^1.6.0",
+    "supertest": "^6.3.4",
+    "@types/supertest": "^6.0.2",
+    "typescript": "^5.4.5",
+    "@types/node": "^20.12.7"
   },
   "keywords": [
     "testing",

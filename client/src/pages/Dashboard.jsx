@@ -70,7 +70,7 @@ function Dashboard() {
       try {
         const { data, error: projectsError } = await supabase
           .from('projects')
-          .select('id, name')
+          .select('id, name, user_id')
           .eq('user_id', user.id)
           .order('id', { ascending: false })
           .limit(5);
@@ -108,7 +108,54 @@ function Dashboard() {
       }
 
       // Load recent test runs from localStorage
-      const savedTestRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      let savedTestRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
+      
+      // Generate project-specific sample data if none exists and we have projects
+      if (savedTestRuns.length === 0 && projectsData.length > 0) {
+        console.log('🎯 Generating project-specific sample test data...');
+        const sampleRuns = [];
+        
+        // Generate different test runs for each project
+        projectsData.forEach((project, projectIndex) => {
+          const projectKey = project.id.substring(0, 8);
+          const projectName = project.name.toLowerCase();
+          
+          // Different test suites based on project name
+          const testSuites = {
+            'ecommerce': ['Payment Processing', 'Product Catalog', 'User Accounts'],
+            'testlab': ['API Endpoints', 'Database Operations', 'Authentication'],
+            'newproject': ['Core Features', 'Integration Tests', 'Performance Tests']
+          };
+          
+          const suites = testSuites[projectName] || ['API Tests', 'UI Tests', 'Integration Tests'];
+          
+          // Generate 2-3 test runs per project
+          const runsPerProject = Math.floor(Math.random() * 2) + 2; // 2-3 runs
+          
+          for (let i = 0; i < runsPerProject; i++) {
+            const suiteName = suites[i % suites.length];
+            const success = Math.random() > 0.3; // 70% success rate
+            
+            sampleRuns.push({
+              id: `${projectKey}-run-${i + 1}`,
+              projectId: project.id,
+              testSuite: { name: `${suiteName} Test` },
+              success: success,
+              totalSteps: Math.floor(Math.random() * 5) + 3, // 3-7 steps
+              passedSteps: success ? Math.floor(Math.random() * 3) + 3 : Math.floor(Math.random() * 2) + 1,
+              failedSteps: success ? 0 : Math.floor(Math.random() * 2) + 1,
+              totalTime: Math.floor(Math.random() * 2000) + 800, // 800-2800ms
+              executedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+              timestamp: Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+            });
+          }
+        });
+        
+        localStorage.setItem('testRunsV2', JSON.stringify(sampleRuns));
+        savedTestRuns = sampleRuns;
+        console.log(`✅ Generated ${sampleRuns.length} project-specific test runs`);
+      }
+      
       const recentRuns = savedTestRuns
         .sort((a, b) => new Date(b.executedAt || b.timestamp || 0) - new Date(a.executedAt || a.timestamp || 0))
         .slice(0, 5);
@@ -161,7 +208,7 @@ function Dashboard() {
       value: recentTestRuns.length.toString(), 
       change: recentTestRuns.length > 0 ? `+${recentTestRuns.length}` : '0', 
       trend: recentTestRuns.length > 0 ? 'up' : 'neutral',
-      link: '/test-management',
+      link: '/projects',
       icon: PlayIcon,
       priority: 'high' // Top-left priority
     },
@@ -172,7 +219,7 @@ function Dashboard() {
         '-', 
       change: '+5%', 
       trend: 'up',
-      link: '/test-management',
+      link: '/projects',
       icon: ChartBarIcon,
       priority: 'medium'
     },
@@ -206,7 +253,7 @@ function Dashboard() {
       title: 'Test Management',
       description: 'Create and manage test plans for your projects',
       icon: CogIcon,
-      link: '/test-management',
+      link: '/projects',
       action: 'Manage'
     }
   ];
@@ -361,7 +408,7 @@ function Dashboard() {
                   Create and run your first test to see results here
                 </p>
                 <Link 
-                  to="/test-management"
+                  to="/projects"
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Start Testing

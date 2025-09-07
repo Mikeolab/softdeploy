@@ -839,9 +839,5 @@ server.listen(PORT, () => {
   console.log(`🔌 WebSocket server ready for real-time updates`);
 });
 
-// Attach WebSocket server to HTTP server
-server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
-});
+// WebSocket server is already attached via { server } option above
+// No need for manual upgrade handling

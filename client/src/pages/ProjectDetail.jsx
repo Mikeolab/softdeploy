@@ -522,7 +522,7 @@ function ProjectDetail() {
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No test runs yet</h3>
                       <p className="text-gray-600 dark:text-gray-300 mb-4">Create and run your first test to see results here</p>
                     <button
-                        onClick={() => navigate(`/test-management?project=${projectId}`)}
+                        onClick={() => navigate(`/projects/${projectId}/test-management`)}
                         className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 font-semibold"
                     >
                         Start Testing

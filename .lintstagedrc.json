@@ -1,0 +1,15 @@
+{
+  "lint-staged": {
+    "client/**/*.{js,jsx,ts,tsx}": [
+      "cd client && npm run lint",
+      "cd client && npm run typecheck"
+    ],
+    "server/**/*.{js,ts}": [
+      "cd server && npm run lint",
+      "cd server && npm run typecheck"
+    ],
+    "*.{js,ts,json,md}": [
+      "prettier --write"
+    ]
+  }
+}
