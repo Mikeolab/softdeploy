@@ -171,50 +171,33 @@ function ProjectDetail() {
     try {
       setLoading(true);
       
-      // Fetch project details - try environment-specific first, then fallback
+      // Fetch project details - temporarily disable environment filtering
       let projectData = null;
       try {
-        // First try environment-specific project
-        const { data: envData, error: envError } = await supabase
+        const { data, error: projectError } = await supabase
           .from('projects')
-          .select('id, name, environment')
+          .select('id, name')
           .eq('id', projectId)
           .eq('user_id', user.id)
-          .eq('environment', ENVIRONMENT)
           .single();
 
-        if (envError || !envData) {
-          // Fallback: try without environment filter
-          console.warn('Environment-specific project not found, trying fallback');
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('projects')
-            .select('id, name, environment')
-            .eq('id', projectId)
-            .eq('user_id', user.id)
-            .single();
-
-          if (fallbackError) {
-            console.warn('Project not found or table not available:', fallbackError);
-            // Create a mock project for testing
-            projectData = {
-              id: projectId,
-              name: `Project ${projectId}`,
-              user_id: user.id,
-              environment: ENVIRONMENT
-            };
-          } else {
-            projectData = fallbackData;
-          }
+        if (projectError) {
+          console.warn('Project not found or table not available:', projectError);
+          // Create a mock project for testing
+          projectData = {
+            id: projectId,
+            name: `Project ${projectId}`,
+            user_id: user.id
+          };
         } else {
-          projectData = envData;
+          projectData = data;
         }
       } catch (err) {
         console.warn('Could not fetch project:', err);
         projectData = {
           id: projectId,
           name: `Project ${projectId}`,
-          user_id: user.id,
-          environment: ENVIRONMENT
+          user_id: user.id
         };
       }
       

@@ -41,47 +41,30 @@ const TestManagement = () => {
       const projectId = searchParams.get('project');
       if (projectId && user?.id) {
         try {
-          // First try environment-specific project
-          const { data: envData, error: envError } = await supabase
+          const { data, error } = await supabase
             .from('projects')
-            .select('id, name, description, environment')
+            .select('id, name, description')
             .eq('id', projectId)
             .eq('user_id', user.id)
-            .eq('environment', ENVIRONMENT)
             .single();
           
-          if (envError || !envData) {
-            // Fallback: try without environment filter
-            console.warn('Environment-specific project not found, trying fallback');
-            const { data: fallbackData, error: fallbackError } = await supabase
-              .from('projects')
-              .select('id, name, description, environment')
-              .eq('id', projectId)
-              .eq('user_id', user.id)
-              .single();
-
-            if (fallbackError) {
-              console.warn('Project not found or table not available:', fallbackError);
-              // Create a mock project for testing
-              setCurrentProject({
-                id: projectId,
-                name: `Project ${projectId}`,
-                description: 'Mock project for testing',
-                environment: ENVIRONMENT
-              });
-            } else {
-              setCurrentProject(fallbackData);
-            }
+          if (error) {
+            console.warn('Project not found or table not available:', error);
+            // Create a mock project for testing
+            setCurrentProject({
+              id: projectId,
+              name: `Project ${projectId}`,
+              description: 'Mock project for testing'
+            });
           } else {
-            setCurrentProject(envData);
+            setCurrentProject(data);
           }
         } catch (error) {
           console.warn('Could not fetch project:', error);
           setCurrentProject({
             id: projectId,
             name: `Project ${projectId}`,
-            description: 'Mock project for testing',
-            environment: ENVIRONMENT
+            description: 'Mock project for testing'
           });
         }
       }
