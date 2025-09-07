@@ -1,7 +1,7 @@
 // Project Context Hook for React
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, ENVIRONMENT } from '../lib/supabaseClient';
 
 const ProjectContext = createContext();
 
@@ -43,8 +43,9 @@ export const ProjectProvider = ({ children }) => {
       // Load project details - simplified query to avoid schema issues
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
-        .select('id, name, user_id')
+        .select('id, name, user_id, environment')
         .eq('id', id)
+        .eq('environment', ENVIRONMENT) // Filter by environment
         .single();
 
       if (projectError) {
@@ -55,6 +56,7 @@ export const ProjectProvider = ({ children }) => {
             id: id,
             name: `Project ${id}`,
             user_id: user.id,
+            environment: ENVIRONMENT,
             created_at: new Date().toISOString()
           });
           setUserRole('owner');

@@ -2,7 +2,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, ENVIRONMENT } from '../lib/supabaseClient';
 import { 
   FolderIcon, 
   ChartBarIcon, 
@@ -70,8 +70,9 @@ function Dashboard() {
       try {
         const { data, error: projectsError } = await supabase
           .from('projects')
-          .select('id, name')
+          .select('id, name, environment')
           .eq('user_id', user.id)
+          .eq('environment', ENVIRONMENT) // Filter by environment
           .order('id', { ascending: false })
           .limit(5);
 

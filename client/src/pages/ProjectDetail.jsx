@@ -2,7 +2,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, ENVIRONMENT } from '../lib/supabaseClient';
 import { Dialog } from '@headlessui/react';
 
 function ProjectDetail() {
@@ -176,9 +176,10 @@ function ProjectDetail() {
       try {
         const { data, error: projectError } = await supabase
           .from('projects')
-          .select('id, name')
+          .select('id, name, environment')
           .eq('id', projectId)
           .eq('user_id', user.id)
+          .eq('environment', ENVIRONMENT) // Filter by environment
           .single();
 
         if (projectError) {
@@ -187,7 +188,8 @@ function ProjectDetail() {
           projectData = {
             id: projectId,
             name: `Project ${projectId}`,
-            user_id: user.id
+            user_id: user.id,
+            environment: ENVIRONMENT
           };
         } else {
           projectData = data;
@@ -197,7 +199,8 @@ function ProjectDetail() {
         projectData = {
           id: projectId,
           name: `Project ${projectId}`,
-          user_id: user.id
+          user_id: user.id,
+          environment: ENVIRONMENT
         };
       }
       

@@ -2,7 +2,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, ENVIRONMENT } from '../lib/supabaseClient';
 import TestFolderManager from '../components/TestFolderManager';
 import TestSuiteConfiguration from '../components/TestSuiteConfiguration';
 import AdvancedTestBuilderV2 from '../components/AdvancedTestBuilderV2';
@@ -43,9 +43,10 @@ const TestManagement = () => {
         try {
           const { data, error } = await supabase
             .from('projects')
-            .select('id, name, description')
+            .select('id, name, description, environment')
             .eq('id', projectId)
             .eq('user_id', user.id)
+            .eq('environment', ENVIRONMENT) // Filter by environment
             .single();
           
           if (error) {
@@ -54,7 +55,8 @@ const TestManagement = () => {
             setCurrentProject({
               id: projectId,
               name: `Project ${projectId}`,
-              description: 'Mock project for testing'
+              description: 'Mock project for testing',
+              environment: ENVIRONMENT
             });
           } else {
             setCurrentProject(data);
@@ -64,7 +66,8 @@ const TestManagement = () => {
           setCurrentProject({
             id: projectId,
             name: `Project ${projectId}`,
-            description: 'Mock project for testing'
+            description: 'Mock project for testing',
+            environment: ENVIRONMENT
           });
         }
       }
