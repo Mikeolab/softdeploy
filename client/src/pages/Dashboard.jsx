@@ -65,25 +65,47 @@ function Dashboard() {
     try {
       setLoading(true);
       
-      // Fetch projects count
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('id, name')
-        .eq('user_id', user.id)
-        .order('id', { ascending: false })
-        .limit(5);
+      // Fetch projects count - handle case where table doesn't exist
+      let projectsData = [];
+      try {
+        const { data, error: projectsError } = await supabase
+          .from('projects')
+          .select('id, name')
+          .eq('user_id', user.id)
+          .order('id', { ascending: false })
+          .limit(5);
 
-      if (projectsError) throw projectsError;
+        if (projectsError) {
+          console.warn('Projects table not available:', projectsError);
+          projectsData = [];
+        } else {
+          projectsData = data || [];
+        }
+      } catch (err) {
+        console.warn('Could not fetch projects:', err);
+        projectsData = [];
+      }
       
-      // Fetch test plans count
-      const { data: testData, error: testError } = await supabase
-        .from('test_plans')
-        .select('id, title, result, ran_at')
-        .eq('user_id', user.id)
-        .order('ran_at', { ascending: false })
-        .limit(5);
+      // Fetch test plans count - handle case where table doesn't exist
+      let testData = [];
+      try {
+        const { data, error: testError } = await supabase
+          .from('test_plans')
+          .select('id, title, result, ran_at')
+          .eq('user_id', user.id)
+          .order('ran_at', { ascending: false })
+          .limit(5);
 
-      if (testError) throw testError;
+        if (testError) {
+          console.warn('Test plans table not available:', testError);
+          testData = [];
+        } else {
+          testData = data || [];
+        }
+      } catch (err) {
+        console.warn('Could not fetch test plans:', err);
+        testData = [];
+      }
 
       // Load recent test runs from localStorage
       const savedTestRuns = JSON.parse(localStorage.getItem('testRunsV2') || '[]');
