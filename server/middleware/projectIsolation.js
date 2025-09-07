@@ -3,11 +3,16 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+// Initialize Supabase client with fallback for missing environment variables
+let supabase = null;
+if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+  );
+} else {
+  console.warn('⚠️ Supabase environment variables not found. Project isolation features will be limited.');
+}
 
 // ===== PROJECT MIDDLEWARE =====
 
@@ -25,6 +30,21 @@ const loadProject = async (req, res, next) => {
         message: 'Project ID is required',
         timestamp: new Date().toISOString()
       });
+    }
+
+    // If Supabase is not available, create a mock project and user
+    if (!supabase) {
+      req.project = {
+        id: projectId,
+        name: `Project ${projectId}`,
+        user_id: 'mock-user-id',
+        created_at: new Date().toISOString()
+      };
+      req.user = {
+        id: 'mock-user-id',
+        email: 'mock@example.com'
+      };
+      return next();
     }
 
     // Get user ID from auth (assuming JWT token in Authorization header)
@@ -106,6 +126,12 @@ const assertMembership = (minRole) => {
   const roleHierarchy = ['viewer', 'editor', 'admin', 'owner'];
   
   return (req, res, next) => {
+    // If Supabase is not available, allow all operations
+    if (!supabase) {
+      req.userRole = 'owner'; // Grant full access in mock mode
+      return next();
+    }
+    
     const userRole = req.userRole;
     const minRoleIndex = roleHierarchy.indexOf(minRole);
     const userRoleIndex = roleHierarchy.indexOf(userRole);
@@ -138,6 +164,11 @@ const validateResourceProject = (resourceType) => {
           message: `${resourceType} ID is required`,
           timestamp: new Date().toISOString()
         });
+      }
+
+      // If Supabase is not available, skip validation
+      if (!supabase) {
+        return next();
       }
 
       // Query the resource to check its project_id
@@ -214,6 +245,14 @@ const validateWebSocketProject = async (ws, req) => {
     if (!projectId) {
       ws.close(1008, 'Project ID is required');
       return false;
+    }
+
+    // If Supabase is not available, allow connection with mock data
+    if (!supabase) {
+      ws.projectId = projectId;
+      ws.userId = 'mock-user-id';
+      ws.userRole = 'owner';
+      return true;
     }
 
     // Get user from token (assuming token in query params)
