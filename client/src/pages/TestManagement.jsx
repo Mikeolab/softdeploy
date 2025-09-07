@@ -35,10 +35,10 @@ const TestManagement = () => {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
 
-  // Fetch current project
+  // Fetch current project from URL params instead of query params
   useEffect(() => {
     const fetchCurrentProject = async () => {
-      const projectId = searchParams.get('project');
+      const { projectId } = useParams();
       if (projectId && user?.id) {
         try {
           const { data, error } = await supabase
@@ -71,7 +71,7 @@ const TestManagement = () => {
     };
 
     fetchCurrentProject();
-  }, [searchParams, user?.id]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user) {
@@ -101,7 +101,7 @@ const TestManagement = () => {
         setCurrentView('folder');
       } else {
         console.log('❌ [DEBUG] Folder not found, going back to folders');
-        navigate('/test-management');
+        navigate(`/projects/${currentProject?.id}/test-management`);
       }
     }
   }, [user, navigate, folderId, selectedFolder, currentProject]);
@@ -143,7 +143,7 @@ const TestManagement = () => {
   const handleFolderSelect = (folder) => {
     setSelectedFolder(folder);
     setCurrentView('folder');
-    navigate(`/test-management/${folder.id}`);
+    navigate(`/projects/${currentProject?.id}/test-management/${folder.id}`);
   };
 
   const handleTestSuiteSelect = (testSuite) => {
@@ -155,7 +155,7 @@ const TestManagement = () => {
     setSelectedFolder(null);
     setSelectedTestSuite(null);
     setCurrentView('folders');
-    navigate('/test-management');
+    navigate(`/projects/${currentProject?.id}/test-management`);
   };
 
   const handleBackToFolder = () => {
@@ -179,7 +179,7 @@ const TestManagement = () => {
 
   const handleEditTestRun = (testRun) => {
     // Navigate to test builder with the test run data
-    navigate('/test-builder', { state: { editTestRun: testRun } });
+    navigate(`/projects/${currentProject?.id}/test-builder`, { state: { editTestRun: testRun } });
   };
 
   const handleCreateNew = (type) => {
