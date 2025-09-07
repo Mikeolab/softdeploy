@@ -26,7 +26,7 @@ import {
 const TestManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { folderId } = useParams();
+  const { folderId, projectId } = useParams();
   const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState('folders'); // 'folders', 'folder', 'test'
   const [selectedFolder, setSelectedFolder] = useState(null);
@@ -35,10 +35,9 @@ const TestManagement = () => {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
 
-  // Fetch current project from URL params instead of query params
+  // Fetch current project from URL params
   useEffect(() => {
     const fetchCurrentProject = async () => {
-      const { projectId } = useParams();
       if (projectId && user?.id) {
         try {
           const { data, error } = await supabase
@@ -79,11 +78,19 @@ const TestManagement = () => {
       return;
     }
     
+    // If no projectId in URL, redirect to projects page
+    if (!projectId) {
+      console.log('❌ [DEBUG] No projectId in URL, redirecting to projects');
+      navigate('/projects');
+      return;
+    }
+    
     // Load saved test runs immediately
     loadSavedTestRuns();
     
     // Debug: Log current state
     console.log('🔍 [DEBUG] TestManagement useEffect:', {
+      projectId,
       folderId,
       currentView,
       selectedFolder: selectedFolder?.name,
@@ -101,10 +108,14 @@ const TestManagement = () => {
         setCurrentView('folder');
       } else {
         console.log('❌ [DEBUG] Folder not found, going back to folders');
-        navigate(`/projects/${currentProject?.id}/test-management`);
+        if (currentProject?.id) {
+          navigate(`/projects/${currentProject.id}/test-management`);
+        } else {
+          navigate('/projects');
+        }
       }
     }
-  }, [user, navigate, folderId, selectedFolder, currentProject]);
+  }, [user, navigate, projectId, folderId, selectedFolder, currentProject]);
 
   // Listen for test run completion events
   useEffect(() => {

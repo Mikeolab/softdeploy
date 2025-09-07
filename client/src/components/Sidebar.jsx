@@ -78,11 +78,11 @@ function Sidebar() {
         { name: 'Runs', href: `/projects/${projectId}/runs`, icon: ChartBarIcon }
       );
     } else {
-      // Legacy routes for when no project is selected
+      // When no project is selected, redirect to projects page
       baseItems.push(
-        { name: 'Test Management', href: '/test-management', icon: PlayIcon },
-        { name: 'Deploy', href: '/deploy', icon: RocketLaunchIcon },
-        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon }
+        { name: 'Test Management', href: '/projects', icon: PlayIcon },
+        { name: 'Deploy', href: '/projects', icon: RocketLaunchIcon },
+        { name: 'Analytics', href: '/projects', icon: ChartBarIcon }
       );
     }
 
