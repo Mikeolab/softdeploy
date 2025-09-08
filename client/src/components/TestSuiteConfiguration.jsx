@@ -17,6 +17,7 @@ import {
   DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import AIAssistant from './AIAssistant';
+import TestRunProgress from './TestRunProgress';
 import sampleDataService from '../lib/sampleDataService';
 
 const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
@@ -30,6 +31,8 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   const [projects, setProjects] = useState([]);
   const [sampleTestSuites, setSampleTestSuites] = useState([]);
   const [errors, setErrors] = useState({});
+  const [activeRunId, setActiveRunId] = useState(null);
+  const [showRunProgress, setShowRunProgress] = useState(false);
   const [newSuite, setNewSuite] = useState({
     name: '',
     description: '',
@@ -110,10 +113,43 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     }
   };
 
-  const handleRunTest = (suite) => {
+  const handleRunTest = async (suite) => {
     console.log('🚀 [DEBUG] Running test suite:', suite.name);
+    
+    try {
+      // Create a new test run
+      const response = await fetch('/api/runs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          testSuite: suite,
+          projectId: projectId || suite.projectId || 'proj-1',
+          userId: 'user-1' // TODO: Get from auth context
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create test run: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setActiveRunId(data.data.id);
+        setShowRunProgress(true);
+        
+        // Call the original onRunTest callback if provided
     if (onRunTest) {
       onRunTest(suite);
+        }
+      } else {
+        throw new Error(data.error || 'Failed to create test run');
+      }
+    } catch (error) {
+      console.error('❌ [DEBUG] Error creating test run:', error);
+      alert(`Failed to start test run: ${error.message}`);
     }
   };
 
@@ -390,6 +426,7 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                       <button
                         onClick={() => handleRunTest(suite)}
                         className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        data-testid="run-test-btn"
                       >
                         <PlayIcon className="w-4 h-4 mr-1" />
                         Run Test
@@ -415,6 +452,27 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
             )}
           </div>
         </div>
+
+        {/* Test Run Progress */}
+        {showRunProgress && activeRunId && (
+          <div className="mt-6">
+            <TestRunProgress
+              runId={activeRunId}
+              onComplete={(run) => {
+                console.log('✅ Test run completed:', run);
+                setShowRunProgress(false);
+                setActiveRunId(null);
+                // Refresh test suites to show updated data
+                loadTestSuites();
+              }}
+              onError={(run) => {
+                console.error('❌ Test run failed:', run);
+                setShowRunProgress(false);
+                setActiveRunId(null);
+              }}
+            />
+          </div>
+        )}
 
         {/* Create/Edit Form */}
         {showCreateForm && (

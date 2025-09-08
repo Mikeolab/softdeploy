@@ -21,6 +21,9 @@ const sampleDataRoutes = require('./routes/sampleData');
 // Import test suites routes
 const testSuitesRoutes = require('./routes/testSuites');
 
+// Import runs routes
+const runsRoutes = require('./routes/runs');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -44,6 +47,9 @@ app.use('/api/sample-data', sampleDataRoutes);
 
 // Test suites API routes
 app.use('/api/suites', testSuitesRoutes);
+
+// Runs API routes
+app.use('/api/runs', runsRoutes);
 
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {
