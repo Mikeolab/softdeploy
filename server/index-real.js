@@ -626,6 +626,18 @@ async function executePlaywrightQuickTest(script) {
   }
 }
 
+// Import sample data routes
+const sampleDataRoutes = require('./routes/sampleData');
+
+// Import test suites routes
+const testSuitesRoutes = require('./routes/testSuites');
+
+// Sample data API routes
+app.use('/api/sample-data', sampleDataRoutes);
+
+// Test suites API routes
+app.use('/api/suites', testSuitesRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
