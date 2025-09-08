@@ -19,8 +19,10 @@ import {
   PlayIcon,
   RocketLaunchIcon,
   PlusIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
+import AccountSwitcher from './AccountSwitcher.jsx';
 
 function Sidebar() {
   const { user, logout } = useAuth();
@@ -188,6 +190,17 @@ function Sidebar() {
                  <span className="text-xl font-bold text-gray-900 dark:text-white">SoftDeploy</span>
                </Link>
              )}
+             
+             {/* Account Switcher */}
+             {!isCollapsed && (
+               <div className="flex-1 ml-4">
+                 <AccountSwitcher onContextChange={(context) => {
+                   console.log('Context changed:', context);
+                   // TODO: Update sidebar content based on context
+                 }} />
+               </div>
+             )}
+             
              <button
                onClick={() => setIsCollapsed(!isCollapsed)}
                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -300,6 +313,20 @@ function Sidebar() {
                          >
                            <RocketLaunchIcon className="h-4 w-4 flex-shrink-0" />
                            <span>Deployments</span>
+                         </Link>
+                         
+                         <Link
+                           to={`/projects/${project.id}/members`}
+                           className={`
+                             flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-sm
+                             ${isActive(`/projects/${project.id}/members`)
+                               ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/30'
+                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                             }
+                           `}
+                         >
+                           <UserGroupIcon className="h-4 w-4 flex-shrink-0" />
+                           <span>Members</span>
                          </Link>
                        </div>
                      )}

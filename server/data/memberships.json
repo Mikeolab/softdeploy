@@ -1,0 +1,26 @@
+[
+  {
+    "id": "membership_1",
+    "projectId": "proj-1",
+    "userId": "user-1",
+    "userEmail": "john.doe@example.com",
+    "role": "owner",
+    "joinedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "membership_2",
+    "projectId": "proj-2",
+    "userId": "user-2",
+    "userEmail": "jane.smith@example.com",
+    "role": "owner",
+    "joinedAt": "2024-01-16T09:15:00Z"
+  },
+  {
+    "id": "membership_3",
+    "projectId": "proj-1",
+    "userId": "user-2",
+    "userEmail": "jane.smith@example.com",
+    "role": "member",
+    "joinedAt": "2024-01-20T14:30:00Z"
+  }
+]

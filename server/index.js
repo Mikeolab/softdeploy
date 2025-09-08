@@ -24,6 +24,12 @@ const testSuitesRoutes = require('./routes/testSuites');
 // Import runs routes
 const runsRoutes = require('./routes/runs');
 
+// Import invitations routes
+const invitationsRoutes = require('./routes/invitations');
+
+// Import project members routes
+const projectMembersRoutes = require('./routes/projectMembers');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -50,6 +56,12 @@ app.use('/api/suites', testSuitesRoutes);
 
 // Runs API routes
 app.use('/api/runs', runsRoutes);
+
+// Invitations API routes
+app.use('/api/invites', invitationsRoutes);
+
+// Project members API routes
+app.use('/api/projects', projectMembersRoutes);
 
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {

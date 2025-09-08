@@ -23,6 +23,8 @@ import SubscriptionPage from './pages/SubscriptionPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
 import SettingsPage from './pages/Settings.jsx';
 import SampleDataEditor from './pages/SampleDataEditor.jsx';
+import ProjectMembers from './pages/ProjectMembers.jsx';
+import InvitationAccept from './pages/InvitationAccept.jsx';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -30,6 +32,7 @@ import RedirectIfAuthenticated from './components/RedirectIfAuthenticated.jsx';
 import AIChatbot from './components/AIChatbot.jsx';
 import NavigationBar from './components/Navigation.jsx';
 import Sidebar from './components/Sidebar.jsx';
+import AccountSwitcher from './components/AccountSwitcher.jsx';
 
 function App() {
   const { user, loading } = useAuth();
@@ -86,6 +89,14 @@ function App() {
                       <RunsPage />
                     </ProjectProvider>
                   } />
+                  <Route path="/projects/:projectId/members" element={
+                    <ProjectProvider>
+                      <ProjectMembers />
+                    </ProjectProvider>
+                  } />
+                  
+                  {/* Invitation routes */}
+                  <Route path="/accept-invitation/:token" element={<InvitationAccept />} />
                   
                   {/* Legacy routes - redirect to projects */}
                   <Route path="/test-management" element={<ProjectsPage />} />
