@@ -18,6 +18,9 @@ const { executeCypressTest, generateCypressScript } = require('./cypressIntegrat
 // Import sample data routes
 const sampleDataRoutes = require('./routes/sampleData');
 
+// Import test suites routes
+const testSuitesRoutes = require('./routes/testSuites');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -38,6 +41,9 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Sample data API routes
 app.use('/api/sample-data', sampleDataRoutes);
+
+// Test suites API routes
+app.use('/api/suites', testSuitesRoutes);
 
 // WebSocket connection handler
 wss.on('connection', (ws, req) => {

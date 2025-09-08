@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { 
   ArrowLeftIcon,
   PlayIcon,
@@ -13,9 +13,11 @@ import {
   ClockIcon,
   UserGroupIcon,
   ChartBarIcon,
-  SparklesIcon
+  SparklesIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import AIAssistant from './AIAssistant';
+import sampleDataService from '../lib/sampleDataService';
 
 const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   const [testSuites, setTestSuites] = useState([]);
@@ -24,12 +26,18 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
   const [editingSuite, setEditingSuite] = useState(null);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [searchParams] = useSearchParams();
+  const { projectId } = useParams();
+  const [projects, setProjects] = useState([]);
+  const [sampleTestSuites, setSampleTestSuites] = useState([]);
+  const [errors, setErrors] = useState({});
   const [newSuite, setNewSuite] = useState({
     name: '',
     description: '',
     testType: 'API',
     toolId: 'axios',
     baseUrl: '',
+    projectId: projectId || '',
+    environment: 'development',
     userStories: [],
     steps: []
   });
@@ -43,6 +51,45 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
       return;
     }
     
+    loadSampleData();
+    loadTestSuites();
+  }, [folder, projectId]);
+
+  const loadSampleData = async () => {
+    try {
+      const [projectsData, sampleSuites] = await Promise.all([
+        sampleDataService.getProjects(),
+        sampleDataService.getTestSuites()
+      ]);
+      
+      setProjects(projectsData);
+      setSampleTestSuites(sampleSuites);
+      
+      // Pre-populate form with sample data if no projectId is set
+      if (!projectId && projectsData.length > 0) {
+        const firstProject = projectsData[0];
+        setNewSuite(prev => ({
+          ...prev,
+          projectId: firstProject.id,
+          environment: firstProject.environment || 'development',
+          baseUrl: getBaseUrlForProject(firstProject)
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading sample data:', error);
+    }
+  };
+
+  const getBaseUrlForProject = (project) => {
+    const baseUrls = {
+      'proj-1': 'https://api.ecommerce.com',
+      'proj-2': 'https://api.testlab.com', 
+      'proj-3': 'https://app.newproject.com'
+    };
+    return baseUrls[project.id] || `https://api.${project.name.toLowerCase().replace(/\s+/g, '')}.com`;
+  };
+
+  const loadTestSuites = () => {
     try {
       // Load test suites for this folder
       let savedSuites = JSON.parse(localStorage.getItem(`testSuites_${folder.id}`) || '[]');
@@ -61,7 +108,7 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     } finally {
       setLoading(false);
     }
-  }, [folder]);
+  };
 
   const handleRunTest = (suite) => {
     console.log('🚀 [DEBUG] Running test suite:', suite.name);
@@ -122,9 +169,56 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     setShowCreateForm(true);
   };
 
-  const saveTestSuite = () => {
+  const validateForm = () => {
+    const newErrors = {};
+    
     if (!newSuite.name.trim()) {
-      alert('Please enter a test suite name');
+      newErrors.name = 'Test suite name is required';
+    }
+    
+    if (!newSuite.baseUrl.trim()) {
+      newErrors.baseUrl = 'Base URL is required';
+    } else if (!isValidUrl(newSuite.baseUrl)) {
+      newErrors.baseUrl = 'Please enter a valid URL';
+    }
+    
+    if (!newSuite.projectId) {
+      newErrors.projectId = 'Please select a project';
+    }
+    
+    if (newSuite.steps.length === 0) {
+      newErrors.steps = 'At least one test step is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const duplicateTestSuite = (suite) => {
+    const duplicatedSuite = {
+      ...suite,
+      id: Date.now(),
+      name: `${suite.name} (Copy)`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    setNewSuite(duplicatedSuite);
+    setShowCreateForm(true);
+    setEditingSuite(null);
+  };
+
+  const saveTestSuite = () => {
+    if (!validateForm()) {
       return;
     }
 
@@ -223,6 +317,7 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
             <button
               onClick={() => setShowCreateForm(true)}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              data-testid="create-test-suite-btn"
             >
               <PlusIcon className="w-4 h-4 mr-2" />
               Create Test Suite
@@ -231,7 +326,7 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
         </div>
 
         {/* Test Suites List */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow" data-testid="test-suites-list">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white">
               Test Suites ({testSuites.length})
@@ -300,6 +395,13 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                         Run Test
                       </button>
                       <button
+                        onClick={() => duplicateTestSuite(suite)}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                      >
+                        <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
+                        Duplicate
+                      </button>
+                      <button
                         onClick={() => handleEditSuite(suite)}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                       >
@@ -331,9 +433,15 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                   type="text"
                   value={newSuite.name}
                   onChange={(e) => setNewSuite({...newSuite, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${
+                    errors.name ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                  }`}
                   placeholder="e.g., User Authentication API Tests"
+                  data-testid="test-suite-name-input"
                 />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600" data-testid="name-error">{errors.name}</p>
+                )}
               </div>
               
               <div>
@@ -346,7 +454,54 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="Describe what this test suite validates..."
+                  data-testid="test-suite-description-input"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Project *
+                  </label>
+                  <select
+                    value={newSuite.projectId}
+                    onChange={(e) => {
+                      const selectedProject = projects.find(p => p.id === e.target.value);
+                      setNewSuite({
+                        ...newSuite, 
+                        projectId: e.target.value,
+                        environment: selectedProject?.environment || 'development',
+                        baseUrl: getBaseUrlForProject(selectedProject)
+                      });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="">Select a project</option>
+                    {projects.map(project => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} ({project.environment})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.projectId && (
+                    <p className="mt-1 text-sm text-red-600">{errors.projectId}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Environment
+                  </label>
+                  <select
+                    value={newSuite.environment}
+                    onChange={(e) => setNewSuite({...newSuite, environment: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                    <option value="development">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -389,9 +544,14 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                   type="url"
                   value={newSuite.baseUrl}
                   onChange={(e) => setNewSuite({...newSuite, baseUrl: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${
+                    errors.baseUrl ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                  }`}
                   placeholder="https://api.example.com"
                 />
+                {errors.baseUrl && (
+                  <p className="mt-1 text-sm text-red-600">{errors.baseUrl}</p>
+                )}
               </div>
 
               {/* Steps Management */}
@@ -421,6 +581,9 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                     Add Step
                   </button>
                 </div>
+                {errors.steps && (
+                  <p className="mt-1 text-sm text-red-600">{errors.steps}</p>
+                )}
 
                 <div className="space-y-3">
                   {newSuite.steps.map((step, index) => (
