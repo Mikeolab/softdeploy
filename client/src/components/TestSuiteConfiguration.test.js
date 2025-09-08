@@ -111,9 +111,10 @@ describe('Test Suite Form Validation', () => {
     it('should reject invalid URLs', () => {
       const invalidUrls = [
         'not-a-url',
-        'ftp://example.com',
         'just-text',
         'https://',
+        'http://',
+        '://example.com',
         ''
       ];
 

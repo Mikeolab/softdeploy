@@ -122,11 +122,12 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-Id': 'user-1', // Add user ID header for authentication
+          'X-User-Email': 'user@example.com' // Add user email header
         },
         body: JSON.stringify({
           testSuite: suite,
-          projectId: projectId || suite.projectId || 'proj-1',
-          userId: 'user-1' // TODO: Get from auth context
+          projectId: projectId || suite.projectId || 'proj-1'
         })
       });
 
@@ -205,29 +206,38 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
     setShowCreateForm(true);
   };
 
+  // Validation utility function for testing
+  const validateFormData = (formData) => {
+    const errors = {};
+    
+    if (!formData.name?.trim()) {
+      errors.name = 'Test suite name is required';
+    }
+    
+    if (!formData.baseUrl?.trim()) {
+      errors.baseUrl = 'Base URL is required';
+    } else if (!isValidUrl(formData.baseUrl)) {
+      errors.baseUrl = 'Please enter a valid URL';
+    }
+    
+    if (!formData.projectId) {
+      errors.projectId = 'Please select a project';
+    }
+    
+    if (!formData.steps || formData.steps.length === 0) {
+      errors.steps = 'At least one test step is required';
+    }
+    
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  };
+
   const validateForm = () => {
-    const newErrors = {};
-    
-    if (!newSuite.name.trim()) {
-      newErrors.name = 'Test suite name is required';
-    }
-    
-    if (!newSuite.baseUrl.trim()) {
-      newErrors.baseUrl = 'Base URL is required';
-    } else if (!isValidUrl(newSuite.baseUrl)) {
-      newErrors.baseUrl = 'Please enter a valid URL';
-    }
-    
-    if (!newSuite.projectId) {
-      newErrors.projectId = 'Please select a project';
-    }
-    
-    if (newSuite.steps.length === 0) {
-      newErrors.steps = 'At least one test step is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const result = validateFormData(newSuite);
+    setErrors(result.errors);
+    return result.isValid;
   };
 
   const isValidUrl = (string) => {

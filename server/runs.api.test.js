@@ -101,6 +101,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .post('/api/runs')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .send(runData)
         .expect(201)
 
@@ -123,11 +125,13 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .post('/api/runs')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .send(incompleteData)
         .expect(400)
 
       expect(response.body.success).toBe(false)
-      expect(response.body.error).toBe('Missing required fields: testSuite, projectId, userId')
+      expect(response.body.error).toBe('Missing required fields: testSuite, projectId')
     })
 
     it('should return 400 for invalid test suite', async () => {
@@ -142,6 +146,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .post('/api/runs')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .send(invalidData)
         .expect(400)
 
@@ -177,6 +183,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -202,6 +210,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs?projectId=proj-1')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -225,6 +235,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs?status=completed')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -242,6 +254,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs?limit=5&offset=0')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -267,6 +281,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/run-1')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -278,6 +294,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/non-existent')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(404)
 
       expect(response.body.success).toBe(false)
@@ -299,6 +317,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/run-1/status')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -312,6 +332,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/non-existent/status')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(404)
 
       expect(response.body.success).toBe(false)
@@ -332,6 +354,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .post('/api/runs/run-1/stop')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -344,7 +368,9 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .post('/api/runs/non-existent/stop')
-        .expect(500)
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
+        .expect(404)
 
       expect(response.body.success).toBe(false)
     })
@@ -369,6 +395,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/project/proj-1')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -396,6 +424,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/user/user-1')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -421,6 +451,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/run-1/artifacts')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)
@@ -443,6 +475,8 @@ describe('Runs API', () => {
 
       const response = await request(app)
         .get('/api/runs/run-1/logs')
+        .set('X-User-Id', 'user-1')
+        .set('X-User-Email', 'user1@example.com')
         .expect(200)
 
       expect(response.body.success).toBe(true)

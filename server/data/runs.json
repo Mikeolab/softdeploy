@@ -1,0 +1,74 @@
+[
+  {
+    "id": "run_1757295620099_53mgfhapy",
+    "testSuiteId": "suite-1",
+    "projectId": "proj-1",
+    "userId": "mock-user-1",
+    "status": "running",
+    "testSuite": {
+      "name": "Sample API Tests",
+      "description": "Test suite for API endpoints",
+      "testType": "API",
+      "toolId": "axios",
+      "baseUrl": "https://api.example.com",
+      "environment": "development",
+      "steps": [
+        {
+          "id": "step-1",
+          "name": "Health Check",
+          "type": "api",
+          "description": "Check API health endpoint",
+          "config": {
+            "method": "GET",
+            "url": "/health",
+            "expectedStatus": 200
+          }
+        },
+        {
+          "id": "step-2",
+          "name": "User Login",
+          "type": "api",
+          "description": "Test user login endpoint",
+          "config": {
+            "method": "POST",
+            "url": "/auth/login",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "username": "test",
+              "password": "test"
+            },
+            "expectedStatus": 200
+          }
+        }
+      ]
+    },
+    "createdAt": "2025-09-08T01:40:20.103Z",
+    "startedAt": "2025-09-08T01:40:20.712Z",
+    "completedAt": null,
+    "duration": null,
+    "results": {
+      "totalSteps": 2,
+      "passedSteps": 0,
+      "failedSteps": 0,
+      "skippedSteps": 0,
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 0
+      },
+      "steps": []
+    },
+    "artifacts": {
+      "cypressReport": null,
+      "mochawesomeReport": null,
+      "allureReport": null,
+      "screenshots": [],
+      "videos": []
+    },
+    "logs": []
+  }
+]

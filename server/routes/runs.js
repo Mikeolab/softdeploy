@@ -1,25 +1,28 @@
 // server/routes/runs.js
 const express = require('express');
 const RunService = require('../services/runService');
+const { authenticateUser, requireAuth, checkResourceAccess, extractUserId } = require('../middleware/auth');
 
 const router = express.Router();
 const runService = new RunService();
 
-// GET /api/runs - Get all runs
-router.get('/', async (req, res) => {
+// Apply authentication middleware to all routes
+router.use(authenticateUser);
+
+// GET /api/runs - Get all runs (filtered by authenticated user)
+router.get('/', extractUserId, async (req, res) => {
   try {
-    const { projectId, userId, status, limit = 50, offset = 0 } = req.query;
+    const { projectId, status, limit = 50, offset = 0 } = req.query;
+    const userId = req.userId; // From authentication middleware
     
     let runs = await runService.getAllRuns();
+    
+    // Filter by authenticated user (security: users can only see their own runs)
+    runs = runs.filter(run => run.userId === userId);
     
     // Filter by project
     if (projectId) {
       runs = runs.filter(run => run.projectId === projectId);
-    }
-    
-    // Filter by user
-    if (userId) {
-      runs = runs.filter(run => run.userId === userId);
     }
     
     // Filter by status
@@ -53,16 +56,26 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/runs/:id - Get specific run
-router.get('/:id', async (req, res) => {
+// GET /api/runs/:id - Get specific run (user must own it)
+router.get('/:id', extractUserId, async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.userId;
+    
     const run = await runService.getRun(id);
     
     if (!run) {
       return res.status(404).json({ 
         success: false, 
         error: 'Run not found' 
+      });
+    }
+
+    // Security: User can only access their own runs
+    if (run.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: You can only access your own runs'
       });
     }
 
@@ -79,19 +92,31 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET /api/runs/:id/status - Get run status
-router.get('/:id/status', async (req, res) => {
+// GET /api/runs/:id/status - Get run status (user must own it)
+router.get('/:id/status', extractUserId, async (req, res) => {
   try {
     const { id } = req.params;
-    const status = await runService.getRunStatus(id);
+    const userId = req.userId;
     
-    if (!status) {
+    const run = await runService.getRun(id);
+    
+    if (!run) {
       return res.status(404).json({ 
         success: false, 
         error: 'Run not found' 
       });
     }
 
+    // Security: User can only access their own runs
+    if (run.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: You can only access your own runs'
+      });
+    }
+
+    const status = await runService.getRunStatus(id);
+    
     res.json({
       success: true,
       data: status
@@ -105,16 +130,17 @@ router.get('/:id/status', async (req, res) => {
   }
 });
 
-// POST /api/runs - Create new run
-router.post('/', async (req, res) => {
+// POST /api/runs - Create new run (user ID from auth)
+router.post('/', extractUserId, async (req, res) => {
   try {
-    const { testSuite, projectId, userId } = req.body;
+    const { testSuite, projectId } = req.body;
+    const userId = req.userId; // From authentication middleware
     
     // Validate required fields
-    if (!testSuite || !projectId || !userId) {
+    if (!testSuite || !projectId) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing required fields: testSuite, projectId, userId' 
+        error: 'Missing required fields: testSuite, projectId' 
       });
     }
 
@@ -142,16 +168,35 @@ router.post('/', async (req, res) => {
   }
 });
 
-// POST /api/runs/:id/stop - Stop running test
-router.post('/:id/stop', async (req, res) => {
+// POST /api/runs/:id/stop - Stop running test (user must own it)
+router.post('/:id/stop', extractUserId, async (req, res) => {
   try {
     const { id } = req.params;
-    const run = await runService.stopRun(id);
+    const userId = req.userId;
+    
+    const run = await runService.getRun(id);
+    
+    if (!run) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Run not found' 
+      });
+    }
+
+    // Security: User can only stop their own runs
+    if (run.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: You can only stop your own runs'
+      });
+    }
+
+    const stoppedRun = await runService.stopRun(id);
     
     res.json({
       success: true,
       message: 'Test run stopped successfully',
-      data: run
+      data: stoppedRun
     });
   } catch (error) {
     console.error('Error stopping run:', error);
@@ -162,13 +207,17 @@ router.post('/:id/stop', async (req, res) => {
   }
 });
 
-// GET /api/runs/project/:projectId - Get runs by project
-router.get('/project/:projectId', async (req, res) => {
+// GET /api/runs/project/:projectId - Get runs by project (user must own them)
+router.get('/project/:projectId', extractUserId, async (req, res) => {
   try {
     const { projectId } = req.params;
+    const userId = req.userId;
     const { status, limit = 50, offset = 0 } = req.query;
     
     let runs = await runService.getRunsByProject(projectId);
+    
+    // Security: Filter to only user's runs
+    runs = runs.filter(run => run.userId === userId);
     
     // Filter by status
     if (status) {
@@ -201,8 +250,8 @@ router.get('/project/:projectId', async (req, res) => {
   }
 });
 
-// GET /api/runs/user/:userId - Get runs by user
-router.get('/user/:userId', async (req, res) => {
+// GET /api/runs/user/:userId - Get runs by user (with access control)
+router.get('/user/:userId', checkResourceAccess('userId'), async (req, res) => {
   try {
     const { userId } = req.params;
     const { status, limit = 50, offset = 0 } = req.query;
@@ -240,16 +289,26 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// GET /api/runs/:id/artifacts - Get run artifacts
-router.get('/:id/artifacts', async (req, res) => {
+// GET /api/runs/:id/artifacts - Get run artifacts (user must own it)
+router.get('/:id/artifacts', extractUserId, async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.userId;
+    
     const run = await runService.getRun(id);
     
     if (!run) {
       return res.status(404).json({ 
         success: false, 
         error: 'Run not found' 
+      });
+    }
+
+    // Security: User can only access their own runs
+    if (run.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: You can only access your own runs'
       });
     }
 
@@ -269,16 +328,26 @@ router.get('/:id/artifacts', async (req, res) => {
   }
 });
 
-// GET /api/runs/:id/logs - Get run logs
-router.get('/:id/logs', async (req, res) => {
+// GET /api/runs/:id/logs - Get run logs (user must own it)
+router.get('/:id/logs', extractUserId, async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.userId;
+    
     const run = await runService.getRun(id);
     
     if (!run) {
       return res.status(404).json({ 
         success: false, 
         error: 'Run not found' 
+      });
+    }
+
+    // Security: User can only access their own runs
+    if (run.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied: You can only access your own runs'
       });
     }
 

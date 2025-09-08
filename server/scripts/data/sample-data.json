@@ -4,9 +4,9 @@
       "email": "new@example.com",
       "name": "New User",
       "role": "developer",
-      "id": "users-1757288877792-5vwleg2aq",
-      "created_at": "2025-09-07T23:47:57.792Z",
-      "updated_at": "2025-09-07T23:47:57.792Z"
+      "id": "users-1757295620514-pj643j7n2",
+      "created_at": "2025-09-08T01:40:20.514Z",
+      "updated_at": "2025-09-08T01:40:20.514Z"
     }
   ],
   "projects": [
@@ -14,54 +14,12 @@
       "name": "New Project",
       "description": "New Project Description",
       "environment": "development",
-      "id": "projects-1757288877824-2r9hkleco",
-      "created_at": "2025-09-07T23:47:57.824Z",
-      "updated_at": "2025-09-07T23:47:57.824Z"
+      "id": "projects-1757295620566-glf4zw33d",
+      "created_at": "2025-09-08T01:40:20.566Z",
+      "updated_at": "2025-09-08T01:40:20.566Z"
     }
   ],
   "testSuites": [
-    {
-      "id": "suite-1",
-      "name": "Payment Processing Tests",
-      "description": "Test suite for payment gateway integration",
-      "project_id": "proj-1",
-      "test_type": "API",
-      "tool_id": "postman",
-      "base_url": "https://api.ecommerce.com",
-      "steps": [
-        {
-          "id": "step-1",
-          "name": "Validate Payment Request",
-          "method": "POST",
-          "url": "/payments/validate",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "amount": 100,
-            "currency": "USD"
-          },
-          "expected_status": 200
-        },
-        {
-          "id": "step-2",
-          "name": "Process Payment",
-          "method": "POST",
-          "url": "/payments/process",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "amount": 100,
-            "currency": "USD",
-            "token": "test_token"
-          },
-          "expected_status": 201
-        }
-      ],
-      "created_at": "2024-01-15T10:30:00Z",
-      "updated_at": "2024-01-20T14:30:00Z"
-    },
     {
       "id": "suite-2",
       "name": "API Endpoints Tests",
@@ -122,6 +80,40 @@
       ],
       "created_at": "2024-01-17T11:50:00Z",
       "updated_at": "2024-01-19T13:15:00Z"
+    },
+    {
+      "id": "suite-1757295623600-lp0ladsqu",
+      "name": "New Test Suite",
+      "description": "A new test suite",
+      "project_id": "proj-1",
+      "test_type": "API",
+      "tool_id": "axios",
+      "base_url": "https://api.example.com",
+      "environment": "development",
+      "steps": [
+        {
+          "id": "step-1",
+          "name": "Test Step",
+          "method": "GET",
+          "url": "/test",
+          "expected_status": 200
+        }
+      ],
+      "created_at": "2025-09-08T01:40:23.600Z",
+      "updated_at": "2025-09-08T01:40:23.600Z"
+    },
+    {
+      "id": "suite-1757295623833-ocqo83e8k",
+      "name": "Test Suite",
+      "description": "",
+      "project_id": "proj-1",
+      "test_type": "API",
+      "tool_id": "axios",
+      "base_url": "https://api.example.com",
+      "environment": "development",
+      "steps": [],
+      "created_at": "2025-09-08T01:40:23.833Z",
+      "updated_at": "2025-09-08T01:40:23.833Z"
     }
   ],
   "testRuns": [
