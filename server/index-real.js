@@ -632,11 +632,29 @@ const sampleDataRoutes = require('./routes/sampleData');
 // Import test suites routes
 const testSuitesRoutes = require('./routes/testSuites');
 
+// Import runs routes
+const runsRoutes = require('./routes/runs');
+
+// Import invitations routes
+const invitationsRoutes = require('./routes/invitations');
+
+// Import project members routes
+const projectMembersRoutes = require('./routes/projectMembers');
+
 // Sample data API routes
 app.use('/api/sample-data', sampleDataRoutes);
 
 // Test suites API routes
 app.use('/api/suites', testSuitesRoutes);
+
+// Runs API routes
+app.use('/api/runs', runsRoutes);
+
+// Invitations API routes
+app.use('/api/invites', invitationsRoutes);
+
+// Project members API routes
+app.use('/api/projects', projectMembersRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

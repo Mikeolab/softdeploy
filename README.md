@@ -1,6 +1,6 @@
 # SoftDeploy - Real Test Management Application
 
-A comprehensive test management platform with **real server-side test execution** using Puppeteer, browser automation, and actual HTTP requests.
+A comprehensive test management platform with **real server-side test execution**, **AI-powered test generation**, **user management**, and **unified reporting**.
 
 ## 🚀 Real Application Features
 
@@ -9,16 +9,18 @@ A comprehensive test management platform with **real server-side test execution*
 1. **Server-Side Test Execution**: Real browser automation using Puppeteer
 2. **Actual HTTP Requests**: Real API testing with axios and fetch
 3. **WebSocket Real-Time Updates**: Live test execution progress
-4. **Browser Control**: Real functional testing with actual browser interactions
-5. **Performance Testing**: Real load testing with concurrent requests
-6. **Variable Management**: Real session management and data extraction
-7. **Test Persistence**: Real test suite storage and execution history
+4. **AI-Powered Test Generation**: Gemini AI integration for intelligent test creation
+5. **User Management & Invitations**: Complete user authentication and project collaboration
+6. **Account Switching**: Personal vs invited project contexts
+7. **Unified Reporting**: Mochawesome reports with Jenkins integration
+8. **Sample Data Management**: Editable sample data for testing
 
 ### 🧪 Test Types Supported
 
 - **API Testing**: Real HTTP requests with authentication, headers, body, validation
 - **Functional Testing**: Real browser automation (navigation, interactions, assertions)
 - **Performance Testing**: Real load and stress testing with concurrent users
+- **AI-Generated Tests**: Intelligent test creation using natural language prompts
 
 ### 🛠️ Technology Stack
 
@@ -27,11 +29,13 @@ A comprehensive test management platform with **real server-side test execution*
 - Puppeteer (Real browser automation)
 - WebSocket (Real-time communication)
 - Axios (Real HTTP requests)
+- Gemini AI (Test generation)
 
 **Frontend (Test Management UI)**:
 - React + Vite
 - Tailwind CSS
 - Real-time WebSocket updates
+- AI Assistant integration
 
 ## 🏃‍♂️ Quick Start
 
@@ -55,92 +59,193 @@ cd ../client && npm install
 
 ```bash
 # Start both server and client together
-npm run dev
+npm start
 
 # Or start separately:
-npm run dev:server  # Backend on port 3001
+npm run dev:server  # Backend on port 5000
 npm run dev:client  # Frontend on port 5173
 ```
 
 ### Access the Application
 
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3001
-- **Health Check**: http://localhost:3001/api/health
+- **Backend API**: http://localhost:5000
+- **Health Check**: http://localhost:5000/api/health
+
+## 🌱 Sample Data Management
+
+### Seeding Sample Data
+
+```bash
+# Seed sample data for testing
+cd server
+npm run seed:sample
+```
+
+This creates:
+- 3 sample users
+- 3 sample projects
+- 3 sample test suites
+- 3 sample test runs
+- LocalStorage test data
+
+### Sample Data Editor
+
+Access the sample data editor at `/sample-data-editor` to:
+- View and edit sample data
+- Add new projects, users, test suites
+- Delete existing data
+- Persist changes across sessions
 
 ## 🧪 How to Use Real Testing
 
-### 1. API Testing (Real HTTP Requests)
+### 1. Creating Test Suites
 
-Create API test steps with:
-- **Real HTTP methods**: GET, POST, PUT, DELETE, PATCH
-- **Real authentication**: Bearer tokens, Basic auth
-- **Real headers and parameters**: Custom headers, query params
-- **Real request bodies**: JSON payloads
-- **Real validation**: Status codes, response times, JSON path validation
-- **Real variable extraction**: Extract data from responses for subsequent steps
+#### Manual Creation
+1. Navigate to **Test Management** → **Create Test Suite**
+2. Fill in the form with:
+   - **Name**: Test suite name
+   - **Description**: What the suite tests
+   - **Test Type**: API, UI, or Performance
+   - **Tool**: axios, playwright, etc.
+   - **Base URL**: Target application URL
+   - **Steps**: Individual test steps
 
-### 2. Functional Testing (Real Browser Automation)
+#### AI-Powered Creation
+1. Click the **AI Assistant** button (✨)
+2. Describe your test requirements in natural language
+3. AI generates test steps automatically
+4. Review and modify generated steps
+5. Save the test suite
 
-Create functional test steps with:
-- **Real navigation**: Navigate to URLs with real browser
-- **Real interactions**: Click, type, select, hover, scroll
-- **Real assertions**: Element existence, text content, visibility
-- **Real waiting**: Wait for elements, network idle
-- **Real screenshots**: Capture browser state
+### 2. Duplicating Test Suites
 
-### 3. Performance Testing (Real Load Testing)
+1. Find an existing test suite
+2. Click the **Duplicate** button (📋)
+3. Modify the duplicated suite as needed
+4. Save with a new name
 
-Create performance test steps with:
-- **Real concurrent users**: Simulate multiple users
-- **Real request timing**: Measure actual response times
-- **Real error tracking**: Track failed requests
-- **Real metrics**: Requests per second, average response time
+### 3. Editing Test Suites
+
+1. Click the **Edit** button (✏️) on any test suite
+2. Modify the test suite details
+3. Add, remove, or reorder test steps
+4. Save changes
+
+### 4. Running Tests
+
+1. Click **Run Test** (▶️) on any test suite
+2. Watch real-time execution progress
+3. View detailed logs and results
+4. Access test artifacts (screenshots, videos)
+
+## 👥 User Management & Collaboration
+
+### Account Switching
+
+The application supports two contexts:
+- **Personal**: Your own projects and test suites
+- **Invited Projects**: Projects you've been invited to
+
+Switch between contexts using the **Account Switcher** in the sidebar.
+
+### Inviting Team Members
+
+1. Navigate to **Project Members** page
+2. Click **Invite Member**
+3. Enter email address and role (Owner, Admin, Member)
+4. Send invitation
+5. Invited user receives email with acceptance link
+
+### Roles & Permissions
+
+- **Owner**: Full project control, can invite/remove members
+- **Admin**: Can create/edit test suites, run tests
+- **Member**: Can view and run tests
+
+## 📊 Unified Reporting & CI/CD
+
+### Local Testing
+
+```bash
+# Run all tests with unified reporting
+cd client
+npm run test:e2e:report
+```
+
+This generates:
+- **HTML Report**: `cypress/reports/html/index.html`
+- **JSON Report**: `cypress/reports/merged-report.json`
+- **JUnit XML**: `cypress/reports/junit/cypress-results.xml`
+- **Videos**: `cypress/videos/`
+- **Screenshots**: `cypress/screenshots/`
+
+### Jenkins Integration
+
+The `Jenkinsfile` provides:
+- **Parallel Test Execution**: Unit tests and E2E tests run simultaneously
+- **Artifact Archiving**: Videos, screenshots, and reports
+- **Slack Notifications**: Success/failure notifications with screenshots
+- **JUnit Integration**: Test trends and history
+- **HTML Report Publishing**: Accessible test reports
+
+### Testing Commands
+
+```bash
+# Global testing commands (run after every queue)
+npm run seed:sample    # Seed sample data
+npm run test:unit      # Run unit tests
+npm run test:api       # Run API tests
+npm run test:e2e       # Run E2E tests
+```
 
 ## 🔧 Real Test Execution Architecture
 
 ```
 ┌─────────────────┐    WebSocket    ┌─────────────────┐
 │   React Client  │ ←──────────────→ │  Node.js Server │
-│   (Port 5173)   │                  │   (Port 3001)   │
+│   (Port 5173)   │                  │   (Port 5000)   │
 └─────────────────┘                  └─────────────────┘
          │                                     │
          │ HTTP API Calls                     │
          ▼                                     ▼
 ┌─────────────────┐                  ┌─────────────────┐
 │  Test Builder   │                  │  Puppeteer      │
-│  UI Components  │                  │  Browser Control│
+│  AI Assistant   │                  │  Browser Control│
 └─────────────────┘                  └─────────────────┘
          │                                     │
          │ Test Suite Data                     │
          ▼                                     ▼
 ┌─────────────────┐                  ┌─────────────────┐
-│  Test Executor  │                  │  Real HTTP       │
-│  (Client-side)  │                  │  Requests        │
+│  Account Switcher│                  │  Real HTTP       │
+│  User Management│                  │  Requests        │
 └─────────────────┘                  └─────────────────┘
 ```
 
 ## 📊 Real Test Execution Flow
 
-1. **User creates test suite** in React UI
+1. **User creates test suite** (manually or via AI)
 2. **Test suite sent to server** via HTTP API
 3. **Server initializes real browser** (Puppeteer)
 4. **Real test execution** with actual browser automation
 5. **Real-time progress updates** via WebSocket
 6. **Real results returned** to client
 7. **Test results stored** for history
+8. **Unified reports generated** for CI/CD
 
-## 🔍 Real vs Demo Features
+## 🔍 Feature Comparison
 
 | Feature | Demo Version | Real Version |
 |---------|-------------|--------------|
 | API Testing | Simulated responses | Real HTTP requests |
 | Browser Testing | Mock interactions | Real Puppeteer automation |
-| Performance Testing | Simulated load | Real concurrent requests |
+| AI Test Generation | ❌ | ✅ Gemini AI integration |
+| User Management | ❌ | ✅ Complete auth & invitations |
+| Account Switching | ❌ | ✅ Personal vs invited contexts |
+| Unified Reporting | ❌ | ✅ Mochawesome + Jenkins |
+| Sample Data Editor | ❌ | ✅ Editable sample data |
 | Real-time Updates | Polling | WebSocket streaming |
 | Test Execution | Client-side only | Server-side with browser control |
-| Variable Management | Basic | Real session data extraction |
-| Error Handling | Basic | Real error detection and reporting |
 
 ## 🚀 Deployment
 
@@ -157,11 +262,15 @@ npm start
 ### Environment Variables
 
 ```bash
-# Server port (default: 3001)
-PORT=3001
+# Server port (default: 5000)
+PORT=5000
 
-# Client port (default: 5173)
-VITE_PORT=5173
+# AI Integration (optional)
+GEMINI_API_KEY=your_gemini_api_key
+
+# Supabase (optional)
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## 🐛 Troubleshooting
@@ -170,8 +279,9 @@ VITE_PORT=5173
 
 1. **Port conflicts**: Change ports in package.json
 2. **Puppeteer issues**: Ensure Node.js 18+ and proper permissions
-3. **WebSocket connection**: Check server is running on port 3001
+3. **WebSocket connection**: Check server is running on port 5000
 4. **CORS issues**: Server includes CORS middleware
+5. **AI features disabled**: Set GEMINI_API_KEY environment variable
 
 ### Debug Mode
 
@@ -185,13 +295,16 @@ cd client && npm run dev -- --debug
 
 ## 📈 Next Steps
 
-- [ ] Add real Cypress integration
-- [ ] Add real k6 performance testing
-- [ ] Add real test reporting and analytics
-- [ ] Add real user authentication
-- [ ] Add real test scheduling
-- [ ] Add real CI/CD integration
+- [x] Real Cypress integration
+- [x] Real test reporting and analytics
+- [x] Real user authentication
+- [x] Real AI test generation
+- [x] Real project collaboration
+- [x] Real CI/CD integration
+- [ ] Real test scheduling
+- [ ] Real performance monitoring
+- [ ] Real test data management
 
 ---
 
-**This is a REAL application that performs REAL testing, not a demo!** 🎯
+**This is a REAL application that performs REAL testing with AI, collaboration, and unified reporting!** 🎯

@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import AIAssistant from './AIAssistant';
 import TestRunProgress from './TestRunProgress';
+import HelpLink from './HelpLink';
 import sampleDataService from '../lib/sampleDataService';
 
 const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
@@ -358,16 +359,21 @@ const TestSuiteConfiguration = ({ folder, onBack, onRunTest }) => {
                 <p className="text-gray-500 dark:text-gray-400">
                   {folder.description || 'Test suite configuration'}
                 </p>
+                <div className="mt-2">
+                  <HelpLink topic="create-test-suite" />
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              data-testid="create-test-suite-btn"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Create Test Suite
-            </button>
+            <div className="flex items-center gap-3">
+              <HelpLink topic="ai-assistant" />
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                data-testid="create-test-suite-btn"
+              >
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Create Test Suite
+              </button>
           </div>
         </div>
 

@@ -76,8 +76,29 @@ const sampleData = {
 const outputPath = path.join(dataDir, 'sample-data.json');
 fs.writeFileSync(outputPath, JSON.stringify(sampleData, null, 2));
 
+// Also write to individual data files for API compatibility
+const dataFilesDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataFilesDir)) {
+  fs.mkdirSync(dataFilesDir, { recursive: true });
+}
+
+// Write individual data files
+fs.writeFileSync(path.join(dataFilesDir, 'projects.json'), JSON.stringify(sampleData.projects, null, 2));
+fs.writeFileSync(path.join(dataFilesDir, 'users.json'), JSON.stringify(sampleData.users, null, 2));
+fs.writeFileSync(path.join(dataFilesDir, 'testSuites.json'), JSON.stringify(sampleData.testSuites, null, 2));
+fs.writeFileSync(path.join(dataFilesDir, 'runs.json'), JSON.stringify(sampleData.testRuns, null, 2));
+
+// Initialize empty files for other data
+if (!fs.existsSync(path.join(dataFilesDir, 'memberships.json'))) {
+  fs.writeFileSync(path.join(dataFilesDir, 'memberships.json'), JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(path.join(dataFilesDir, 'invitations.json'))) {
+  fs.writeFileSync(path.join(dataFilesDir, 'invitations.json'), JSON.stringify([], null, 2));
+}
+
 console.log('✅ Sample data seeded successfully!');
 console.log(`📁 Data written to: ${outputPath}`);
+console.log(`📁 Individual data files updated in: ${dataFilesDir}`);
 console.log(`📊 Users: ${sampleData.users.length}`);
 console.log(`📊 Projects: ${sampleData.projects.length}`);
 console.log(`📊 Test Suites: ${sampleData.testSuites.length}`);
