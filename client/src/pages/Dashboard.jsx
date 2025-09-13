@@ -112,13 +112,14 @@ function Dashboard() {
     try {
       setLoading(true);
       
-      // Fetch projects count - temporarily disable environment filtering
+      // Fetch projects count - with environment filtering
       let projectsData = [];
       try {
         const { data, error: projectsError } = await supabase
           .from('projects')
-          .select('id, name, user_id')
+          .select('id, name, environment')
           .eq('user_id', user.id)
+          .eq('environment', ENVIRONMENT)
           .order('id', { ascending: false })
           .limit(5);
 
