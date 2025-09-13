@@ -35,7 +35,7 @@ SELECT
     COALESCE(au.email, 'Unknown') as user_email
 FROM public.project_memberships pm
 LEFT JOIN public.projects p ON p.id = pm.project_id
-LEFT JOIN auth.users au ON au.id = pm.user_id;
+LEFT JOIN auth.users au ON au.id::text = pm.user_id;
 
 -- Enable RLS on the view
 ALTER VIEW public.project_members_view SET (security_invoker = true);
@@ -55,7 +55,7 @@ SELECT
     COALESCE(au.email, 'Unknown') as user_email
 FROM public.test_runs tr
 LEFT JOIN public.projects p ON p.id = tr.project_id
-LEFT JOIN auth.users au ON au.id = tr.user_id;
+LEFT JOIN auth.users au ON au.id::text = tr.user_id;
 
 -- Enable RLS on the view
 ALTER VIEW public.test_runs_with_project SET (security_invoker = true);
