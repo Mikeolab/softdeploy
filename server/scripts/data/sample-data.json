@@ -1,105 +1,25 @@
 {
   "users": [
     {
-      "id": "user-1",
-      "email": "john.doe@example.com",
-      "name": "John Doe",
-      "role": "admin",
-      "created_at": "2024-01-15T10:00:00Z",
-      "last_login": "2024-01-20T14:30:00Z"
-    },
-    {
-      "id": "user-2",
-      "email": "jane.smith@example.com",
-      "name": "Jane Smith",
+      "email": "new@example.com",
+      "name": "New User",
       "role": "developer",
-      "created_at": "2024-01-16T09:15:00Z",
-      "last_login": "2024-01-20T16:45:00Z"
-    },
-    {
-      "id": "user-3",
-      "email": "mike.wilson@example.com",
-      "name": "Mike Wilson",
-      "role": "tester",
-      "created_at": "2024-01-17T11:20:00Z",
-      "last_login": "2024-01-19T13:15:00Z"
+      "id": "users-1757315127363-ro06kks7u",
+      "created_at": "2025-09-08T07:05:27.363Z",
+      "updated_at": "2025-09-08T07:05:27.363Z"
     }
   ],
   "projects": [
     {
-      "id": "proj-1",
-      "name": "E-commerce Platform",
-      "description": "Full-stack e-commerce application with payment processing",
-      "environment": "development",
-      "user_id": "user-1",
-      "created_at": "2024-01-15T10:00:00Z",
-      "updated_at": "2024-01-20T14:30:00Z",
-      "status": "active"
-    },
-    {
-      "id": "proj-2",
-      "name": "TestLab API",
-      "description": "RESTful API for test management and execution",
-      "environment": "staging",
-      "user_id": "user-2",
-      "created_at": "2024-01-16T09:15:00Z",
-      "updated_at": "2024-01-20T16:45:00Z",
-      "status": "active"
-    },
-    {
-      "id": "proj-3",
       "name": "New Project",
-      "description": "Fresh project for testing new features",
+      "description": "New Project Description",
       "environment": "development",
-      "user_id": "user-3",
-      "created_at": "2024-01-17T11:20:00Z",
-      "updated_at": "2024-01-19T13:15:00Z",
-      "status": "active"
+      "id": "projects-1757315127867-6vfrw3uig",
+      "created_at": "2025-09-08T07:05:27.867Z",
+      "updated_at": "2025-09-08T07:05:27.867Z"
     }
   ],
   "testSuites": [
-    {
-      "id": "suite-1",
-      "name": "Payment Processing Tests",
-      "description": "Test suite for payment gateway integration",
-      "project_id": "proj-1",
-      "test_type": "API",
-      "tool_id": "postman",
-      "base_url": "https://api.ecommerce.com",
-      "steps": [
-        {
-          "id": "step-1",
-          "name": "Validate Payment Request",
-          "method": "POST",
-          "url": "/payments/validate",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "amount": 100,
-            "currency": "USD"
-          },
-          "expected_status": 200
-        },
-        {
-          "id": "step-2",
-          "name": "Process Payment",
-          "method": "POST",
-          "url": "/payments/process",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "amount": 100,
-            "currency": "USD",
-            "token": "test_token"
-          },
-          "expected_status": 201
-        }
-      ],
-      "created_at": "2024-01-15T10:30:00Z",
-      "updated_at": "2024-01-20T14:30:00Z"
-    },
     {
       "id": "suite-2",
       "name": "API Endpoints Tests",
@@ -160,6 +80,40 @@
       ],
       "created_at": "2024-01-17T11:50:00Z",
       "updated_at": "2024-01-19T13:15:00Z"
+    },
+    {
+      "id": "suite-1757315163936-yr7d9nsd6",
+      "name": "New Test Suite",
+      "description": "A new test suite",
+      "project_id": "proj-1",
+      "test_type": "API",
+      "tool_id": "axios",
+      "base_url": "https://api.example.com",
+      "environment": "development",
+      "steps": [
+        {
+          "id": "step-1",
+          "name": "Test Step",
+          "method": "GET",
+          "url": "/test",
+          "expected_status": 200
+        }
+      ],
+      "created_at": "2025-09-08T07:06:03.936Z",
+      "updated_at": "2025-09-08T07:06:03.936Z"
+    },
+    {
+      "id": "suite-1757315164762-mmhwg8az7",
+      "name": "Test Suite",
+      "description": "",
+      "project_id": "proj-1",
+      "test_type": "API",
+      "tool_id": "axios",
+      "base_url": "https://api.example.com",
+      "environment": "development",
+      "steps": [],
+      "created_at": "2025-09-08T07:06:04.762Z",
+      "updated_at": "2025-09-08T07:06:04.762Z"
     }
   ],
   "testRuns": [

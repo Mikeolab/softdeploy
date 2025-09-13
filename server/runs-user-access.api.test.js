@@ -1,7 +1,32 @@
 // server/runs-user-access.api.test.js
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
+
+// Mock fs and path before importing the routes
+const mockFs = {
+  readFile: vi.fn(),
+  writeFile: vi.fn(),
+  mkdir: vi.fn(),
+  readdir: vi.fn(),
+  unlink: vi.fn(),
+  rm: vi.fn()
+}
+
+const mockPath = {
+  join: vi.fn((...args) => args.join('/')),
+  dirname: vi.fn(() => '/mock/dir'),
+  resolve: vi.fn((...args) => args.join('/'))
+}
+
+const mockExec = vi.fn()
+
+vi.mock('fs', () => ({ promises: mockFs }))
+vi.mock('path', () => ({ default: mockPath }))
+vi.mock('child_process', () => ({ exec: mockExec }))
+vi.mock('util', () => ({ promisify: vi.fn(() => mockExec) }))
+
+// Import after mocking
 import runsRoutes from './routes/runs.js';
 
 const app = express();
@@ -22,14 +47,23 @@ describe('Runs API - User Access Control', () => {
   };
 
   beforeEach(() => {
-    // Clear any existing test data
-    const fs = require('fs');
-    const path = require('path');
-    const dataPath = path.join(__dirname, 'data', 'runs.json');
+    // Reset mocks
+    vi.clearAllMocks()
     
-    if (fs.existsSync(dataPath)) {
-      fs.writeFileSync(dataPath, JSON.stringify([]));
-    }
+    // Mock file operations - return empty runs array initially
+    mockFs.readFile.mockResolvedValue('[]')
+    mockFs.writeFile.mockResolvedValue(undefined)
+    mockFs.mkdir.mockResolvedValue(undefined)
+    mockFs.readdir.mockResolvedValue([])
+    mockFs.unlink.mockResolvedValue(undefined)
+    mockFs.rm.mockResolvedValue(undefined)
+    
+    // Mock exec for Cypress
+    mockExec.mockResolvedValue({
+      stdout: 'Cypress test output',
+      stderr: '',
+      code: 0
+    })
   });
 
   describe('POST /api/runs - Create Run', () => {

@@ -35,7 +35,7 @@ SELECT
     COALESCE(au.email, 'Unknown') as user_email
 FROM public.project_memberships pm
 LEFT JOIN public.projects p ON p.id = pm.project_id
-LEFT JOIN auth.users au ON au.id::text = pm.user_id;
+LEFT JOIN auth.users au ON au.id = pm.user_id;
 
 -- Enable RLS on the view
 ALTER VIEW public.project_members_view SET (security_invoker = true);
@@ -55,7 +55,7 @@ SELECT
     COALESCE(au.email, 'Unknown') as user_email
 FROM public.test_runs tr
 LEFT JOIN public.projects p ON p.id = tr.project_id
-LEFT JOIN auth.users au ON au.id::text = tr.user_id;
+LEFT JOIN auth.users au ON au.id = tr.user_id::uuid;
 
 -- Enable RLS on the view
 ALTER VIEW public.test_runs_with_project SET (security_invoker = true);
@@ -74,7 +74,8 @@ $$ LANGUAGE plpgsql
 SET search_path = public;
 
 -- Fix get_user_project_role function
-CREATE OR REPLACE FUNCTION public.get_user_project_role(user_uuid UUID, project_uuid UUID)
+DROP FUNCTION IF EXISTS public.get_user_project_role(UUID, UUID);
+CREATE FUNCTION public.get_user_project_role(user_uuid UUID, project_uuid UUID)
 RETURNS TEXT AS $$
 DECLARE
     user_role TEXT;
@@ -89,7 +90,8 @@ $$ LANGUAGE plpgsql
 SET search_path = public;
 
 -- Fix has_project_role function
-CREATE OR REPLACE FUNCTION public.has_project_role(user_uuid UUID, project_uuid UUID, required_role TEXT)
+DROP FUNCTION IF EXISTS public.has_project_role(UUID, UUID, TEXT);
+CREATE FUNCTION public.has_project_role(user_uuid UUID, project_uuid UUID, required_role TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
     user_role TEXT;

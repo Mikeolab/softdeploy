@@ -1,4 +1,5 @@
 // server/index.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { exec } = require('child_process');
@@ -852,7 +853,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    activeExecutions: activeBrowsers.size
+    activeExecutions: activeExecutors.size
   });
 });
 

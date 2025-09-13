@@ -75,8 +75,70 @@ describe('Runs API', () => {
     // Reset mocks
     vi.clearAllMocks()
     
-    // Mock file operations
-    mockFs.readFile.mockResolvedValue('[]') // Empty runs array
+    // Mock file operations - return the actual runs data
+    const mockRunsData = [
+      {
+        "id": "run-1",
+        "testSuiteId": "suite-1",
+        "projectId": "proj-1",
+        "userId": "user-1",
+        "status": "completed",
+        "testSuite": {
+          "name": "Payment Processing Tests",
+          "description": "Test suite for payment gateway integration",
+          "testType": "API",
+          "toolId": "postman",
+          "baseUrl": "https://api.ecommerce.com",
+          "environment": "development",
+          "steps": [
+            {
+              "id": "step-1",
+              "name": "Validate Payment Request",
+              "method": "POST",
+              "url": "/payments/validate",
+              "headers": { "Content-Type": "application/json" },
+              "body": { "amount": 100, "currency": "USD" },
+              "expected_status": 200
+            },
+            {
+              "id": "step-2",
+              "name": "Process Payment",
+              "method": "POST",
+              "url": "/payments/process",
+              "headers": { "Content-Type": "application/json" },
+              "body": { "amount": 100, "currency": "USD", "token": "test_token" },
+              "expected_status": 201
+            }
+          ]
+        },
+        "createdAt": "2024-01-20T10:00:00Z",
+        "startedAt": "2024-01-20T10:00:00Z",
+        "completedAt": "2024-01-20T10:00:20Z",
+        "duration": 20000,
+        "results": {
+          "totalSteps": 2,
+          "passedSteps": 2,
+          "failedSteps": 0,
+          "success": true,
+          "summary": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "duration": 20000
+          }
+        },
+        "artifacts": {
+          "cypressReport": null,
+          "mochawesomeReport": null,
+          "allureReport": null,
+          "screenshots": [],
+          "videos": []
+        },
+        "logs": []
+      }
+    ]
+    
+    mockFs.readFile.mockResolvedValue(JSON.stringify(mockRunsData))
     mockFs.writeFile.mockResolvedValue(undefined)
     mockFs.mkdir.mockResolvedValue(undefined)
     mockFs.readdir.mockResolvedValue([])

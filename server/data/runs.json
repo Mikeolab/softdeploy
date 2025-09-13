@@ -1,68 +1,86 @@
 [
   {
-    "id": "run-1",
-    "test_suite_id": "suite-1",
-    "project_id": "proj-1",
-    "user_id": "user-1",
-    "status": "completed",
-    "total_steps": 2,
-    "passed_steps": 2,
-    "failed_steps": 0,
-    "total_time": 1250,
-    "created_at": "2024-01-20T10:00:00Z",
-    "executed_at": "2024-01-20T10:00:00Z",
+    "id": "run_1757315166041_xjm44noq0",
+    "projectId": "proj-1",
+    "userId": "user-1",
+    "status": "queued",
+    "testSuite": {
+      "name": "Test Suite",
+      "steps": [
+        {
+          "name": "Step 1",
+          "method": "GET",
+          "url": "/api/test"
+        }
+      ]
+    },
+    "createdAt": "2025-09-08T07:06:06.041Z",
+    "startedAt": null,
+    "completedAt": null,
+    "duration": null,
     "results": {
-      "success": true,
+      "totalSteps": 1,
+      "passedSteps": 0,
+      "failedSteps": 0,
+      "skippedSteps": 0,
       "summary": {
-        "total": 2,
-        "passed": 2,
+        "total": 1,
+        "passed": 0,
         "failed": 0,
-        "duration": 1250
-      }
-    }
-  },
-  {
-    "id": "run-2",
-    "test_suite_id": "suite-2",
-    "project_id": "proj-2",
-    "user_id": "user-2",
-    "status": "completed",
-    "total_steps": 2,
-    "passed_steps": 1,
-    "failed_steps": 1,
-    "total_time": 2100,
-    "created_at": "2024-01-20T11:30:00Z",
-    "executed_at": "2024-01-20T11:30:00Z",
+        "skipped": 0,
+        "duration": 0
+      },
+      "steps": []
+    },
+    "artifacts": {
+      "cypressReport": null,
+      "mochawesomeReport": null,
+      "allureReport": null,
+      "screenshots": [],
+      "videos": []
+    },
+    "logs": []
+  }
+]  {
+    "id": "run_1757315167623_nsf9kukcd",
+    "projectId": "proj-2",
+    "userId": "user-2",
+    "status": "queued",
+    "testSuite": {
+      "name": "Test Suite",
+      "steps": [
+        {
+          "name": "Step 1",
+          "method": "GET",
+          "url": "/api/test"
+        }
+      ]
+    },
+    "createdAt": "2025-09-08T07:06:07.623Z",
+    "startedAt": null,
+    "completedAt": null,
+    "duration": null,
     "results": {
-      "success": false,
+      "totalSteps": 1,
+      "passedSteps": 0,
+      "failedSteps": 0,
+      "skippedSteps": 0,
       "summary": {
-        "total": 2,
-        "passed": 1,
-        "failed": 1,
-        "duration": 2100
-      }
-    }
-  },
-  {
-    "id": "run-3",
-    "test_suite_id": "suite-3",
-    "project_id": "proj-3",
-    "user_id": "user-3",
-    "status": "completed",
-    "total_steps": 2,
-    "passed_steps": 2,
-    "failed_steps": 0,
-    "total_time": 1800,
-    "created_at": "2024-01-20T13:15:00Z",
-    "executed_at": "2024-01-20T13:15:00Z",
-    "results": {
-      "success": true,
-      "summary": {
-        "total": 2,
-        "passed": 2,
+        "total": 1,
+        "passed": 0,
         "failed": 0,
-        "duration": 1800
-      }
-    }
+        "skipped": 0,
+        "duration": 0
+      },
+      "steps": []
+    },
+    "artifacts": {
+      "cypressReport": null,
+      "mochawesomeReport": null,
+      "allureReport": null,
+      "screenshots": [],
+      "videos": []
+    },
+    "logs": []
   }
 ]

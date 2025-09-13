@@ -9,7 +9,7 @@ module.exports = {
     responseTimeout: 10000,
     video: true,
     screenshotOnRunFailure: true,
-    specPattern: 'C:\Users\PC\Documents\devops-real-app\server\artifacts\run_1757306503216_s64ev217r.spec.js',
+    specPattern: 'C:\Users\PC\Documents\devops-real-app\server\artifacts\run_1757315164669_9khzp5699.spec.js',
     supportFile: false,
     fixturesFolder: false
   }

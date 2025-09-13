@@ -45,6 +45,15 @@ const mockSampleData = {
           headers: { 'Content-Type': 'application/json' },
           body: { amount: 100, currency: 'USD' },
           expected_status: 200
+        },
+        {
+          id: 'step-2',
+          name: 'Process Payment',
+          method: 'POST',
+          url: '/payments/process',
+          headers: { 'Content-Type': 'application/json' },
+          body: { amount: 100, currency: 'USD', token: 'test_token' },
+          expected_status: 201
         }
       ],
       created_at: '2024-01-15T10:30:00Z',
@@ -61,15 +70,52 @@ const mockSampleData = {
       environment: 'staging',
       steps: [
         {
-          id: 'step-2',
+          id: 'step-3',
           name: 'Health Check',
           method: 'GET',
           url: '/health',
+          expected_status: 200
+        },
+        {
+          id: 'step-4',
+          name: 'Authentication Test',
+          method: 'POST',
+          url: '/auth/login',
+          headers: { 'Content-Type': 'application/json' },
+          body: { username: 'test', password: 'test' },
           expected_status: 200
         }
       ],
       created_at: '2024-01-16T09:45:00Z',
       updated_at: '2024-01-20T16:45:00Z'
+    },
+    {
+      id: 'suite-3',
+      name: 'Core Features Tests',
+      description: 'Test suite for basic application features',
+      project_id: 'proj-3',
+      test_type: 'UI',
+      tool_id: 'playwright',
+      base_url: 'https://app.newproject.com',
+      environment: 'development',
+      steps: [
+        {
+          id: 'step-5',
+          name: 'Login Flow',
+          method: 'GET',
+          url: '/login',
+          expected_status: 200
+        },
+        {
+          id: 'step-6',
+          name: 'Dashboard Access',
+          method: 'GET',
+          url: '/dashboard',
+          expected_status: 200
+        }
+      ],
+      created_at: '2024-01-17T11:50:00Z',
+      updated_at: '2024-01-19T13:15:00Z'
     }
   ]
 }
@@ -79,8 +125,15 @@ describe('Test Suites API', () => {
     // Reset mocks
     vi.clearAllMocks()
     
-    // Mock file reading
-    mockFs.readFileSync.mockReturnValue(JSON.stringify(mockSampleData))
+    // Mock file reading - return the full sample data structure
+    const fullSampleData = {
+      testSuites: mockSampleData.testSuites,
+      users: [],
+      projects: [],
+      testRuns: [],
+      localStorage: {}
+    }
+    mockFs.readFileSync.mockReturnValue(JSON.stringify(fullSampleData))
     mockFs.writeFileSync.mockReturnValue(undefined)
   })
 

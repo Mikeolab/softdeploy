@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "id": "invite_1757313136887_04d6b1a016ab06ad",
+    "projectId": "proj-1",
+    "projectName": "E-commerce Platform",
+    "email": "newuser@example.com",
+    "role": "member",
+    "inviterId": "user-1",
+    "inviterEmail": "john.doe@example.com",
+    "token": "b7ae7c10ba80dba01d9b5d68740edf3b5e52583840f3d54919dc5c5fa3e36816",
+    "status": "pending",
+    "createdAt": "2025-09-08T06:32:16.888Z",
+    "expiresAt": "2025-09-15T06:32:16.888Z"
+  },
+  {
+    "id": "invite_1757313138501_013ec07eafbf5c2f",
+    "projectId": "proj-1",
+    "projectName": "E-commerce Platform",
+    "email": "acceptuser@example.com",
+    "role": "member",
+    "inviterId": "user-1",
+    "inviterEmail": "john.doe@example.com",
+    "token": "a8526ad42f827367d5e6f833310ad9cf66d3553e16d4bb557ab69f1762b915e0",
+    "status": "pending",
+    "createdAt": "2025-09-08T06:32:18.501Z",
+    "expiresAt": "2025-09-15T06:32:18.501Z"
+  },
+  {
+    "id": "invite_1757313139671_4ae6b35b94ee2add",
+    "projectId": "proj-1",
+    "projectName": "E-commerce Platform",
+    "email": "inviteduser@example.com",
+    "role": "member",
+    "inviterId": "user-1",
+    "inviterEmail": "john.doe@example.com",
+    "token": "5d714bd07eacefa980b571ec18f40cde8afb13959e400a2b17eb5fe2d638a4f2",
+    "status": "pending",
+    "createdAt": "2025-09-08T06:32:19.671Z",
+    "expiresAt": "2025-09-15T06:32:19.671Z"
+  },
+  {
+    "id": "invite_1757313140880_e2cc5e7a57ac4e74",
+    "projectId": "proj-1",
+    "projectName": "E-commerce Platform",
+    "email": "tokenuser@example.com",
+    "role": "member",
+    "inviterId": "user-1",
+    "inviterEmail": "john.doe@example.com",
+    "token": "11fc5443371f8c3f3ed860177cfc4df4073647ba7dbe6f50d2eb26840f3c1792",
+    "status": "pending",
+    "createdAt": "2025-09-08T06:32:20.880Z",
+    "expiresAt": "2025-09-15T06:32:20.880Z"
+  },
+  {
+    "id": "invite_1757313144200_9b881f970a55baa8",
+    "projectId": "proj-1",
+    "projectName": "E-commerce Platform",
+    "email": "canceluser@example.com",
+    "role": "member",
+    "inviterId": "user-1",
+    "inviterEmail": "john.doe@example.com",
+    "token": "a3015a39601a0477cf4eedf070f4a34fa9624c3943eedb09fc0c1b9f663315d0",
+    "status": "pending",
+    "createdAt": "2025-09-08T06:32:24.200Z",
+    "expiresAt": "2025-09-15T06:32:24.200Z"
+  }
+]

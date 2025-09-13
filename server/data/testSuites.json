@@ -7,6 +7,7 @@
     "test_type": "API",
     "tool_id": "postman",
     "base_url": "https://api.ecommerce.com",
+    "environment": "development",
     "steps": [
       {
         "id": "step-1",
@@ -49,6 +50,7 @@
     "test_type": "API",
     "tool_id": "rest",
     "base_url": "https://api.testlab.com",
+    "environment": "staging",
     "steps": [
       {
         "id": "step-3",
@@ -83,6 +85,7 @@
     "test_type": "UI",
     "tool_id": "playwright",
     "base_url": "https://app.newproject.com",
+    "environment": "development",
     "steps": [
       {
         "id": "step-5",
