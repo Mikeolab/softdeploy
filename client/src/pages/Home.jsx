@@ -20,6 +20,9 @@ import {
 } from '@heroicons/react/24/outline';
 import WorkflowDiagram from '../components/WorkflowDiagram';
 import AutomationUIPreview from '../components/AutomationUIPreview';
+import FAQSection from '../components/FAQSection';
+import ROICalculator from '../components/ROICalculator';
+import TrustBadges from '../components/TrustBadges';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -529,6 +532,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ROI Calculator */}
+      <ROICalculator />
+
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* Final CTA with urgency */}
       <section className="py-24 bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-600">
