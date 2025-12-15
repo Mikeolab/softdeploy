@@ -208,14 +208,25 @@ export default function Contact() {
                 />
               </label>
 
-              <a
-                href={`mailto:mikeolab@gmail.com?subject=${encodeURIComponent("Automation Audit Request")}`}
-                className="inline-flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
+              <button
+                onClick={handleSendRequest}
+                className="w-full inline-flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={copied}
               >
-                <EnvelopeIcon className="h-5 w-5" />
-                Send request
-              </a>
+                {copied ? (
+                  <>
+                    <CheckCircleIcon className="h-5 w-5" />
+                    Copied! Opening email...
+                  </>
+                ) : (
+                  <>
+                    <EnvelopeIcon className="h-5 w-5" />
+                    Send request
+                  </>
+                )}
+              </button>
 
+              <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
                 Your message will open in your email app. We'll respond within 24 hours.
               </div>
             </div>
