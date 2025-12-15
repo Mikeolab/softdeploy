@@ -11,7 +11,6 @@ export default function Contact() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [goal, setGoal] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const emailContent = useMemo(() => {
     return [
@@ -32,24 +31,11 @@ export default function Contact() {
     ].join("\n");
   }, [business, email, goal, name, phone]);
 
-  const handleSendRequest = async () => {
-    const subject = "Automation Audit Request";
-    const body = emailContent;
-    const mailtoLink = `mailto:mikeolab@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Try to copy email content to clipboard
-    try {
-      await navigator.clipboard.writeText(`To: mikeolab@gmail.com\nSubject: ${subject}\n\n${body}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-      
-      // Also open mailto as fallback
-      window.location.href = mailtoLink;
-    } catch (err) {
-      // Fallback: just open mailto
-      window.location.href = mailtoLink;
-    }
-  };
+  const mailtoHref = useMemo(() => {
+    const subject = encodeURIComponent("Automation Audit Request");
+    const body = encodeURIComponent(emailContent);
+    return `mailto:mikeolab@gmail.com?subject=${subject}&body=${body}`;
+  }, [emailContent]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -114,18 +100,18 @@ export default function Contact() {
             </p>
 
             <div className="space-y-4">
-            <a
-              className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 text-white border border-emerald-500/60 hover:from-emerald-700 hover:to-cyan-700 transition-colors"
-              href="https://calendly.com/softdeployautomation"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <CalendarDaysIcon className="h-5 w-5" />
-              <div>
-                <div className="font-semibold">Book a 20–45min Automation Audit</div>
-                <div className="text-sm text-emerald-50/80">Instant scheduling via Calendly</div>
-              </div>
-            </a>
+              <a
+                className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 text-white border border-emerald-500/60 hover:from-emerald-700 hover:to-cyan-700 transition-colors"
+                href="https://calendly.com/softdeployautomation"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CalendarDaysIcon className="h-5 w-5" />
+                <div>
+                  <div className="font-semibold">Book a 20–45min Automation Audit</div>
+                  <div className="text-sm text-emerald-50/80">Instant scheduling via Calendly</div>
+                </div>
+              </a>
 
               <a
                 className="flex items-center gap-3 p-4 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-500 transition-colors"
@@ -208,23 +194,13 @@ export default function Contact() {
                 />
               </label>
 
-              <button
-                onClick={handleSendRequest}
-                className="w-full inline-flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={copied}
+              <a
+                href={mailtoHref}
+                className="w-full inline-flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
               >
-                {copied ? (
-                  <>
-                    <CheckCircleIcon className="h-5 w-5" />
-                    Copied! Opening email...
-                  </>
-                ) : (
-                  <>
-                    <EnvelopeIcon className="h-5 w-5" />
-                    Send request
-                  </>
-                )}
-              </button>
+                <EnvelopeIcon className="h-5 w-5" />
+                Send request
+              </a>
 
               <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
                 Your message will open in your email app. We'll respond within 24 hours.
