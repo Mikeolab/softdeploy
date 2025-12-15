@@ -216,8 +216,7 @@ export default function Contact() {
                 Send request
               </a>
 
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                This button opens your email app (no server needed yet). When you’re ready, we can switch it to a real form submit + CRM pipeline automation.
+                Your message will open in your email app. We'll respond within 24 hours.
               </div>
             </div>
           </div>
