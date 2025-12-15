@@ -253,6 +253,75 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Before/After Comparison */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Before vs. After Automation
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              See the difference automation makes in your daily workflow
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Before */}
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 border-2 border-red-200 dark:border-red-900/50 shadow-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <span className="text-2xl">😰</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Before Automation</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "Leads wait hours for a response",
+                  "Missed calls = lost opportunities",
+                  "Manual follow-up emails every day",
+                  "No-shows waste your time",
+                  "Reviews? You have to ask manually",
+                  "5+ hours/week on admin tasks"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-red-500 mt-1">✗</span>
+                    <span className="text-gray-700 dark:text-gray-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* After */}
+            <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 rounded-3xl p-8 border-2 border-emerald-300 dark:border-emerald-700 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                    <span className="text-2xl">🚀</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">After Automation</h3>
+                </div>
+                <ul className="space-y-4">
+                  {[
+                    "Leads get instant replies 24/7",
+                    "Missed calls auto-text back & book",
+                    "Follow-up sequences run automatically",
+                    "Reminders reduce no-shows by 40%+",
+                    "Reviews requested automatically",
+                    "Focus on delivery, not admin"
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="text-emerald-600 dark:text-emerald-400 mt-1">✓</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-medium">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works - Simple 3-Step Process */}
       <section className="py-24 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-6">
