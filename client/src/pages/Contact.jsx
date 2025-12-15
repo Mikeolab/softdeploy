@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
-import { EnvelopeIcon, PhoneIcon, CalendarDaysIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, PhoneIcon, CalendarDaysIcon, SunIcon, MoonIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Contact() {
   const { theme, toggleTheme } = useTheme();
@@ -11,6 +11,7 @@ export default function Contact() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [goal, setGoal] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const mailtoHref = useMemo(() => {
     const subject = encodeURIComponent("Automation Audit Request");
