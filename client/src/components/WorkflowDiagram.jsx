@@ -3,7 +3,7 @@ import {
   SparklesIcon, 
   ChatBubbleLeftRightIcon, 
   CalendarDaysIcon,
-  ArrowRightIcon
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 export default function WorkflowDiagram() {
@@ -84,7 +84,7 @@ export default function WorkflowDiagram() {
                   {/* Arrow Indicator */}
                   {index < steps.length - 1 && (
                     <div className="absolute top-1/2 left-full -translate-y-1/2 -translate-x-1/2 z-20">
-                      <ArrowRightIcon className="h-6 w-6 text-gray-400" />
+                      <ChevronRightIcon className="h-6 w-6 text-gray-400" />
                     </div>
                   )}
                   
