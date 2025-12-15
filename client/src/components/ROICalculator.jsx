@@ -110,7 +110,7 @@ export default function ROICalculator() {
             {/* Revenue Impact */}
             <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
               <div className="flex items-center gap-3 mb-4">
-                <CurrencyDollarIcon className="h-8 w-8" />
+                <ArrowTrendingUpIcon className="h-8 w-8" />
                 <h3 className="text-2xl font-bold">Revenue Impact</h3>
               </div>
               <div className="space-y-2">

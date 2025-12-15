@@ -17,29 +17,47 @@ export function AuthProvider({ children }) {
   // Initial session + live subscription
   useEffect(() => {
     let mounted = true;
+    let timeoutId;
+
+    // Set a timeout to ensure loading never hangs forever
+    timeoutId = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth check timeout - proceeding without auth');
+        setLoading(false);
+      }
+    }, 5000); // 5 second timeout
 
     (async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) console.warn('getSession error:', error.message);
-        if (mounted) setUser(session?.user ?? null);
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       } catch (e) {
         console.error('getSession threw:', e);
-        if (mounted) setUser(null);
-      } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setUser(null);
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       }
     })();
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      // ensure loading is not stuck if auth changes after mount
-      setLoading(false);
+      if (mounted) {
+        setUser(session?.user ?? null);
+        setLoading(false);
+        clearTimeout(timeoutId);
+      }
     });
 
     return () => {
       mounted = false;
-      sub.subscription?.unsubscribe();
+      clearTimeout(timeoutId);
+      sub?.subscription?.unsubscribe();
     };
   }, []);
 

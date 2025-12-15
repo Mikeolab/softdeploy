@@ -533,6 +533,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust Badges & Integrations */}
+      <TrustBadges />
+
       {/* ROI Calculator */}
       <ROICalculator />
 

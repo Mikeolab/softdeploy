@@ -71,7 +71,7 @@ export default function SignupPage() {
         {/* Left Side - Info */}
         <div className="lg:w-1/2 space-y-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-full text-cyan-700 dark:text-cyan-300 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-full text-emerald-700 dark:text-emerald-300 text-sm font-medium">
               <SparklesIcon className="h-4 w-4" />
               Join the Future
             </div>
@@ -222,7 +222,7 @@ export default function SignupPage() {
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-6 text-center">
               Already have an account?{' '}
-              <Link to="/login" className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium hover:underline">
+              <Link to="/login" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium hover:underline">
                 Sign in here
               </Link>
             </p>
