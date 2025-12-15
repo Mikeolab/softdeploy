@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { ProjectProvider } from './context/ProjectContext.jsx';
@@ -25,6 +25,7 @@ import SettingsPage from './pages/Settings.jsx';
 import SampleDataEditor from './pages/SampleDataEditor.jsx';
 import ProjectMembers from './pages/ProjectMembers.jsx';
 import InvitationAccept from './pages/InvitationAccept.jsx';
+import Contact from './pages/Contact.jsx';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -123,6 +124,7 @@ function App() {
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/contact" element={<Contact />} />
               <Route
                 path="/login"
                 element={

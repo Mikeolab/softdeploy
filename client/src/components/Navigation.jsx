@@ -1,9 +1,10 @@
 // src/components/Navigation.jsx
 import { Link } from 'react-router-dom';
 import { 
-  BookOpenIcon, 
-  PlayIcon,
-  SparklesIcon
+  CalendarDaysIcon,
+  BriefcaseIcon,
+  SparklesIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 
 function Navigation() {
@@ -19,37 +20,47 @@ function Navigation() {
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-gray-900 dark:text-white">SoftDeploy</span>
               <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
-                QA & CI/CD Platform
+                Business Automation
               </span>
             </div>
           </Link>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
-              Features
+            <Link
+              to="/features"
+              className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium"
+            >
+              <WrenchScrewdriverIcon className="h-4 w-4" />
+              What we automate
             </Link>
-            <Link to="/subscription" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
-              Pricing
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium"
+            >
+              <BriefcaseIcon className="h-4 w-4" />
+              Packages
             </Link>
-            <Link to="/integrations" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
-              Integrations
-            </Link>
-            <Link to="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium">
-              Dashboard
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium"
+            >
+              <SparklesIcon className="h-4 w-4" />
+              Contact
             </Link>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex items-center gap-3">
-            <Link to="/docs" className="hidden md:flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-              <BookOpenIcon className="h-4 w-4" />
-              Docs
-            </Link>
-            <Link to="/login" className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-sm font-semibold rounded-lg transition-all duration-300 transform hover:scale-105">
-              <PlayIcon className="h-4 w-4" />
-              Try Demo
-            </Link>
+            <a
+              href="https://calendly.com/softdeployautomation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-sm font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
+            >
+              <CalendarDaysIcon className="h-4 w-4" />
+              Book audit
+            </a>
           </div>
         </div>
       </div>

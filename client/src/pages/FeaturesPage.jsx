@@ -4,13 +4,12 @@ import { useTheme } from '../context/ThemeContext';
 import { 
   SunIcon,
   MoonIcon,
-  BeakerIcon,
-  RocketLaunchIcon,
-  CommandLineIcon,
-  ClockIcon,
-  BellIcon,
-  LightBulbIcon,
-  CodeBracketIcon
+  InboxArrowDownIcon,
+  ChatBubbleLeftRightIcon,
+  CalendarDaysIcon,
+  PhoneArrowUpRightIcon,
+  ArrowTrendingUpIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 export default function FeaturesPage() {
@@ -22,7 +21,6 @@ export default function FeaturesPage() {
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 grid place-items-center">
                 <span className="text-white font-bold text-sm">SD</span>
@@ -30,25 +28,19 @@ export default function FeaturesPage() {
               <span className="text-xl font-bold text-gray-900 dark:text-white">SoftDeploy</span>
             </Link>
 
-            {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
               <Link to="/features" className="text-cyan-600 dark:text-cyan-400 font-medium">
-                Features
+                What we automate
               </Link>
               <Link to="/pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Pricing
+                Packages
               </Link>
-              <Link to="/integrations" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Integrations
-              </Link>
-              <Link to="/docs" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Docs
+              <Link to="/contact" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Contact
               </Link>
             </nav>
 
-            {/* Actions */}
             <div className="flex items-center gap-4">
-              {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
@@ -61,73 +53,73 @@ export default function FeaturesPage() {
                 )}
               </button>
 
-              {/* Auth Buttons */}
-              <div className="hidden sm:flex items-center gap-3">
-                <Link
-                  to="/login"
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
-                >
-                  Get Started
-                </Link>
-              </div>
+            <div className="hidden sm:flex items-center gap-3">
+              <Link
+                to="/contact"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Contact
+              </Link>
+              <a
+                href="https://calendly.com/softdeployautomation"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+              >
+                Book Audit
+              </a>
+            </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            Core Features
+            What we automate for your business
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        Everything your engineering team needs to build, test, deploy, and scale faster.
-      </p>
+            These are the workflows we install in almost every client account — no matter the niche.
+          </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {[
           {
-              icon: RocketLaunchIcon,
-            title: "One-click Deployments",
-              description: "Push code to staging or production with pre-flight health checks and rollback on failure.",
+            icon: InboxArrowDownIcon,
+            title: "New lead capture & qualification",
+            description: "Forms, ads, DMs and calls flow into one pipeline with basic qualification and tagging.",
               color: "from-blue-500 to-cyan-500"
           },
           {
-              icon: BeakerIcon,
-            title: "Live Test Logging",
-              description: "Stream real-time Cypress, Playwright or unit test logs directly in your dashboard.",
+            icon: ChatBubbleLeftRightIcon,
+            title: "Speed-to-lead & nurturing",
+            description: "Instant SMS/email replies plus structured follow-up over days so you stop losing warm leads.",
               color: "from-green-500 to-emerald-500"
           },
           {
-              icon: ClockIcon,
-            title: "Scheduled Test Runs",
-              description: "Run E2E/API tests every night (or afternoon). Visualized pass history included.",
+            icon: CalendarDaysIcon,
+            title: "Booking, reminders & no-show reduction",
+            description: "Calendar booking, confirmations, reminders, and easy reschedules to reduce no-shows.",
               color: "from-purple-500 to-pink-500"
           },
           {
-              icon: BellIcon,
-            title: "Slack & Email Notifications",
-              description: "Critical updates reach your team instantly with actionable summaries and diff insights.",
+            icon: PhoneArrowUpRightIcon,
+            title: "Missed call text-back",
+            description: "When you miss a call, we text back automatically, answer simple questions, and send your booking link.",
               color: "from-orange-500 to-red-500"
           },
           {
-              icon: LightBulbIcon,
-            title: "AI Failure Insights",
-              description: "Catch flakiness and receive smart fixes when deployments or tests break.",
+            icon: ArrowTrendingUpIcon,
+            title: "Reviews, referrals & reactivation",
+            description: "Request reviews from happy customers, trigger referral requests, and revive old leads with targeted campaigns.",
               color: "from-yellow-500 to-amber-500"
           },
           {
-              icon: CodeBracketIcon,
-            title: "GitHub/GitLab Pipelines",
-              description: "CI/CD integration for every team with YAML or visual pipeline creation.",
+            icon: UserGroupIcon,
+            title: "Simple reporting & dashboard (coming soon)",
+            description: "See leads, bookings, no-shows, and reviews at a glance, plus alerts when automations break.",
               color: "from-indigo-500 to-purple-500"
             },
           ].map((feature, index) => (
@@ -148,28 +140,27 @@ export default function FeaturesPage() {
         ))}
         </div>
 
-        {/* CTA Section */}
         <div className="text-center mt-16">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Ready to Get Started?
+            Ready to see this mapped to your business?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-            Join thousands of developers who trust SoftDeploy to ship faster and more reliably.
+            Tell me how leads come in today and how you handle booking, follow-up, and reviews. I’ll send back a simple automation plan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/signup"
+            <a
+              href="https://calendly.com/softdeployautomation"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105"
             >
-              <RocketLaunchIcon className="h-5 w-5" />
-              Start Free Trial
-            </Link>
+              Book Automation Audit
+            </a>
             <Link
-              to="/login"
+              to="/pricing"
               className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold px-8 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-cyan-500 transition-all duration-300"
             >
-              <CommandLineIcon className="h-5 w-5" />
-              Sign In
+              View Packages
             </Link>
           </div>
         </div>
