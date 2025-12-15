@@ -15,7 +15,14 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// Ensure root element exists
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  console.error('Root element not found!');
+  document.body.innerHTML = '<div style="padding: 20px; font-family: sans-serif;"><h1>Error: Root element not found</h1><p>Please check index.html</p></div>';
+} else {
+  console.log('React app initializing...');
+  ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ErrorBoundary>
       <AuthProvider>
@@ -23,4 +30,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </AuthProvider>
     </ErrorBoundary>
   </React.StrictMode>
-);
+  );
+}
