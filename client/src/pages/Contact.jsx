@@ -135,9 +135,6 @@ export default function Contact() {
               </a>
             </div>
 
-            <div className="mt-8 text-sm text-gray-600 dark:text-gray-400">
-              Prefer a calendar link? Add your GoHighLevel/Calendly booking URL here and I’ll wire it into the CTA buttons site-wide.
-            </div>
           </div>
 
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-gray-200/50 dark:border-gray-700/50">
