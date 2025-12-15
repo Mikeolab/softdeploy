@@ -15,7 +15,8 @@ import {
   CheckCircleIcon,
   StarIcon,
   ClockIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 
 export default function Home() {
@@ -160,16 +161,27 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 text-center">
                   A simple automation engine for your entire front office
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div className="flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 flex items-center justify-center mb-3">
                       <InboxArrowDownIcon className="h-6 w-6" />
                     </div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      New lead captured
+                      Lead captured
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Web form, ad, DM, or missed call.
+                      Form, ad, DM, or call.
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-300 flex items-center justify-center mb-3">
+                      <SparklesIcon className="h-6 w-6" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                      AI chatbot replies
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      24/7 answers questions & books.
                     </p>
                   </div>
                   <div className="flex flex-col items-center text-center">
@@ -177,10 +189,10 @@ export default function Home() {
                       <ChatBubbleLeftRightIcon className="h-6 w-6" />
                     </div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      Instant reply & nurture
+                      Auto follow-up
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      SMS/email answer common questions & follow up for days.
+                      SMS/email sequences for days.
                     </p>
                   </div>
                   <div className="flex flex-col items-center text-center">
@@ -191,7 +203,7 @@ export default function Home() {
                       Booked & reminded
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Calendar booking, reminders, and no-show reduction.
+                      Calendar + reminders.
                     </p>
                   </div>
                 </div>
@@ -369,6 +381,12 @@ export default function Home() {
                 title: "Reviews & reactivation",
                 description: "Request reviews from happy customers and re-open conversations with past leads that went quiet.",
                 color: "from-yellow-500 to-amber-500"
+              },
+              {
+                icon: SparklesIcon,
+                title: "AI-powered chatbot",
+                description: "24/7 AI receptionist answers calls, books appointments, and captures leads even when you're offline.",
+                color: "from-violet-500 to-purple-500"
               },
               {
                 icon: UserGroupIcon,

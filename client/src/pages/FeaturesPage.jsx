@@ -9,7 +9,8 @@ import {
   CalendarDaysIcon,
   PhoneArrowUpRightIcon,
   ArrowTrendingUpIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 
 export default function FeaturesPage() {
@@ -114,13 +115,19 @@ export default function FeaturesPage() {
             icon: ArrowTrendingUpIcon,
             title: "Reviews, referrals & reactivation",
             description: "Request reviews from happy customers, trigger referral requests, and revive old leads with targeted campaigns.",
-              color: "from-yellow-500 to-amber-500"
+            color: "from-yellow-500 to-amber-500"
+          },
+          {
+            icon: SparklesIcon,
+            title: "AI-powered chatbot",
+            description: "24/7 AI receptionist handles calls, answers questions, books appointments, and captures leads even when you're offline.",
+            color: "from-violet-500 to-purple-500"
           },
           {
             icon: UserGroupIcon,
             title: "Simple reporting & dashboard (coming soon)",
             description: "See leads, bookings, no-shows, and reviews at a glance, plus alerts when automations break.",
-              color: "from-indigo-500 to-purple-500"
+            color: "from-indigo-500 to-purple-500"
             },
           ].map((feature, index) => (
             <div
