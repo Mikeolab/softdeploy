@@ -129,7 +129,7 @@ export default function Contact() {
 
               <a
                 className="flex items-center gap-3 p-4 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-500 transition-colors"
-                href={mailtoHref}
+                href={`mailto:mikeolab@gmail.com?subject=${encodeURIComponent("Automation Audit Request")}`}
               >
                 <EnvelopeIcon className="h-5 w-5 text-emerald-600" />
                 <div>
@@ -209,7 +209,7 @@ export default function Contact() {
               </label>
 
               <a
-                href={mailtoHref}
+                href={`mailto:mikeolab@gmail.com?subject=${encodeURIComponent("Automation Audit Request")}`}
                 className="inline-flex justify-center items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
               >
                 <EnvelopeIcon className="h-5 w-5" />
