@@ -156,55 +156,95 @@ export default function Home() {
               ⚡ Limited spots this week — Book your free audit now
             </p>
 
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 text-center">
+            <div className="max-w-5xl mx-auto">
+              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
                   A simple automation engine for your entire front office
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 flex items-center justify-center mb-3">
-                      <InboxArrowDownIcon className="h-6 w-6" />
+                
+                {/* Visual Workflow with Arrows */}
+                <div className="relative">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* Step 1 */}
+                    <div className="relative flex flex-col items-center text-center group">
+                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-lg shadow-cyan-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <InboxArrowDownIcon className="h-10 w-10 text-white" />
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
+                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                          New lead captured
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          Web form, ad, DM, or missed call
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-cyan-500 to-violet-500 z-0">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-violet-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                      </div>
                     </div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      Lead captured
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Form, ad, DM, or call.
-                    </p>
+
+                    {/* Step 2 */}
+                    <div className="relative flex flex-col items-center text-center group">
+                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg shadow-violet-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <SparklesIcon className="h-10 w-10 text-white" />
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
+                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                          AI chatbot replies
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          24/7 instant answers & booking
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-violet-500 to-emerald-500 z-0">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-emerald-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="relative flex flex-col items-center text-center group">
+                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <ChatBubbleLeftRightIcon className="h-10 w-10 text-white" />
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
+                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                          Auto follow-up
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          SMS/email sequences for days
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-emerald-500 to-blue-500 z-0">
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-blue-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                      </div>
+                    </div>
+
+                    {/* Step 4 */}
+                    <div className="relative flex flex-col items-center text-center group">
+                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <CalendarDaysIcon className="h-10 w-10 text-white" />
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
+                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                          Booked & reminded
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          Calendar booking + reminders
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-300 flex items-center justify-center mb-3">
-                      <SparklesIcon className="h-6 w-6" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      AI chatbot replies
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      24/7 answers questions & books.
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mb-3">
-                      <ChatBubbleLeftRightIcon className="h-6 w-6" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      Auto follow-up
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      SMS/email sequences for days.
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300 flex items-center justify-center mb-3">
-                      <CalendarDaysIcon className="h-6 w-6" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      Booked & reminded
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Calendar + reminders.
-                    </p>
+
+                  {/* Mobile arrows (vertical) */}
+                  <div className="lg:hidden flex flex-col items-center gap-4 mt-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-0.5 h-8 bg-gradient-to-b from-cyan-500 via-violet-500 via-emerald-500 to-blue-500 relative">
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-4 border-t-blue-500 border-l-4 border-l-transparent border-r-4 border-r-transparent"></div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
