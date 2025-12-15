@@ -18,6 +18,8 @@ import {
   ShieldCheckIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
+import WorkflowDiagram from '../components/WorkflowDiagram';
+import AutomationUIPreview from '../components/AutomationUIPreview';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -156,97 +158,12 @@ export default function Home() {
               ⚡ Limited spots this week — Book your free audit now
             </p>
 
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
                   A simple automation engine for your entire front office
                 </h3>
-                
-                {/* Visual Workflow with Arrows */}
-                <div className="relative">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {/* Step 1 */}
-                    <div className="relative flex flex-col items-center text-center group">
-                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-lg shadow-cyan-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <InboxArrowDownIcon className="h-10 w-10 text-white" />
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
-                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                          New lead captured
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          Web form, ad, DM, or missed call
-                        </p>
-                      </div>
-                      {/* Arrow */}
-                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-cyan-500 to-violet-500 z-0">
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-violet-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
-                      </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className="relative flex flex-col items-center text-center group">
-                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg shadow-violet-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <SparklesIcon className="h-10 w-10 text-white" />
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
-                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                          AI chatbot replies
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          24/7 instant answers & booking
-                        </p>
-                      </div>
-                      {/* Arrow */}
-                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-violet-500 to-emerald-500 z-0">
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-emerald-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
-                      </div>
-                    </div>
-
-                    {/* Step 3 */}
-                    <div className="relative flex flex-col items-center text-center group">
-                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <ChatBubbleLeftRightIcon className="h-10 w-10 text-white" />
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
-                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                          Auto follow-up
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          SMS/email sequences for days
-                        </p>
-                      </div>
-                      {/* Arrow */}
-                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-emerald-500 to-blue-500 z-0">
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-l-blue-500 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
-                      </div>
-                    </div>
-
-                    {/* Step 4 */}
-                    <div className="relative flex flex-col items-center text-center group">
-                      <div className="relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <CalendarDaysIcon className="h-10 w-10 text-white" />
-                      </div>
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 w-full border border-gray-200 dark:border-gray-600">
-                        <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                          Booked & reminded
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          Calendar booking + reminders
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mobile arrows (vertical) */}
-                  <div className="lg:hidden flex flex-col items-center gap-4 mt-6">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="w-0.5 h-8 bg-gradient-to-b from-cyan-500 via-violet-500 via-emerald-500 to-blue-500 relative">
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-t-4 border-t-blue-500 border-l-4 border-l-transparent border-r-4 border-r-transparent"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <WorkflowDiagram />
               </div>
             </div>
           </div>
@@ -389,18 +306,85 @@ export default function Home() {
               We've automated workflows for businesses across industries
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
             {[
               { name: "Local Services", icon: "🔧" },
               { name: "Agencies", icon: "💼" },
               { name: "Clinics", icon: "🏥" },
               { name: "Coaches", icon: "🎯" }
             ].map((item, index) => (
-              <div key={index} className="text-center p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div key={index} className="text-center p-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <div className="text-4xl mb-3">{item.icon}</div>
                 <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
               </div>
             ))}
+          </div>
+
+          {/* Industry-Specific Automation Examples */}
+          <div className="mt-16">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                Real automation examples by industry
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                See how automation works for businesses like yours
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {[
+                {
+                  industry: "Local Services",
+                  icon: "🔧",
+                  example: "Plumber gets a lead → AI chatbot answers pricing questions → Auto-schedules consultation → Sends reminder SMS → Requests review after job",
+                  color: "from-blue-500 to-cyan-500"
+                },
+                {
+                  industry: "Agencies",
+                  icon: "💼",
+                  example: "Marketing agency form submission → Instant welcome email → 3-day nurture sequence → Booking link for discovery call → Auto-follows up if no booking",
+                  color: "from-purple-500 to-pink-500"
+                },
+                {
+                  industry: "Clinics",
+                  icon: "🏥",
+                  example: "Patient calls after hours → AI answers FAQs → Books appointment → Sends confirmation + intake forms → Reminder 24hrs before → Review request after visit",
+                  color: "from-emerald-500 to-teal-500"
+                },
+                {
+                  industry: "Coaches",
+                  icon: "🎯",
+                  example: "Lead downloads free guide → Welcome email → 5-day value sequence → Booking link for free consultation → Reminder texts → Converts to paid client",
+                  color: "from-orange-500 to-red-500"
+                }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-cyan-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${item.color} flex items-center justify-center text-2xl`}>
+                      {item.icon}
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {item.industry}
+                    </h4>
+                  </div>
+                  <div className="space-y-2">
+                    {item.example.split(" → ").map((step, stepIndex) => (
+                      <div key={stepIndex} className="flex items-start gap-3">
+                        <div className={`w-6 h-6 rounded-full bg-gradient-to-r ${item.color} text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0`}>
+                          {stepIndex + 1}
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {step}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
