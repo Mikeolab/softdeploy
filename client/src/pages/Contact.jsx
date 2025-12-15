@@ -13,29 +13,43 @@ export default function Contact() {
   const [goal, setGoal] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const mailtoHref = useMemo(() => {
-    const subject = encodeURIComponent("Automation Audit Request");
-    const body = encodeURIComponent(
-      [
-        "Hi Mike,",
-        "",
-        "I'd like help automating parts of my business.",
-        "",
-        `Name: ${name || "-"}`,
-        `Business: ${business || "-"}`,
-        `Email: ${email || "-"}`,
-        `Phone: ${phone || "-"}`,
-        "",
-        "What I want to automate:",
-        goal || "-",
-        "",
-        "Best time to reach me:",
-        "-",
-      ].join("\n")
-    );
-    // NOTE: replace with your preferred inbox
-    return `mailto:mikeolab@gmail.com?subject=${subject}&body=${body}`;
+  const emailContent = useMemo(() => {
+    return [
+      "Hi Mike,",
+      "",
+      "I'd like help automating parts of my business.",
+      "",
+      `Name: ${name || "-"}`,
+      `Business: ${business || "-"}`,
+      `Email: ${email || "-"}`,
+      `Phone: ${phone || "-"}`,
+      "",
+      "What I want to automate:",
+      goal || "-",
+      "",
+      "Best time to reach me:",
+      "-",
+    ].join("\n");
   }, [business, email, goal, name, phone]);
+
+  const handleSendRequest = async () => {
+    const subject = "Automation Audit Request";
+    const body = emailContent;
+    const mailtoLink = `mailto:mikeolab@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // Try to copy email content to clipboard
+    try {
+      await navigator.clipboard.writeText(`To: mikeolab@gmail.com\nSubject: ${subject}\n\n${body}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+      
+      // Also open mailto as fallback
+      window.location.href = mailtoLink;
+    } catch (err) {
+      // Fallback: just open mailto
+      window.location.href = mailtoLink;
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
