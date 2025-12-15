@@ -7,9 +7,10 @@ import {
   LockClosedIcon, 
   EyeIcon, 
   EyeSlashIcon,
-  CommandLineIcon,
-  BeakerIcon,
-  RocketLaunchIcon
+  SparklesIcon,
+  ChatBubbleLeftRightIcon,
+  CalendarDaysIcon,
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 
 export default function Login() {
@@ -42,29 +43,29 @@ export default function Login() {
         {/* Left Side - Info */}
         <div className="lg:w-1/2 space-y-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-full text-cyan-700 dark:text-cyan-300 text-sm font-medium">
-              <CommandLineIcon className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-full text-emerald-700 dark:text-emerald-300 text-sm font-medium">
+              <SparklesIcon className="h-4 w-4" />
               Welcome Back
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              Log in to <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">SoftDeploy</span>
+              Log in to <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">SoftDeploy</span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Your workspace for AI-powered CI/CD and intelligent testing workflows.
+              Your client dashboard for monitoring business automation workflows.
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">What you'll get:</h3>
+            <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Your automation dashboard:</h3>
             <div className="space-y-3">
               {[
-                { icon: BeakerIcon, text: "AI-powered test automation and intelligent bug detection" },
-                { icon: RocketLaunchIcon, text: "One-click deployments with automatic rollback" },
-                { icon: CommandLineIcon, text: "Real-time monitoring and performance insights" }
+                { icon: ChatBubbleLeftRightIcon, text: "Monitor lead responses and follow-up sequences" },
+                { icon: CalendarDaysIcon, text: "Track bookings, reminders, and no-shows" },
+                { icon: ArrowTrendingUpIcon, text: "View automation performance and ROI metrics" }
               ].map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-                    <item.icon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
+                    <item.icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
                 </div>
@@ -99,7 +100,7 @@ export default function Login() {
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     required
                     type="email"
-                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -116,7 +117,7 @@ export default function Login() {
                     onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                     required
                     type={showPassword ? "text" : "password"}
-                    className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="Enter your password"
                   />
                   <button
@@ -137,14 +138,14 @@ export default function Login() {
             <button
               type="submit"
               disabled={status.loading}
-              className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full mt-6 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
             >
               {status.loading ? 'Signing in...' : 'Sign In'}
             </button>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-6 text-center">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium hover:underline">
+              <Link to="/signup" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium hover:underline">
                 Create one now
               </Link>
             </p>

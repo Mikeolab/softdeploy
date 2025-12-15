@@ -8,10 +8,11 @@ import {
   EyeIcon, 
   EyeSlashIcon,
   UserIcon,
-  RocketLaunchIcon,
-  BeakerIcon,
-  CommandLineIcon,
-  SparklesIcon
+  ChatBubbleLeftRightIcon,
+  CalendarDaysIcon,
+  ArrowTrendingUpIcon,
+  SparklesIcon,
+  CheckCircleIcon as CheckCircleOutlineIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from "../lib/supabaseClient";
 
@@ -75,25 +76,25 @@ export default function SignupPage() {
               Join the Future
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              Create your <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">SoftDeploy</span> Account
+              Create your <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">SoftDeploy</span> Account
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Automate your tests, deploy with AI, and build full CI/CD pipelines in just a few clicks.
+              Access your client dashboard to monitor automation workflows and track performance.
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">What you'll get:</h3>
+            <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Your dashboard includes:</h3>
             <div className="space-y-3">
               {[
-                { icon: BeakerIcon, text: "AI-powered test automation and intelligent bug detection" },
-                { icon: RocketLaunchIcon, text: "One-click deployments with automatic rollback" },
-                { icon: CommandLineIcon, text: "Real-time monitoring and performance insights" },
-                { icon: SparklesIcon, text: "Advanced analytics and team collaboration tools" }
+                { icon: ChatBubbleLeftRightIcon, text: "Monitor lead responses and follow-up sequences" },
+                { icon: CalendarDaysIcon, text: "Track bookings, reminders, and no-shows" },
+                { icon: ArrowTrendingUpIcon, text: "View automation performance and ROI metrics" },
+                { icon: SparklesIcon, text: "Real-time alerts when automations need attention" }
               ].map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-                    <item.icon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
+                    <item.icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
                 </div>
@@ -104,24 +105,24 @@ export default function SignupPage() {
           {/* Benefits Card */}
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <RocketLaunchIcon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              Start Building Today
+              <SparklesIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              Client Dashboard Access
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Get started with our free tier and scale as you grow:
+              Monitor your automation workflows:
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                <span className="text-gray-700 dark:text-gray-300">Unlimited test runs</span>
+                <span className="text-gray-700 dark:text-gray-300">View all automation activity</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                <span className="text-gray-700 dark:text-gray-300">AI-powered insights</span>
+                <span className="text-gray-700 dark:text-gray-300">Track leads and conversions</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                <span className="text-gray-700 dark:text-gray-300">24/7 support</span>
+                <span className="text-gray-700 dark:text-gray-300">Performance reports & insights</span>
               </div>
             </div>
           </div>
@@ -159,7 +160,7 @@ export default function SignupPage() {
                     onChange={(e) => setForm((p) => ({ ...p, fullName: e.target.value }))}
                     required
                     type="text"
-                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -176,7 +177,7 @@ export default function SignupPage() {
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     required
                     type="email"
-                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full pl-10 pr-3 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -214,7 +215,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={status.loading}
-              className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full mt-6 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
             >
               {status.loading ? 'Creating account...' : 'Create Account'}
             </button>
